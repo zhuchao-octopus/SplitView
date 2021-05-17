@@ -10,7 +10,7 @@ uses
 {$ELSE}
   Messages,
 {$ENDIF}
-  Classes, SysUtils, Controls, ExtCtrls, Graphics, PasLibVlcUnit, PasLibVlcClassUnit, PasLibVlcPlayerUnit;
+  Classes, SysUtils, Controls, ExtCtrls, Graphics;
 
 type
   TVideoMatrix = class

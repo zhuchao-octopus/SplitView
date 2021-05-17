@@ -45,13 +45,20 @@ type
     cbxVclStyles: TComboBox;
     lblTitle: TLabel;
     Notebook1: TNotebook;
+    Panel1: TPanel;
     Memo1: TMemo;
-    GroupBox1: TGroupBox;
+    ListView1: TListView;
+    ListView2: TListView;
+    Panel2: TPanel;
     Label1: TLabel;
     Label2: TLabel;
     Edit1: TEdit;
     Edit2: TEdit;
     Button1: TButton;
+    SpeedButton1: TSpeedButton;
+    GroupBox1: TGroupBox;
+    GroupBox2: TGroupBox;
+
     procedure FormCreate(Sender: TObject);
     procedure SVClosed(Sender: TObject);
     procedure SVOpened(Sender: TObject);
@@ -65,6 +72,7 @@ type
     procedure catMenuItemsCategories0Items3Click(Sender: TObject);
     procedure Edit1KeyPress(Sender: TObject; var Key: Char);
     procedure Edit2KeyPress(Sender: TObject; var Key: Char);
+    procedure SpeedButton1Click(Sender: TObject);
   private
     procedure Log(const Msg: string);
     procedure SynchroPage(ItemIndex: Integer);
@@ -129,6 +137,21 @@ begin
     SV.Close
   else
     SV.Open;
+end;
+
+procedure TSplitViewForm.SpeedButton1Click(Sender: TObject);
+begin
+ListView1.Clear;
+ListView1.Columns.Clear;
+ListView1.Columns.Add;
+ListView1.Columns.Add;
+ListView1.Columns.Add;
+ListView1.Columns.Items[0].Caption:='id';
+ListView1.Columns.Items[1].Caption:='type';
+ListView1.Columns.Items[2].Caption:='title';
+ListView1.Columns.Items[2].Width:=300;
+//Listview1.ViewStyle:=vsreport;
+//Listview1.GridLines:=true;
 end;
 
 procedure TSplitViewForm.SVClosed(Sender: TObject);

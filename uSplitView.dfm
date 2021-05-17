@@ -2,8 +2,8 @@ object SplitViewForm: TSplitViewForm
   Left = 0
   Top = 0
   Caption = #20806#31185#38899#35270#39057#22352#24109#31649#29702#31995#32479
-  ClientHeight = 634
-  ClientWidth = 1021
+  ClientHeight = 462
+  ClientWidth = 808
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -18,14 +18,14 @@ object SplitViewForm: TSplitViewForm
   object pnlToolbar: TPanel
     Left = 0
     Top = 0
-    Width = 1021
+    Width = 808
     Height = 50
     Align = alTop
     BevelOuter = bvNone
     Color = 12477460
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 671
+    ExplicitWidth = 1021
     object imgMenu: TImage
       Left = 10
       Top = 10
@@ -46,7 +46,7 @@ object SplitViewForm: TSplitViewForm
     object lblTitle: TLabel
       Left = 68
       Top = 12
-      Width = 485
+      Width = 198
       Height = 21
       Caption = #20806#31185#38899#35270#39057#22352#24109#31649#29702#31995#32479
       Font.Charset = DEFAULT_CHARSET
@@ -58,7 +58,7 @@ object SplitViewForm: TSplitViewForm
     end
     object cbxVclStyles: TComboBox
       AlignWithMargins = True
-      Left = 832
+      Left = 619
       Top = 10
       Width = 179
       Height = 29
@@ -68,14 +68,14 @@ object SplitViewForm: TSplitViewForm
       Style = csDropDownList
       TabOrder = 0
       OnChange = cbxVclStylesChange
-      ExplicitLeft = 839
+      ExplicitLeft = 832
     end
   end
   object SV: TSplitView
     Left = 0
     Top = 50
     Width = 200
-    Height = 584
+    Height = 412
     Color = clBlack
     OpenedWidth = 200
     Placement = svpLeft
@@ -83,12 +83,12 @@ object SplitViewForm: TSplitViewForm
     OnClosed = SVClosed
     OnOpened = SVOpened
     OnOpening = SVOpening
-    ExplicitHeight = 383
+    ExplicitHeight = 584
     object catMenuItems: TCategoryButtons
       Left = 0
       Top = 0
       Width = 200
-      Height = 584
+      Height = 412
       Align = alClient
       BorderStyle = bsNone
       ButtonFlow = cbfVertical
@@ -132,29 +132,155 @@ object SplitViewForm: TSplitViewForm
       SelectedButtonColor = clNone
       TabOrder = 0
       OnCategoryCollapase = catMenuItemsCategoryCollapase
-      ExplicitTop = -20
-      ExplicitWidth = 194
-      ExplicitHeight = 237
+      ExplicitTop = -2
     end
   end
   object Notebook1: TNotebook
     Left = 200
     Top = 50
-    Width = 821
-    Height = 584
+    Width = 608
+    Height = 412
     Align = alClient
-    PageIndex = 3
     TabOrder = 2
-    ExplicitLeft = 304
-    ExplicitTop = 240
-    ExplicitWidth = 150
-    ExplicitHeight = 150
+    ExplicitWidth = 821
+    ExplicitHeight = 584
     object TPage
       Left = 0
       Top = 0
       Caption = 'Default'
-      ExplicitWidth = 150
-      ExplicitHeight = 150
+      ExplicitWidth = 821
+      ExplicitHeight = 584
+      object Panel1: TPanel
+        Left = 0
+        Top = 0
+        Width = 608
+        Height = 308
+        Align = alClient
+        BevelOuter = bvNone
+        Color = clWindow
+        ParentBackground = False
+        TabOrder = 0
+        ExplicitLeft = 6
+        ExplicitTop = -5
+        object Panel2: TPanel
+          Left = 0
+          Top = 184
+          Width = 608
+          Height = 124
+          Align = alBottom
+          BevelOuter = bvNone
+          TabOrder = 0
+          object Label1: TLabel
+            Left = 6
+            Top = 14
+            Width = 73
+            Height = 21
+            Caption = #21457#23556#31471' ID:'
+          end
+          object Label2: TLabel
+            Left = 6
+            Top = 54
+            Width = 85
+            Height = 21
+            Caption = #25509#25910#31471' ID'#65306
+          end
+          object SpeedButton1: TSpeedButton
+            Left = 337
+            Top = 40
+            Width = 23
+            Height = 22
+            OnClick = SpeedButton1Click
+          end
+          object Edit1: TEdit
+            Left = 101
+            Top = 6
+            Width = 121
+            Height = 29
+            TabOrder = 0
+            Text = 'Edit1'
+            OnKeyPress = Edit1KeyPress
+          end
+          object Edit2: TEdit
+            Left = 101
+            Top = 54
+            Width = 121
+            Height = 29
+            TabOrder = 1
+            Text = 'Edit2'
+            OnKeyPress = Edit2KeyPress
+          end
+          object Button1: TButton
+            Left = 240
+            Top = 30
+            Width = 75
+            Height = 29
+            Caption = 'Button1'
+            TabOrder = 2
+          end
+        end
+        object GroupBox1: TGroupBox
+          Left = 0
+          Top = 0
+          Width = 289
+          Height = 184
+          Align = alLeft
+          Caption = #21457#23556#31471
+          TabOrder = 1
+          object ListView1: TListView
+            Left = 2
+            Top = 23
+            Width = 285
+            Height = 159
+            Align = alClient
+            BorderStyle = bsNone
+            Columns = <>
+            Ctl3D = True
+            HideSelection = False
+            GroupView = True
+            ReadOnly = True
+            RowSelect = True
+            TabOrder = 0
+            ViewStyle = vsReport
+            ExplicitLeft = 3
+            ExplicitTop = 25
+          end
+        end
+        object GroupBox2: TGroupBox
+          Left = 289
+          Top = 0
+          Width = 280
+          Height = 184
+          Align = alLeft
+          Caption = #25509#25910#31471
+          TabOrder = 2
+          object ListView2: TListView
+            Left = 2
+            Top = 23
+            Width = 276
+            Height = 159
+            Align = alClient
+            BorderStyle = bsNone
+            Columns = <>
+            TabOrder = 0
+            ExplicitLeft = 3
+            ExplicitTop = 25
+            ExplicitWidth = 181
+          end
+        end
+      end
+      object Memo1: TMemo
+        Left = 0
+        Top = 308
+        Width = 608
+        Height = 104
+        Align = alBottom
+        Lines.Strings = (
+          'Memo1')
+        ScrollBars = ssVertical
+        TabOrder = 1
+        ExplicitTop = 480
+        ExplicitWidth = 821
+      end
     end
     object TPage
       Left = 0
@@ -185,7 +311,7 @@ object SplitViewForm: TSplitViewForm
     Left = 80
     Top = 316
     Bitmap = {
-      494C010104008000040020002000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101040080000C0020002000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
