@@ -6,7 +6,6 @@ uses SysUtils, Classes, Windows, Messages, Graphics;
 
 
 type
-
   TDeviceType = (DT_UNKNOW, DT_ENCODE, DT_DECODE, DT_IPC, DT_MIC, DT_SOUND, TD_RECORD, TD_CONTROL, TD_KVM);
 
   TKLineDateMode = (KD_MIN, KD_MIN5, KD_MIN10, KD_MIN15, KD_MIN30, KD_MIN60, KD_MIN120, KD_DAY, KD_WEEK, KD_MONTH, KD_DAY45, KD_DAY120, KD_YEAR, KD_);

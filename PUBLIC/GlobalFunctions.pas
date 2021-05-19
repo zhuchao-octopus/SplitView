@@ -1,17 +1,19 @@
-unit GlobalFunctions;
+ï»¿unit GlobalFunctions;
 
 interface
 
-uses SysUtils, Classes, Windows, GlobalTypes, SyncObjs,ShlObj,GlobalConst, MyMessageQueue,
-System.Variants;
+uses SysUtils, Classes, Windows, GlobalTypes, SyncObjs, ShlObj, GlobalConst,
+  MyMessageQueue,
+  System.Variants,IdGlobal,unit200;
 
-// È¡µÄºº×ÖÆ´ÒôµÄÊ××ÖÄ¸
+// å–çš„æ±‰å­—æ‹¼éŸ³çš„é¦–å­—æ¯
 function GetHzPy(const AHzStr: string): string;
 Function KModeToJiBie(KLineDateMode: TKLineDateMode): integer;
 function GetBeginTradeTime(KLineDateMode: TKLineDateMode): LongWord;
 function DateTimeToMyLongWord(DateTime: TDateTime; JiBie: integer): LongWord;
 function DateTimeStrToMyLongWord(DateTimeStr: String; JiBie: integer): LongWord;
-function DateTimeStrToMyLongWord2(DateTimeStr: String; JiBie: integer): LongWord;
+function DateTimeStrToMyLongWord2(DateTimeStr: String; JiBie: integer)
+  : LongWord;
 function MyLongWordToDateTimeStr(cDataTime: LongWord; JiBie: SmallInt): String;
 
 function MyMinLongWordToMyDayLongWord(MinLW: LongWord): LongWord;
@@ -44,50 +46,104 @@ function SearchInList(Key: string; SList: TStrings; DList: TStrings): integer;
 
 function GetNowTimeNN(): integer;
 function GetNowTimeSS(): integer;
-function GetSpecialFolderDir(const folderid: Integer): string;
-function GetCFGDir(DirName:String):String;
+function GetSpecialFolderDir(const folderid: integer): string;
+function GetCFGDir(DirName: String): String;
 
 Function GetUpperLevel(KLineDateMode: TKLineDateMode): TKLineDateMode;
 Function GetLowerLevel(KLineDateMode: TKLineDateMode): TKLineDateMode;
-procedure GetBuildInfo(FileName:string; var vs:string);
+procedure GetBuildInfo(FileName: string; var vs: string);
+function BytestoHexString(ABytes: TBytes; len: integer): AnsiString;
+function IdBytesToAnsiString(ParamBytes: TIdBytes): AnsiString;
+function Hex2Byte(HexStr: String): TIdBytes;
+function HexStrToBuff(hs: string):TIdBytes;
+
 var
   MyErrorMsgs: TStringList;
   MsgLogList: TStringList;
   MQueue: TMyMessageQueue;
-  //FCriticalSection :TCriticalSection;
+  // FCriticalSection :TCriticalSection;
 
 implementation
 
-procedure GetBuildInfo(FileName:string; var vs:string);
-var VerInfoSize,VerValueSize,Dummy:DWORD;
-    VerInfo: Pointer;
-    VerValue: PVSFixedFileInfo;
-    V1,V2,V3,V4:Word;
+function HexStrToBuff(hs: string):TIdBytes;
+var
+  i, len, bLen: Word;
+  buf:TIdBytes;
 begin
-  vs:='';
-  if not FileExists(FileName) then exit;
-  VerInfoSize:=GetFileVersionInfoSize(PChar(FileName),Dummy);
-  if VerInfoSize=0 then exit;
-  GetMem(VerInfo,VerInfoSize);
-  if not GetFileVersionInfo(PChar(FileName),0,VerInfoSize,VerInfo) then exit;
+  len := (length(hs) + 2) div 3;
+  SetLength(buf,len);
+  bLen := length(buf);
+  ZeroMemory(@buf, bLen);
+
+  for i := 1 to len do
+  begin
+    buf[i - 1] := CharToByte(hs[i * 3 - 2], hs[i * 3 - 1]);
+  end;
+    result:=buf;
+end;
+function Hex2Byte(HexStr: String): TIdBytes;
+var
+   Buf: TIdBytes;
+begin
+  SetLength(Buf, Length(HexStr) div 2);
+  HexToBin(PAnsiChar(HexStr), @Buf[0], Length(HexStr) div 2);
+  Result := Buf;
+end;
+
+function IdBytesToAnsiString(ParamBytes: TIdBytes): AnsiString;
+var
+  i: integer;
+  S: AnsiString;
+begin
+  S := '';
+  for i := 0 to Length(ParamBytes) - 1 do
+  begin
+    S := S + AnsiChar(ParamBytes[i]);
+  end;
+  Result := S;
+end;
+
+function BytestoHexString(ABytes: TBytes; len: integer): AnsiString;
+begin
+  SetLength(Result, len * 2);
+  BinToHex(@ABytes[0], PAnsiChar(Result), len);
+end;
+
+procedure GetBuildInfo(FileName: string; var vs: string);
+var
+  VerInfoSize, VerValueSize, Dummy: DWORD;
+  VerInfo: Pointer;
+  VerValue: PVSFixedFileInfo;
+  V1, V2, V3, V4: Word;
+begin
+  vs := '';
+  if not FileExists(FileName) then
+    exit;
+  VerInfoSize := GetFileVersionInfoSize(PChar(FileName), Dummy);
+  if VerInfoSize = 0 then
+    exit;
+  GetMem(VerInfo, VerInfoSize);
+  if not GetFileVersionInfo(PChar(FileName), 0, VerInfoSize, VerInfo) then
+    exit;
   VerQueryValue(VerInfo, '\', Pointer(VerValue), VerValueSize);
   with VerValue^ do
   begin
-    V1:=dwFileVersionMS shr 16;
-    V2:=dwFileVersionMS and $FFFF;
-    V3:=dwFileVersionLS shr 16;
-    V4:=dwFileVersionLS and $FFFF;
-    vs:=inttostr(v1)+'.'+inttostr(v2)+'.'+inttostr(v3)+'.'+inttostr(v4);
+    V1 := dwFileVersionMS shr 16;
+    V2 := dwFileVersionMS and $FFFF;
+    V3 := dwFileVersionLS shr 16;
+    V4 := dwFileVersionLS and $FFFF;
+    vs := inttostr(V1) + '.' + inttostr(V2) + '.' + inttostr(V3) + '.' +
+      inttostr(V4);
   end;
-  FreeMem(VerInfo,VerInfoSize);
+  FreeMem(VerInfo, VerInfoSize);
 end;
 
 procedure PrintError(Name: String; Position: integer; Msg: String);
 var
   ErrorMsg: String;
 begin
-  ErrorMsg := GetSystemDateTimeStr + ', ErrorName:' + Name + ', Position:' + IntToStr(Position) +
-    ', Msg:' + Msg;
+  ErrorMsg := GetSystemDateTimeStr + ', ErrorName:' + Name + ', Position:' +
+    inttostr(Position) + ', Msg:' + Msg;
   MyErrorMsgs.Append(ErrorMsg);
   MyErrorMsgs.SaveToFile(MyErrorMsgs.Strings[0]);
 end;
@@ -102,11 +158,12 @@ end;
 
 function GetHzPy(const AHzStr: string): string;
 const
-  ChinaCode: array [0 .. 25, 0 .. 1] of integer = ((1601, 1636), (1637, 1832), (1833, 2077),
-    (2078, 2273), (2274, 2301), (2302, 2432), (2433, 2593), (2594, 2786), (9999, 0000),
-    (2787, 3105), (3106, 3211), (3212, 3471), (3472, 3634), (3635, 3722), (3723, 3729),
-    (3730, 3857), (3858, 4026), (4027, 4085), (4086, 4389), (4390, 4557), (9999, 0000),
-    (9999, 0000), (4558, 4683), (4684, 4924), (4925, 5248), (5249, 5589));
+  ChinaCode: array [0 .. 25, 0 .. 1] of integer = ((1601, 1636), (1637, 1832),
+    (1833, 2077), (2078, 2273), (2274, 2301), (2302, 2432), (2433, 2593),
+    (2594, 2786), (9999, 0000), (2787, 3105), (3106, 3211), (3212, 3471),
+    (3472, 3634), (3635, 3722), (3723, 3729), (3730, 3857), (3858, 4026),
+    (4027, 4085), (4086, 4389), (4390, 4557), (9999, 0000), (9999, 0000),
+    (4558, 4683), (4684, 4924), (4925, 5248), (5249, 5589));
 var
   i, j, HzOrd: integer;
 begin
@@ -156,13 +213,13 @@ function StrToMyDateTime(DateTimeStr: String): TDateTime;
 Var
   MySettings: TFormatSettings;
 begin
-  //MySettings.ShortDateFormat := 'yyyy-MM-dd';
-  //MySettings.ShortDateFormat := 'yyyymmdd';
-  //MySettings.DateSeparator := '-';
-  //MySettings.ShortTimeFormat := 'hhnnss';
-  //MySettings.TimeSeparator := ':';
-  MySettings.LongDateFormat :=  'yyyy-MM-dd';
-  MySettings.ShortDateFormat :=  'yyyy-MM-dd';
+  // MySettings.ShortDateFormat := 'yyyy-MM-dd';
+  // MySettings.ShortDateFormat := 'yyyymmdd';
+  // MySettings.DateSeparator := '-';
+  // MySettings.ShortTimeFormat := 'hhnnss';
+  // MySettings.TimeSeparator := ':';
+  MySettings.LongDateFormat := 'yyyy-MM-dd';
+  MySettings.ShortDateFormat := 'yyyy-MM-dd';
   MySettings.LongTimeFormat := 'hh:mm:ss';
   MySettings.ShortTimeFormat := 'hh:mm:ss';
   MySettings.DateSeparator := '-';
@@ -173,7 +230,7 @@ end;
 
 function GetNowTimeString(): String;
 begin
-  Result := 'Ê±¼ä:' + FormatDateTime('hh:nn', Now);
+  Result := 'æ—¶é—´:' + FormatDateTime('hh:nn', Now);
 end;
 
 function GetNowTimeNN(): integer;
@@ -213,7 +270,7 @@ begin
     60:
       Result := 3;
   else
-    Exit;
+    exit;
   end;
 end;
 
@@ -227,9 +284,9 @@ var
   // temp: word;
   yyyy, MM, dd, hh, nn, ss: String;
 begin
-  // 53431384Ê®½øÖÆ//032f4c58Ê®Áù½øÖÆ//ÎÄ¼ş´æ´¢¸ñÊ½584c2f03//ĞÅÏ¢20131112 13:35
+  // 53431384åè¿›åˆ¶//032f4c58åå…­è¿›åˆ¶//æ–‡ä»¶å­˜å‚¨æ ¼å¼584c2f03//ä¿¡æ¯20131112 13:35
   // 0000 0011 0010 1111 [01001] [10001] 011000
-  //             Äê  ÔÂ    ÈÕ     Ê±      ·Ö
+  // å¹´  æœˆ    æ—¥     æ—¶      åˆ†
   Result := 0;
   yyyy := FormatDateTime('yyyy', DateTime);
   MM := FormatDateTime('MM', DateTime);
@@ -259,7 +316,7 @@ end;
 
 function MyLongWordToDateTimeStr(cDataTime: LongWord; JiBie: SmallInt): string;
 var
-  wYear, wMon, wDay, wHour, wMin: word;
+  wYear, wMon, wDay, wHour, wMin: Word;
 begin
   Result := '';
   if JiBie > 120 then
@@ -276,7 +333,8 @@ begin
     wDay := cDataTime shr 11 and $0000001F;
     wHour := ((cDataTime shr 6) and $0000001F);
     wMin := cDataTime and $0000003F;
-    Result := Format('%0.2d-%0.2d-%0.2d %.02d:%.02d', [wYear, wMon, wDay, wHour, wMin])
+    Result := Format('%0.2d-%0.2d-%0.2d %.02d:%.02d',
+      [wYear, wMon, wDay, wHour, wMin])
   end;
 end;
 
@@ -284,37 +342,43 @@ function DateTimeStrToMyLongWord(DateTimeStr: String; JiBie: integer): LongWord;
 begin
   Result := DateTimeToMyLongWord(StrToMyDateTime(DateTimeStr), JiBie);
 end;
+
 function MyMinLongWordToMyDayLongWord(MinLW: LongWord): LongWord;
 begin
-    Result:= MinLW and $FFFFF800;
+  Result := MinLW and $FFFFF800;
 end;
-//showapi ½Ó¿ÚÓÃ£¬×÷·Ï
-function DateTimeStrToMyLongWord2(DateTimeStr: String; JiBie: integer): LongWord;
+
+// showapi æ¥å£ç”¨ï¼Œä½œåºŸ
+function DateTimeStrToMyLongWord2(DateTimeStr: String; JiBie: integer)
+  : LongWord;
 Var
-  DateTime:TDateTime;
-  S:String;
+  DateTime: TDateTime;
+  S: String;
 begin
-  //DateTime:=VarToDateTime(DateTimeStr);
-  if(JiBie <= 60) then
+  // DateTime:=VarToDateTime(DateTimeStr);
+  if (JiBie <= 60) then
   begin
-  S:=copy(DateTimeStr,1,4)+'-'+copy(DateTimeStr,5,2)+'-'+copy(DateTimeStr,7,2)+' ' +
-     copy(DateTimeStr,9,2)+':'+copy(DateTimeStr,11,2);
+    S := copy(DateTimeStr, 1, 4) + '-' + copy(DateTimeStr, 5, 2) + '-' +
+      copy(DateTimeStr, 7, 2) + ' ' + copy(DateTimeStr, 9, 2) + ':' +
+      copy(DateTimeStr, 11, 2);
   end
   else
   begin
-      S:=copy(DateTimeStr,1,4)+'-'+copy(DateTimeStr,5,2)+'-'+copy(DateTimeStr,7,2);
+    S := copy(DateTimeStr, 1, 4) + '-' + copy(DateTimeStr, 5, 2) + '-' +
+      copy(DateTimeStr, 7, 2);
   end;
-  DateTime := StrToMyDateTime(s);
+  DateTime := StrToMyDateTime(S);
   Result := DateTimeToMyLongWord(DateTime, JiBie);
 end;
 
 function CardinalToTime(cDataTime: Cardinal): string;
 var
-  wYear, wMon, wDay, wHour, wMin: word;
+  wYear, wMon, wDay, wHour, wMin: Word;
 begin
   Result := '';
 
-  wYear := (cDataTime shr 12 and $0000000F) { + 2008 } + (cDataTime shr 11 and $00000001);
+  wYear := (cDataTime shr 12 and $0000000F) { + 2008 } +
+    (cDataTime shr 11 and $00000001);
   // wYear := cDataTime shr 12 and $0000000F + 2008;
   wMon := cDataTime and $000007FF div 100;
   wDay := cDataTime and $000007FF mod 100;
@@ -328,53 +392,56 @@ var
   // temp: word;
   yyyy, MM, dd, hh, nn, ss: String;
 begin
-  yyyy := FormatDateTime('yyyy', now);
-  MM := FormatDateTime('MM', now);
-  dd := FormatDateTime('dd', now);
-  hh := FormatDateTime('hh', now);
-  nn := FormatDateTime('nn', now);
-  ss:=yyyy+'-'+MM+'-'+dd+' ';
+  yyyy := FormatDateTime('yyyy', Now);
+  MM := FormatDateTime('MM', Now);
+  dd := FormatDateTime('dd', Now);
+  hh := FormatDateTime('hh', Now);
+  nn := FormatDateTime('nn', Now);
+  ss := yyyy + '-' + MM + '-' + dd + ' ';
   Result := 0;
   case KLineDateMode of
     KD_MIN:
       begin
-        Result := DateTimeStrToMyLongWord(ss+'09:30',KModeToJiBie(KLineDateMode));
+        Result := DateTimeStrToMyLongWord(ss + '09:30',
+          KModeToJiBie(KLineDateMode));
       end;
     KD_MIN5:
       begin
-        Result := DateTimeStrToMyLongWord(ss+'09:35',KModeToJiBie(KLineDateMode));
+        Result := DateTimeStrToMyLongWord(ss + '09:35',
+          KModeToJiBie(KLineDateMode));
       end;
     KD_MIN10:
       begin
-       Result := DateTimeStrToMyLongWord(ss+'09:40',KModeToJiBie(KLineDateMode));
+        Result := DateTimeStrToMyLongWord(ss + '09:40',
+          KModeToJiBie(KLineDateMode));
       end;
     KD_MIN15:
       begin
-       Result := DateTimeStrToMyLongWord(ss+'09:45',KModeToJiBie(KLineDateMode));
+        Result := DateTimeStrToMyLongWord(ss + '09:45',
+          KModeToJiBie(KLineDateMode));
       end;
     KD_MIN30:
       begin
-        Result := DateTimeStrToMyLongWord(ss+'10:00',KModeToJiBie(KLineDateMode));
+        Result := DateTimeStrToMyLongWord(ss + '10:00',
+          KModeToJiBie(KLineDateMode));
       end;
     KD_MIN60:
       begin
-        Result := DateTimeStrToMyLongWord(ss+'10:30',KModeToJiBie(KLineDateMode));
+        Result := DateTimeStrToMyLongWord(ss + '10:30',
+          KModeToJiBie(KLineDateMode));
       end;
     KD_MIN120:
       begin
-       Result := DateTimeStrToMyLongWord(ss+'11:30',KModeToJiBie(KLineDateMode));
+        Result := DateTimeStrToMyLongWord(ss + '11:30',
+          KModeToJiBie(KLineDateMode));
       end;
-    KD_DAY,
-    KD_WEEK,
-    KD_MONTH,
-    KD_DAY45,
-    KD_DAY120,
-    KD_YEAR:
+    KD_DAY, KD_WEEK, KD_MONTH, KD_DAY45, KD_DAY120, KD_YEAR:
       begin
-       Result := DateTimeStrToMyLongWord(ss,KModeToJiBie(KLineDateMode));
+        Result := DateTimeStrToMyLongWord(ss, KModeToJiBie(KLineDateMode));
       end;
   end;
 end;
+
 Function KModeToJiBie(KLineDateMode: TKLineDateMode): integer;
 begin
   Result := 0;
@@ -436,7 +503,6 @@ begin
   end;
 end;
 
-
 Function GetLowerLevel(KLineDateMode: TKLineDateMode): TKLineDateMode;
 begin
   Result := KLineDateMode;
@@ -470,9 +536,10 @@ begin
         Result := KD_MIN60;
       end;
   else
-    ;//Result := KD_MIN;
+    ; // Result := KD_MIN;
   end;
 end;
+
 Function GetUpperLevel(KLineDateMode: TKLineDateMode): TKLineDateMode;
 begin
   Result := KLineDateMode;
@@ -518,22 +585,22 @@ begin
   end;
 end;
 
-function FormatVolume(value: Int64): string; // ¹É
+function FormatVolume(value: Int64): string; // è‚¡
 begin
   if value >= 10000000 then
-    Result := Format('%.2fÒÚ', [value / (100000000)])
+    Result := Format('%.2fäº¿', [value / (100000000)])
     // else if value >= 100000 then
-    // Result := Format('%.01fÍò', [value / 10000])
+    // Result := Format('%.01fä¸‡', [value / 10000])
   else
-    Result := Format('%.2fÍò', [value / 10000])
+    Result := Format('%.2fä¸‡', [value / 10000])
 end;
 
 function FormatAmount(sg: Double): string;
 begin
   if sg > 10000000 then
-    Result := Format('%.2fÒÚ', [sg / (100000000)])
+    Result := Format('%.2fäº¿', [sg / (100000000)])
   else
-    Result := Format('%.2fÍò', [sg / (10000)]);
+    Result := Format('%.2fä¸‡', [sg / (10000)]);
 end;
 
 function SingleToStr(sg: Double): string;
@@ -559,8 +626,9 @@ begin
   // Getsystemtime(lpSystemTime);
   GetLocalTime(lpSystemTime);
   // Result:=Format('[%0.4d\%0.2d\%0.2d\%0.2d:%0.2d:%0.2d] ',[lpSystemTime.wYear,lpSystemTime.wMonth,lpSystemTime.wDay,lpSystemTime.wHour,lpSystemTime.wMinute,lpSystemTime.wSecond]);
-  Result := Format('%0.4d/%0.2d/%0.2d %0.2d:%0.2d:%0.2d', [lpSystemTime.wYear, lpSystemTime.wMonth,
-    lpSystemTime.wDay, lpSystemTime.wHour, lpSystemTime.wMinute, lpSystemTime.wSecond]);
+  Result := Format('[%0.4d-%0.2d-%0.2d %0.2d:%0.2d:%0.2d]',
+    [lpSystemTime.wYear, lpSystemTime.wMonth, lpSystemTime.wDay,
+    lpSystemTime.wHour, lpSystemTime.wMinute, lpSystemTime.wSecond]);
 
 end;
 
@@ -596,7 +664,8 @@ begin
   // Getsystemtime(lpSystemTime);
   GetLocalTime(lpSystemTime);
   // Result:=Format('[%0.4d\%0.2d\%0.2d\%0.2d:%0.2d:%0.2d] ',[lpSystemTime.wYear,lpSystemTime.wMonth,lpSystemTime.wDay,lpSystemTime.wHour,lpSystemTime.wMinute,lpSystemTime.wSecond]);
-  Result := Format('%0.4d%0.2d%0.2d', [lpSystemTime.wYear, lpSystemTime.wMonth, lpSystemTime.wDay]);
+  Result := Format('%0.4d%0.2d%0.2d', [lpSystemTime.wYear, lpSystemTime.wMonth,
+    lpSystemTime.wDay]);
 
 end;
 
@@ -607,7 +676,8 @@ var
 begin
   Result := 2013116;
   GetLocalTime(lpSystemTime);
-  Str := Format('%0.4d%0.2d%0.2d', [lpSystemTime.wYear, lpSystemTime.wMonth, lpSystemTime.wDay]);
+  Str := Format('%0.4d%0.2d%0.2d', [lpSystemTime.wYear, lpSystemTime.wMonth,
+    lpSystemTime.wDay]);
   Result := StrToInt(Str);
 end;
 
@@ -627,21 +697,21 @@ begin
   begin
     if (StrToInt(hh) = 9) and (StrToInt(nn) >= 30) then
     begin
-      Result := 0; // ÉÏÎç
+      Result := 0; // ä¸Šåˆ
     end
     else if (StrToInt(hh) = 10) then
     begin
-      Result := 0; // ÉÏÎç
+      Result := 0; // ä¸Šåˆ
     end
     else if (StrToInt(hh) = 11) and (StrToInt(nn) <= 30) then
     begin
-      Result := 0; // ÉÏÎç
+      Result := 0; // ä¸Šåˆ
     end;
   end;
 
   if (StrToInt(hh) >= 13) and (StrToInt(hh) < 15) then // 13:
   begin
-    Result := 1; // ÏÂÎç
+    Result := 1; // ä¸‹åˆ
   end;
 
 end;
@@ -653,19 +723,19 @@ begin
   GetLocalTime(date);
   case date.wDayOfWeek of
     0:
-      Result := 'ĞÇÆÚÌì';
+      Result := 'æ˜ŸæœŸå¤©';
     1:
-      Result := 'ĞÇÆÚÒ»';
+      Result := 'æ˜ŸæœŸä¸€';
     2:
-      Result := 'ĞÇÆÚ¶ş';
+      Result := 'æ˜ŸæœŸäºŒ';
     3:
-      Result := 'ĞÇÆÚÈı';
+      Result := 'æ˜ŸæœŸä¸‰';
     4:
-      Result := 'ĞÇÆÚËÄ';
+      Result := 'æ˜ŸæœŸå››';
     5:
-      Result := 'ĞÇÆÚÎå';
+      Result := 'æ˜ŸæœŸäº”';
     6:
-      Result := 'ĞÇÆÚÁù';
+      Result := 'æ˜ŸæœŸå…­';
   end;
 end;
 
@@ -686,34 +756,34 @@ begin
   // DayOfWeek();
   Result := '';
   try
-    //if TryStrToDate(DataTime, DateTime) then
+    // if TryStrToDate(DataTime, DateTime) then
     begin
       DateTime := StrToMyDateTime(DataTime);
       case DayOfWeek(DateTime) of
         0, 1:
           Result := '';
         2:
-          Result := 'Ò»';
+          Result := 'ä¸€';
         3:
-          Result := '¶ş';
+          Result := 'äºŒ';
         4:
-          Result := 'Èı';
+          Result := 'ä¸‰';
         5:
-          Result := 'ËÄ';
+          Result := 'å››';
         6:
-          Result := 'Îå';
+          Result := 'äº”';
         7:
-          Result := 'Áù';
+          Result := 'å…­';
         8:
-          Result := 'ÈÕ';
+          Result := 'æ—¥';
       else
         Result := ' ';
       end;
     end;
-    Result:='ĞÇÆÚ'+result;
+    Result := 'æ˜ŸæœŸ' + Result;
     // DateTimeToSystemTime(DateTime, date);
   except
-    Exit;
+    exit;
   end;
 end;
 
@@ -734,7 +804,7 @@ var
 begin
   Result := 0;
   if Key = '' then
-    Exit;
+    exit;
   for i := 0 to SList.Count - 1 do
   begin
     if (Pos(Key, SList.Strings[i]) > 0) then
@@ -745,28 +815,31 @@ begin
   Result := DList.Count;
 end;
 
-function GetCFGDir(DirName:String):String;
+function GetCFGDir(DirName: String): String;
 begin
- Result:= GetSpecialFolderDir(35) + '\'+ DirName+'\';
+  Result := GetSpecialFolderDir(35) + '\' + DirName + '\';
 end;
 
-function GetSpecialFolderDir(const folderid: Integer): string;
+function GetSpecialFolderDir(const folderid: integer): string;
 var
   PIDL: PItemIDList; // pItemIDList;     // LPCITEMIDLIST
-  buffer: array [0 .. 255] of Char;
+  buffer: array [0 .. 255] of char;
 begin
-  // È¡Ö¸¶¨µÄÎÄ¼ş¼ĞÏîÄ¿±í
+  // å–æŒ‡å®šçš„æ–‡ä»¶å¤¹é¡¹ç›®è¡¨
   SHGetSpecialFolderLocation(0, folderid, PIDL);
-  SHGetPathFromIDList(PIDL, buffer); // ×ª»»³ÉÎÄ¼şÏµÍ³µÄÂ·¾¶
+  SHGetPathFromIDList(PIDL, buffer); // è½¬æ¢æˆæ–‡ä»¶ç³»ç»Ÿçš„è·¯å¾„
   Result := strpas(buffer);
 end;
 
-
 initialization
- MQueue := TMyMessageQueue.Create;
- //FCriticalSection := TCriticalSection.Create;
+
+MQueue := TMyMessageQueue.Create;
+
+// FCriticalSection := TCriticalSection.Create;
 finalization
- //FCriticalSection.Free;
- MQueue.CleanupInstance;
- MQueue.free;
+
+// FCriticalSection.Free;
+MQueue.CleanupInstance;
+MQueue.free;
+
 end.

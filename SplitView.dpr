@@ -16,7 +16,9 @@ uses
   GlobalTypes in 'PUBLIC\GlobalTypes.pas',
   MyMessageQueue in 'PUBLIC\MyMessageQueue.pas',
   DataEngine in 'DATAS\DataEngine.pas',
-  IP in 'PUBLIC\IP.pas';
+  IP in 'PUBLIC\IP.pas',
+  ueIPEdit in 'PUBLIC\ueIPEdit.pas',
+  Unit200 in 'PUBLIC\Unit200.pas';
 
 {$R *.res}
 

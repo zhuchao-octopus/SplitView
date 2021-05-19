@@ -1,4 +1,12 @@
 // ---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 
 // This software is Copyright (c) 2015 Embarcadero Technologies, Inc.
 // You may only use this software if you are an authorized licensee
@@ -34,7 +42,8 @@ uses
   Vcl.Imaging.PngImage,
   Vcl.ComCtrls,
   Vcl.ActnList, IdTCPConnection, IdTCPClient, IdIPMCastBase, IdIPMCastClient,
-  IdBaseComponent, IdComponent, IdUDPBase, IdUDPServer;
+  IdBaseComponent, IdComponent, IdUDPBase, IdUDPServer, Vcl.Samples.Spin,
+  ueIPEdit, Vcl.Mask, IdGlobal, IdSocketHandle, VDeviceGroup, VDevice;
 
 type
   TSplitViewForm = class(TForm)
@@ -55,8 +64,14 @@ type
     Edit2: TEdit;
     Button1: TButton;
     IdUDPServer1: TIdUDPServer;
-    IdIPMCastClient1: TIdIPMCastClient;
     IdTCPClient1: TIdTCPClient;
+    GroupBox2: TGroupBox;
+    Button2: TButton;
+    Label3: TLabel;
+    Edit3: TEdit;
+    Edit4: TEdit;
+    Button3: TButton;
+    Button4: TButton;
 
     procedure FormCreate(Sender: TObject);
     procedure imgMenuClick(Sender: TObject);
@@ -67,13 +82,20 @@ type
     procedure catMenuItemsCategories0Items3Click(Sender: TObject);
     procedure Edit1KeyPress(Sender: TObject; var Key: Char);
     procedure Edit2KeyPress(Sender: TObject; var Key: Char);
-    procedure SpeedButton1Click(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure IdUDPServer1UDPRead(AThread: TIdUDPListenerThread;
+      const AData: TIdBytes; ABinding: TIdSocketHandle);
+    procedure Button3Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
   private
     procedure Log(const Msg: string);
     procedure SynchroPage(ItemIndex: Integer);
+    procedure UpdateListView();
+
   public
+    DeviceList: TVDeviceGroup;
   end;
 
 var
@@ -82,7 +104,7 @@ var
 implementation
 
 uses
-  Vcl.Themes, GlobalConst, GlobalFunctions;
+  Vcl.Themes, GlobalConst, GlobalFunctions, Unit200;
 
 {$R *.dfm}
 
@@ -93,18 +115,88 @@ var
 begin
   for StyleName in TStyleManager.StyleNames do
     cbxVclStyles.Items.Add(StyleName);
-  cbxVclStyles.ItemIndex := cbxVclStyles.Items.IndexOf(TStyleManager.ActiveStyle.Name);
+  cbxVclStyles.ItemIndex := cbxVclStyles.Items.IndexOf
+    (TStyleManager.ActiveStyle.Name);
 
   GetBuildInfo(Application.ExeName, S);
 
-  Caption := APPLICATION_TITLE_NAME + ' v' + S + ' - ' + {$IFDEF CPUX64}'64'{$ELSE}'32'{$ENDIF} + ' bit';
+  Caption := APPLICATION_TITLE_NAME + ' v' + S + ' - ' +
+{$IFDEF CPUX64}'64'{$ELSE}'32'{$ENDIF} + ' bit';
 
   SynchroPage(0);
+
+  /// ///////////////////////////////////////////////////////////////////////////
+  DeviceList := TVDeviceGroup.Create('');
 end;
 
 procedure TSplitViewForm.FormResize(Sender: TObject);
 begin
-    ListView1.width:=panel1.width div 2;
+  ListView1.width := Panel1.width div 2;
+end;
+
+procedure TSplitViewForm.IdUDPServer1UDPRead(AThread: TIdUDPListenerThread;
+  const AData: TIdBytes; ABinding: TIdSocketHandle);
+var
+  sl: TStringList;
+  dv: TVDevice;
+begin
+  sl := TStringList.Create;
+  Memo1.Lines.Add(GetSystemDateTimeStr() + ' 接收到数据来自：' + ABinding.PeerIP + ':' +
+    IntToStr(ABinding.PeerPort) + ':' + IntToStr(AThread.ThreadID));
+  // Memo1.Lines.Add(IdBytesToAnsiString((AData)));
+  FormatBuff(AData, sl, 16);
+  Memo1.Lines.AddStrings(sl);
+
+  dv := TVDevice.Create();
+  dv.port := IntToStr(ABinding.PeerPort);
+  dv.SetBuffer(AData);
+  DeviceList.Devices.addObject(dv.Name, dv);
+  UpdateListView();
+end;
+
+procedure TSplitViewForm.UpdateListView();
+var
+  ListItem: TListItem;
+  i: Integer;
+  dv: TVDevice;
+begin
+  if DeviceList.Devices.count <= 0 then
+    Exit;
+  for i := 0 to DeviceList.Devices.count - 1 do
+  begin
+    dv := TVDevice(DeviceList.Devices.Objects[i]);
+    if dv.typee = 'Tx' then
+    begin
+
+      with ListView2 do
+      begin
+        ListItem := Items.Add;
+        ListItem.Caption := dv.Name;;
+        ListItem.subitems.Add(dv.ID);
+        ListItem.subitems.Add(dv.IP);
+        ListItem.subitems.Add(dv.port);
+        ListItem.subitems.Add(dv.MAC);
+        ListItem.subitems.Add(dv.typee);
+        ListItem.subitems.Add(dv.St);
+      end;
+    end;
+    if dv.typee = 'Rx' then
+    begin
+      with ListView1 do
+      begin
+        ListItem := Items.Add;
+        ListItem.Caption := dv.Name;;
+        ListItem.subitems.Add(dv.ID);
+        ListItem.subitems.Add(dv.IP);
+        ListItem.subitems.Add(dv.port);
+        ListItem.subitems.Add(dv.MAC);
+        ListItem.subitems.Add(dv.typee);
+        ListItem.subitems.Add(dv.St);
+      end;
+      // ListView1.update;
+    end;
+  end;
+
 end;
 
 procedure TSplitViewForm.cbxVclStylesChange(Sender: TObject);
@@ -143,19 +235,35 @@ begin
     SV.Open;
 end;
 
-procedure TSplitViewForm.SpeedButton1Click(Sender: TObject);
+procedure TSplitViewForm.Button2Click(Sender: TObject);
+var
+  IP, str: String;
+  buf: TIdBytes;
 begin
-ListView1.Clear;
-ListView1.Columns.Clear;
-ListView1.Columns.Add;
-ListView1.Columns.Add;
-ListView1.Columns.Add;
-ListView1.Columns.Items[0].Caption:='id';
-ListView1.Columns.Items[1].Caption:='type';
-ListView1.Columns.Items[2].Caption:='title';
-ListView1.Columns.Items[2].Width:=300;
-//Listview1.ViewStyle:=vsreport;
-//Listview1.GridLines:=true;
+  IP := Edit4.Text;
+  SetLength(buf, 4);
+  str := FormatHexStrToByte(trim(Edit3.Text), buf);
+  IdUDPServer1.SendBuffer(IP, 3333, buf);
+end;
+
+procedure TSplitViewForm.Button3Click(Sender: TObject);
+begin
+  UpdateListView();
+end;
+
+procedure TSplitViewForm.Button4Click(Sender: TObject);
+var
+  ListItem: TListItem;
+  i: Integer;
+begin
+  i := ListView1.Items.count;
+  with ListView1 do
+  begin
+    ListItem := Items.Add;
+    ListItem.Caption := IntToStr(i);
+    ListItem.subitems.Add('第 ' + IntToStr(i) + ' 行');
+    ListItem.subitems.Add('第三列内容');
+  end;
 end;
 
 procedure TSplitViewForm.catMenuItemsCategories0Items0Click(Sender: TObject);
@@ -185,10 +293,10 @@ end;
 
 procedure TSplitViewForm.Timer1Timer(Sender: TObject);
 var
- str:String;
+  str: String;
 begin
-  //str:=GetSystemDateTimeStr();
-  //statusbar1.panels[0].text:=str;
+  // str:=GetSystemDateTimeStr();
+  // statusbar1.panels[0].text:=str;
 end;
 
 procedure TSplitViewForm.Log(const Msg: string);
@@ -197,3 +305,4 @@ begin
 end;
 
 end.
+

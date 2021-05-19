@@ -37,6 +37,9 @@ end;
 destructor TVDeviceGroup.Destroy;
 begin
    Devices.Free;
+   Devices.Clear;
+   Devices.Free
 end;
+
 
 end.

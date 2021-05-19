@@ -8,15 +8,15 @@ object SplitViewForm: TSplitViewForm
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -13
-  Font.Name = 'Segoe UI'
+  Font.Height = -16
+  Font.Name = #26032#23435#20307
   Font.Style = []
   OldCreateOrder = False
   Position = poDesktopCenter
   OnCreate = FormCreate
   OnResize = FormResize
   PixelsPerInch = 96
-  TextHeight = 17
+  TextHeight = 16
   object SV: TSplitView
     Left = 862
     Top = 0
@@ -25,13 +25,12 @@ object SplitViewForm: TSplitViewForm
     OpenedWidth = 250
     Placement = svpRight
     TabOrder = 0
-    ExplicitLeft = 0
     object cbxVclStyles: TComboBox
       AlignWithMargins = True
       Left = 3
       Top = 3
       Width = 244
-      Height = 25
+      Height = 24
       Align = alTop
       Style = csDropDownList
       TabOrder = 0
@@ -40,30 +39,30 @@ object SplitViewForm: TSplitViewForm
     object GroupBox1: TGroupBox
       AlignWithMargins = True
       Left = 3
-      Top = 34
+      Top = 33
       Width = 244
-      Height = 151
+      Height = 128
       Align = alTop
       TabOrder = 1
       object Label1: TLabel
         Left = 3
         Top = 18
-        Width = 80
-        Height = 17
+        Width = 88
+        Height = 16
         Caption = #21457#23556#31471' ID'#65306
       end
       object Label2: TLabel
         Left = 6
         Top = 50
-        Width = 80
-        Height = 17
+        Width = 88
+        Height = 16
         Caption = #25509#25910#31471' ID'#65306
       end
       object Edit1: TEdit
         Left = 81
         Top = 10
         Width = 156
-        Height = 25
+        Height = 24
         TabOrder = 0
         Text = 'Edit1'
         OnKeyPress = Edit1KeyPress
@@ -72,19 +71,78 @@ object SplitViewForm: TSplitViewForm
         Left = 81
         Top = 42
         Width = 156
-        Height = 25
+        Height = 24
         TabOrder = 1
         Text = 'Edit2'
         OnKeyPress = Edit2KeyPress
       end
       object Button1: TButton
         Left = 3
-        Top = 78
-        Width = 234
+        Top = 74
+        Width = 235
         Height = 48
         Caption = #36830#25509#21305#37197
         TabOrder = 2
       end
+    end
+    object GroupBox2: TGroupBox
+      AlignWithMargins = True
+      Left = 3
+      Top = 167
+      Width = 244
+      Height = 194
+      Align = alTop
+      TabOrder = 2
+      object Label3: TLabel
+        Left = 6
+        Top = 15
+        Width = 56
+        Height = 16
+        Caption = #22320#22336'IP:'
+      end
+      object Edit4: TEdit
+        Left = 72
+        Top = 9
+        Width = 121
+        Height = 24
+        TabOrder = 0
+        Text = '225.1.0.0'
+      end
+    end
+    object Button2: TButton
+      Left = 6
+      Top = 272
+      Width = 235
+      Height = 46
+      Caption = #21457#36865#25968#25454
+      TabOrder = 3
+      OnClick = Button2Click
+    end
+    object Edit3: TEdit
+      Left = 40
+      Top = 224
+      Width = 193
+      Height = 24
+      TabOrder = 4
+      Text = '01 00 00 0d'
+    end
+    object Button3: TButton
+      Left = 48
+      Top = 367
+      Width = 75
+      Height = 25
+      Caption = 'Button3'
+      TabOrder = 5
+      OnClick = Button3Click
+    end
+    object Button4: TButton
+      Left = 64
+      Top = 424
+      Width = 75
+      Height = 25
+      Caption = 'Button4'
+      TabOrder = 6
+      OnClick = Button4Click
     end
   end
   object Notebook1: TNotebook
@@ -94,16 +152,10 @@ object SplitViewForm: TSplitViewForm
     Height = 663
     Align = alClient
     TabOrder = 1
-    ExplicitLeft = 200
-    ExplicitTop = 50
-    ExplicitWidth = 894
-    ExplicitHeight = 721
     object TPage
       Left = 0
       Top = 0
       Caption = #33410#28857#35774#22791#31649#29702
-      ExplicitWidth = 894
-      ExplicitHeight = 721
       object Panel1: TPanel
         Left = 0
         Top = 0
@@ -134,6 +186,7 @@ object SplitViewForm: TSplitViewForm
           Height = 489
           Margins.Right = 1
           Align = alLeft
+          Checkboxes = True
           Columns = <
             item
               Caption = #21517#31216
@@ -163,9 +216,9 @@ object SplitViewForm: TSplitViewForm
           FlatScrollBars = True
           GridLines = True
           HideSelection = False
-          GroupView = True
           ReadOnly = True
           RowSelect = True
+          SortType = stBoth
           TabOrder = 0
           ViewStyle = vsReport
         end
@@ -189,8 +242,14 @@ object SplitViewForm: TSplitViewForm
             Width = 856
             Height = 159
             Align = alClient
-            Lines.Strings = (
-              'Memo1')
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -15
+            Font.Name = #26032#23435#20307
+            Font.Style = []
+            ParentFont = False
+            ReadOnly = True
+            ScrollBars = ssBoth
             TabOrder = 0
           end
         end
@@ -243,22 +302,16 @@ object SplitViewForm: TSplitViewForm
       Left = 0
       Top = 0
       Caption = '1'
-      ExplicitWidth = 894
-      ExplicitHeight = 721
     end
     object TPage
       Left = 0
       Top = 0
       Caption = '2'
-      ExplicitWidth = 894
-      ExplicitHeight = 721
     end
     object TPage
       Left = 0
       Top = 0
       Caption = '3'
-      ExplicitWidth = 894
-      ExplicitHeight = 721
     end
   end
   object Timer1: TTimer
@@ -267,20 +320,18 @@ object SplitViewForm: TSplitViewForm
     Top = 682
   end
   object IdUDPServer1: TIdUDPServer
+    Active = True
+    BroadcastEnabled = True
     Bindings = <>
-    DefaultPort = 0
-    Left = 128
-    Top = 200
-  end
-  object IdIPMCastClient1: TIdIPMCastClient
-    Bindings = <>
-    DefaultPort = 0
-    MulticastGroup = '224.0.0.1'
-    Left = 40
-    Top = 200
+    DefaultPort = 3334
+    ThreadedEvent = True
+    OnUDPRead = IdUDPServer1UDPRead
+    Left = 304
+    Top = 248
   end
   object IdTCPClient1: TIdTCPClient
     ConnectTimeout = 0
+    IPVersion = Id_IPv4
     Port = 0
     ReadTimeout = -1
     Left = 32
