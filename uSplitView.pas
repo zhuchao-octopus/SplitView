@@ -33,37 +33,32 @@ uses
   Vcl.ImgList,
   Vcl.Imaging.PngImage,
   Vcl.ComCtrls,
-  Vcl.ActnList;
+  Vcl.ActnList, IdTCPConnection, IdTCPClient, IdIPMCastBase, IdIPMCastClient,
+  IdBaseComponent, IdComponent, IdUDPBase, IdUDPServer;
 
 type
   TSplitViewForm = class(TForm)
-    pnlToolbar: TPanel;
     SV: TSplitView;
-    catMenuItems: TCategoryButtons;
-    imlIcons: TImageList;
-    imgMenu: TImage;
-    cbxVclStyles: TComboBox;
-    lblTitle: TLabel;
     Notebook1: TNotebook;
+    Timer1: TTimer;
     Panel1: TPanel;
-    Memo1: TMemo;
+    Splitter1: TSplitter;
     ListView1: TListView;
+    Panel3: TPanel;
+    Memo1: TMemo;
     ListView2: TListView;
-    Panel2: TPanel;
+    cbxVclStyles: TComboBox;
+    GroupBox1: TGroupBox;
     Label1: TLabel;
     Label2: TLabel;
     Edit1: TEdit;
     Edit2: TEdit;
     Button1: TButton;
-    SpeedButton1: TSpeedButton;
-    GroupBox1: TGroupBox;
-    GroupBox2: TGroupBox;
+    IdUDPServer1: TIdUDPServer;
+    IdIPMCastClient1: TIdIPMCastClient;
+    IdTCPClient1: TIdTCPClient;
 
     procedure FormCreate(Sender: TObject);
-    procedure SVClosed(Sender: TObject);
-    procedure SVOpened(Sender: TObject);
-    procedure SVOpening(Sender: TObject);
-    procedure catMenuItemsCategoryCollapase(Sender: TObject; const Category: TButtonCategory);
     procedure imgMenuClick(Sender: TObject);
     procedure cbxVclStylesChange(Sender: TObject);
     procedure catMenuItemsCategories0Items0Click(Sender: TObject);
@@ -73,6 +68,8 @@ type
     procedure Edit1KeyPress(Sender: TObject; var Key: Char);
     procedure Edit2KeyPress(Sender: TObject; var Key: Char);
     procedure SpeedButton1Click(Sender: TObject);
+    procedure FormResize(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     procedure Log(const Msg: string);
     procedure SynchroPage(ItemIndex: Integer);
@@ -101,6 +98,13 @@ begin
   GetBuildInfo(Application.ExeName, S);
 
   Caption := APPLICATION_TITLE_NAME + ' v' + S + ' - ' + {$IFDEF CPUX64}'64'{$ELSE}'32'{$ENDIF} + ' bit';
+
+  SynchroPage(0);
+end;
+
+procedure TSplitViewForm.FormResize(Sender: TObject);
+begin
+    ListView1.width:=panel1.width div 2;
 end;
 
 procedure TSplitViewForm.cbxVclStylesChange(Sender: TObject);
@@ -154,28 +158,6 @@ ListView1.Columns.Items[2].Width:=300;
 //Listview1.GridLines:=true;
 end;
 
-procedure TSplitViewForm.SVClosed(Sender: TObject);
-begin
-  // When TSplitView is closed, adjust ButtonOptions and Width
-  catMenuItems.ButtonOptions := catMenuItems.ButtonOptions - [boShowCaptions];
-  if SV.CloseStyle = svcCompact then
-    catMenuItems.Width := SV.CompactWidth;
-end;
-
-procedure TSplitViewForm.SVOpened(Sender: TObject);
-begin
-  // When not animating, change size of catMenuItems when TSplitView is opened
-  catMenuItems.ButtonOptions := catMenuItems.ButtonOptions + [boShowCaptions];
-  catMenuItems.Width := SV.OpenedWidth;
-end;
-
-procedure TSplitViewForm.SVOpening(Sender: TObject);
-begin
-  // When animating, change size of catMenuItems at the beginning of open
-  catMenuItems.ButtonOptions := catMenuItems.ButtonOptions + [boShowCaptions];
-  catMenuItems.Width := SV.OpenedWidth;
-end;
-
 procedure TSplitViewForm.catMenuItemsCategories0Items0Click(Sender: TObject);
 begin
   SynchroPage(0);
@@ -196,16 +178,17 @@ begin
   SynchroPage(3);
 end;
 
-procedure TSplitViewForm.catMenuItemsCategoryCollapase(Sender: TObject; const Category: TButtonCategory);
-begin
-  // Prevent the catMenuItems Category group from being collapsed
-  catMenuItems.Categories[0].Collapsed := False;
-end;
-
 procedure TSplitViewForm.SynchroPage(ItemIndex: Integer);
 begin
   Notebook1.PageIndex := ItemIndex;
-  lblTitle.Caption := APPLICATION_TITLE_NAME + ' - ' + catMenuItems.SelectedItem.Caption;
+end;
+
+procedure TSplitViewForm.Timer1Timer(Sender: TObject);
+var
+ str:String;
+begin
+  //str:=GetSystemDateTimeStr();
+  //statusbar1.panels[0].text:=str;
 end;
 
 procedure TSplitViewForm.Log(const Msg: string);

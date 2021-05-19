@@ -1,4 +1,4 @@
-unit ping;
+unit IP;
 
 interface
 
@@ -163,7 +163,7 @@ function CheckTelnet(State_Ping: Byte; DvrIP: string; DvrPort: integer): integer
 var
   IdTCPClient: TIdTCPClient;
 var
-  t1, t2: integer;
+  t1: integer;
 begin
   Result := -1;
   if DvrPort <= 0 then

@@ -6,9 +6,10 @@ uses SysUtils, Classes, Windows,
   ExtCtrls, MATH, Messages, SyncObjs, System.Threading,
   System.json, GlobalConst, GlobalTypes, GlobalFunctions,
   IdBaseComponent, IdComponent, IdTCPConnection, IdTCPClient,
-  IdHTTP, IdSSLOpenSSL, MyMessageQueue, WinInet, Ping;
+  IdHTTP, IdSSLOpenSSL, MyMessageQueue, WinInet, IP;
 
 type
+ TProc = procedure() of object;
   TDataEngineManager = class(TThread)
   private
     FThreadPool: TThreadPool;
@@ -20,16 +21,18 @@ type
     // FMaxTaskCount:Integer;
 
     FTaskOBJList: TStringList;
-    procedure Execute; override; { 执行 }
-    Procedure CreateTaskInPool();
+
+    Procedure CreateTasksInPool();
     procedure TaskFunction();
     procedure CallActionInterface(IP: String);
 
   protected
+   procedure Execute; override; { 执行 }
   public
     Constructor Create(Handle: HWND);
     Destructor Destroy; override;
-    procedure StartScan();
+    procedure StartScanLocalNet();
+    procedure RunTastInPool(task:TProc);
   end;
 
 var
@@ -63,6 +66,12 @@ begin
   FTaskOBJList.Free;
 end;
 
+
+procedure TDataEngineManager.RunTastInPool(task:TProc);
+begin
+   TTask.Create(task, FThreadPool).start;
+end;
+
 procedure TDataEngineManager.Execute;
 begin
   while not Terminated do
@@ -77,7 +86,7 @@ begin
         end;
       2: // 工作模式 2
         begin
-          CreateTaskInPool();
+          CreateTasksInPool();
           // Sleep(60000);
           FWorkingStatus := 0; // 目标数据源反爬虫每天只能刷新一遍
         end;
@@ -92,7 +101,7 @@ begin
 end;
 
 // 线程池批量处理入口
-Procedure TDataEngineManager.CreateTaskInPool();
+Procedure TDataEngineManager.CreateTasksInPool();
 var
   Task: ITask;
   i: Integer;
@@ -124,10 +133,17 @@ begin
 
   MQueue.SendMessage(TMyMessage.Create(WM_MYMESSAGE_DATAENGINE_CREATE, FTaskIndex, ''));
 
+  /////////////////////////////////////////////////////////////////////////////////////
+  ///  调用特定功能函数
   CallActionInterface(IP);
+  /////////////////////////////////////////////////////////////////////////////////////
+
 end;
 
-/// //////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
 // 线程池批量最终数据源函数
 procedure TDataEngineManager.CallActionInterface(IP: String);
 var
@@ -152,7 +168,8 @@ begin
   MQueue.SendMessage(TMyMessage.Create(WM_MYMESSAGE_DATAENGINE_WORKING_DONE,FTaskOBJList.Count - FTaskWorkingCount, IP));
 end;
 
-procedure TDataEngineManager.StartScan();
+
+procedure TDataEngineManager.StartScanLocalNet();
 var
   i: Integer;
   IP: String;

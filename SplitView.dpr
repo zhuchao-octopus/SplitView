@@ -14,7 +14,9 @@ uses
   GlobalConst in 'PUBLIC\GlobalConst.pas',
   GlobalFunctions in 'PUBLIC\GlobalFunctions.pas',
   GlobalTypes in 'PUBLIC\GlobalTypes.pas',
-  MyMessageQueue in 'PUBLIC\MyMessageQueue.pas';
+  MyMessageQueue in 'PUBLIC\MyMessageQueue.pas',
+  DataEngine in 'DATAS\DataEngine.pas',
+  IP in 'PUBLIC\IP.pas';
 
 {$R *.res}
 
