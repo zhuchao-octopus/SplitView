@@ -18,7 +18,8 @@ uses
   DataEngine in 'DATAS\DataEngine.pas',
   IP in 'PUBLIC\IP.pas',
   ueIPEdit in 'PUBLIC\ueIPEdit.pas',
-  Unit200 in 'PUBLIC\Unit200.pas';
+  Unit200 in 'PUBLIC\Unit200.pas',
+  ClientObject in 'PUBLIC\ClientObject.pas';
 
 {$R *.res}
 

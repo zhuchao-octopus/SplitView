@@ -13,6 +13,7 @@ object SplitViewForm: TSplitViewForm
   Font.Style = []
   OldCreateOrder = False
   Position = poDesktopCenter
+  OnClose = FormClose
   OnCreate = FormCreate
   OnResize = FormResize
   PixelsPerInch = 96
@@ -25,7 +26,6 @@ object SplitViewForm: TSplitViewForm
     OpenedWidth = 250
     Placement = svpRight
     TabOrder = 0
-    ExplicitHeight = 663
     object Notebook2: TNotebook
       Left = 0
       Top = 0
@@ -36,12 +36,10 @@ object SplitViewForm: TSplitViewForm
       PageIndex = 1
       ParentCtl3D = False
       TabOrder = 0
-      ExplicitHeight = 636
       object TPage
         Left = 0
         Top = 0
         Caption = #22352#24109#31649#29702
-        ExplicitHeight = 636
         object cbxVclStyles: TComboBox
           AlignWithMargins = True
           Left = 3
@@ -79,7 +77,7 @@ object SplitViewForm: TSplitViewForm
             Left = 85
             Top = 10
             Width = 155
-            Height = 24
+            Height = 22
             TabOrder = 0
             OnKeyPress = Edit1KeyPress
           end
@@ -87,7 +85,7 @@ object SplitViewForm: TSplitViewForm
             Left = 85
             Top = 42
             Width = 155
-            Height = 24
+            Height = 22
             TabOrder = 1
             OnKeyPress = Edit2KeyPress
           end
@@ -132,7 +130,6 @@ object SplitViewForm: TSplitViewForm
         Left = 0
         Top = 0
         Caption = #32593#32476#35843#35797
-        ExplicitHeight = 636
         object Button3: TButton
           Left = 0
           Top = 495
@@ -142,41 +139,45 @@ object SplitViewForm: TSplitViewForm
           Caption = #33719#21462#26412#26426#20449#24687
           TabOrder = 0
           OnClick = Button3Click
-          ExplicitTop = 508
         end
         object GroupBox3: TGroupBox
           AlignWithMargins = True
           Left = 3
           Top = 3
           Width = 244
-          Height = 111
+          Height = 134
           Align = alTop
           TabOrder = 1
-          ExplicitLeft = 6
-          ExplicitTop = 11
           object Label4: TLabel
-            Left = 8
+            Left = 6
             Top = 43
             Width = 80
             Height = 16
             Caption = #26412#22320#20027#26426#65306
           end
           object Label5: TLabel
-            Left = 8
+            Left = 6
             Top = 74
             Width = 80
             Height = 16
             Caption = #26412#22320#31471#21475#65306
           end
           object Label8: TLabel
-            Left = 8
+            Left = 6
             Top = 14
             Width = 80
             Height = 16
             Caption = #26412#22320#21517#31216#65306
           end
+          object Label9: TLabel
+            Left = 6
+            Top = 105
+            Width = 80
+            Height = 16
+            Caption = #21327#35758#31867#22411#65306
+          end
           object ComboBox1: TComboBox
-            Left = 88
+            Left = 86
             Top = 40
             Width = 155
             Height = 24
@@ -185,10 +186,10 @@ object SplitViewForm: TSplitViewForm
             TabOrder = 0
           end
           object Edit6: TEdit
-            Left = 88
+            Left = 86
             Top = 11
             Width = 155
-            Height = 24
+            Height = 22
             Color = clBtnFace
             ReadOnly = True
             TabOrder = 1
@@ -196,77 +197,70 @@ object SplitViewForm: TSplitViewForm
             OnKeyPress = Edit6KeyPress
           end
           object Edit7: TEdit
-            Left = 88
+            Left = 86
             Top = 70
             Width = 155
-            Height = 24
+            Height = 22
             TabOrder = 2
             Text = '3334'
             OnKeyPress = Edit7KeyPress
+          end
+          object ComboBox2: TComboBox
+            Left = 86
+            Top = 100
+            Width = 155
+            Height = 24
+            Style = csDropDownList
+            ItemIndex = 0
+            TabOrder = 3
+            Text = 'UDP'
+            OnChange = ComboBox2Change
+            Items.Strings = (
+              'UDP'
+              'UDP '#26381#21153
+              'TCP '
+              'TCP '#26381#21153)
           end
         end
         object GroupBox2: TGroupBox
           AlignWithMargins = True
           Left = 3
-          Top = 120
+          Top = 143
           Width = 244
-          Height = 223
+          Height = 82
           Align = alTop
           TabOrder = 2
-          ExplicitTop = 284
           object Label3: TLabel
-            Left = 6
-            Top = 12
+            Left = 3
+            Top = 16
             Width = 80
             Height = 16
-            Caption = #35774#22791#22320#22336#65306
+            Caption = #36828#31243#22320#22336#65306
           end
           object Label6: TLabel
             Left = 6
-            Top = 47
+            Top = 49
             Width = 80
             Height = 16
-            Caption = #35774#22791#31471#21475#65306
-          end
-          object Label7: TLabel
-            Left = 6
-            Top = 82
-            Width = 80
-            Height = 16
-            Caption = #21629#20196#25968#25454#65306
-          end
-          object Edit4: TEdit
-            Left = 85
-            Top = 10
-            Width = 155
-            Height = 24
-            TabOrder = 0
-            Text = '225.1.0.0'
-          end
-          object Button2: TButton
-            Left = 3
-            Top = 109
-            Width = 237
-            Height = 46
-            Caption = #21457#36865#25968#25454
-            TabOrder = 1
-            OnClick = Button2Click
-          end
-          object Edit3: TEdit
-            Left = 85
-            Top = 79
-            Width = 155
-            Height = 24
-            TabOrder = 2
-            Text = '01 00 00 0d'
+            Caption = #36828#31243#31471#21475#65306
           end
           object Edit5: TEdit
-            Left = 85
-            Top = 44
+            Left = 86
+            Top = 45
+            Width = 155
+            Height = 22
+            TabOrder = 0
+            Text = 'Edit5'
+            OnKeyPress = Edit5KeyPress
+          end
+          object ComboBox3: TComboBox
+            Left = 86
+            Top = 11
             Width = 155
             Height = 24
-            TabOrder = 3
-            Text = 'Edit5'
+            TabOrder = 1
+            Text = '255.1.0.0'
+            OnKeyPress = ComboBox3KeyPress
           end
         end
         object Button6: TButton
@@ -278,8 +272,6 @@ object SplitViewForm: TSplitViewForm
           Caption = #28165#26970#35774#22791#21015#34920
           TabOrder = 3
           OnClick = Button6Click
-          ExplicitLeft = 3
-          ExplicitTop = 527
         end
         object Button7: TButton
           Left = 0
@@ -290,7 +282,24 @@ object SplitViewForm: TSplitViewForm
           Caption = #28165#26970#21382#21490#35760#24405
           TabOrder = 4
           OnClick = Button7Click
-          ExplicitTop = 572
+        end
+        object Button2: TButton
+          Left = 6
+          Top = 358
+          Width = 238
+          Height = 46
+          Caption = #21457#36865#25968#25454
+          TabOrder = 5
+          OnClick = Button2Click
+        end
+        object Memo2: TMemo
+          Left = 6
+          Top = 231
+          Width = 238
+          Height = 122
+          Lines.Strings = (
+            '0x01 0x00 0x00 0x0d')
+          TabOrder = 6
         end
       end
     end
@@ -314,7 +323,6 @@ object SplitViewForm: TSplitViewForm
         #32593#32476#35843#35797)
       TabIndex = 0
       OnChange = TabSet1Change
-      ExplicitTop = 636
     end
   end
   object Notebook1: TNotebook
@@ -324,12 +332,10 @@ object SplitViewForm: TSplitViewForm
     Height = 642
     Align = alClient
     TabOrder = 1
-    ExplicitHeight = 663
     object TPage
       Left = 0
       Top = 0
       Caption = #33410#28857#35774#22791#31649#29702
-      ExplicitHeight = 663
       object Panel1: TPanel
         Left = 0
         Top = 0
@@ -340,7 +346,6 @@ object SplitViewForm: TSplitViewForm
         Color = clWindow
         ParentBackground = False
         TabOrder = 0
-        ExplicitHeight = 663
         object Splitter1: TSplitter
           Left = 0
           Top = 474
@@ -420,7 +425,6 @@ object SplitViewForm: TSplitViewForm
           TabOrder = 0
           ViewStyle = vsReport
           OnClick = ListView1Click
-          ExplicitHeight = 489
         end
         object Panel3: TPanel
           Left = 0
@@ -435,7 +439,6 @@ object SplitViewForm: TSplitViewForm
           ParentColor = True
           ParentCtl3D = False
           TabOrder = 1
-          ExplicitTop = 498
           object Memo1: TMemo
             AlignWithMargins = True
             Left = 3
@@ -521,7 +524,6 @@ object SplitViewForm: TSplitViewForm
           TabOrder = 2
           ViewStyle = vsReport
           OnClick = ListView2Click
-          ExplicitHeight = 489
         end
       end
     end
@@ -529,19 +531,22 @@ object SplitViewForm: TSplitViewForm
       Left = 0
       Top = 0
       Caption = '1'
-      ExplicitHeight = 640
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object TPage
       Left = 0
       Top = 0
       Caption = '2'
-      ExplicitHeight = 640
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object TPage
       Left = 0
       Top = 0
       Caption = '3'
-      ExplicitHeight = 640
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
   end
   object StatusBar1: TStatusBar
@@ -557,43 +562,24 @@ object SplitViewForm: TSplitViewForm
       item
         Width = 200
       end>
-    ExplicitTop = 641
   end
   object IdUDPServer1: TIdUDPServer
-    Active = True
+    OnStatus = IdUDPServer1Status
     BroadcastEnabled = True
-    Bindings = <
-      item
-        IP = '169.254.6.80'
-        Port = 3334
-      end
-      item
-        IP = '192.168.1.233'
-        Port = 3334
-      end
-      item
-        IP = '192.168.2.104'
-        Port = 3334
-      end
-      item
-        IP = '127.0.0.1'
-        Port = 3334
-      end
-      item
-        IP = '0.0.0.0'
-        Port = 3334
-      end>
+    Bindings = <>
     DefaultPort = 3334
     ThreadedEvent = True
     OnUDPRead = IdUDPServer1UDPRead
+    OnUDPException = IdUDPServer1UDPException
     Left = 304
     Top = 248
   end
   object IdTCPClient1: TIdTCPClient
     OnStatus = IdTCPClient1Status
     OnDisconnected = IdTCPClient1Disconnected
+    OnWork = IdTCPClient1Work
     OnConnected = IdTCPClient1Connected
-    ConnectTimeout = 0
+    ConnectTimeout = 3000
     IPVersion = Id_IPv4
     Port = 0
     ReadTimeout = -1

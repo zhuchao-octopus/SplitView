@@ -6,10 +6,11 @@ uses SysUtils, Classes, Windows,
   ExtCtrls, MATH, Messages, SyncObjs, System.Threading,
   System.json, GlobalConst, GlobalTypes, GlobalFunctions,
   IdBaseComponent, IdComponent, IdTCPConnection, IdTCPClient,
-  IdHTTP, IdSSLOpenSSL, MyMessageQueue, WinInet, IP;
+  IdHTTP, IdSSLOpenSSL, MyMessageQueue, WinInet, IP, ClientObject;
 
 type
- TProc = procedure() of object;
+  TProc = procedure() of object;
+
   TDataEngineManager = class(TThread)
   private
     FThreadPool: TThreadPool;
@@ -25,14 +26,16 @@ type
     Procedure CreateTasksInPool();
     procedure TaskFunction();
     procedure CallActionInterface(IP: String);
-
   protected
-   procedure Execute; override; { 执行 }
+    procedure Execute; override; { 执行 }
   public
     Constructor Create(Handle: HWND);
     Destructor Destroy; override;
     procedure StartScanLocalNet();
-    procedure RunTastInPool(task:TProc);
+    procedure DoIt(task: TProc);
+
+    function Add(name: String; obj: TObject): TObject;
+    function Get(name: String): TObject;
   end;
 
 var
@@ -66,10 +69,9 @@ begin
   FTaskOBJList.Free;
 end;
 
-
-procedure TDataEngineManager.RunTastInPool(task:TProc);
+procedure TDataEngineManager.DoIt(task: TProc);
 begin
-   TTask.Create(task, FThreadPool).start;
+  TTask.Create(task, FThreadPool).start;
 end;
 
 procedure TDataEngineManager.Execute;
@@ -103,14 +105,14 @@ end;
 // 线程池批量处理入口
 Procedure TDataEngineManager.CreateTasksInPool();
 var
-  Task: ITask;
+  task: ITask;
   i: Integer;
 begin
   FTaskWorkingCount := FTaskOBJList.Count;
   for i := FTaskIndex to FTaskOBJList.Count - 1 do
   begin
-    Task := TTask.Create(TaskFunction, FThreadPool);
-    Task.Start;
+    task := TTask.Create(TaskFunction, FThreadPool);
+    task.start;
   end;
 
 end;
@@ -133,23 +135,22 @@ begin
 
   MQueue.SendMessage(TMyMessage.Create(WM_MYMESSAGE_DATAENGINE_CREATE, FTaskIndex, ''));
 
-  /////////////////////////////////////////////////////////////////////////////////////
-  ///  调用特定功能函数
+  /// //////////////////////////////////////////////////////////////////////////////////
+  /// 调用特定功能函数
   CallActionInterface(IP);
-  /////////////////////////////////////////////////////////////////////////////////////
+  /// //////////////////////////////////////////////////////////////////////////////////
 
 end;
 
-
-/////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////
+/// //////////////////////////////////////////////////////////////////////////////////
+/// //////////////////////////////////////////////////////////////////////////////////
+/// //////////////////////////////////////////////////////////////////////////////////
 // 线程池批量最终数据源函数
 procedure TDataEngineManager.CallActionInterface(IP: String);
 var
   port: Integer;
   b: boolean;
-  //rr: String;
+  // rr: String;
 begin
   port := 554;
   b := false;
@@ -164,10 +165,8 @@ begin
   DEC(FTaskWorkingCount);
   DataSourceCriticalSection.Leave;
 
-
-  MQueue.SendMessage(TMyMessage.Create(WM_MYMESSAGE_DATAENGINE_WORKING_DONE,FTaskOBJList.Count - FTaskWorkingCount, IP));
+  MQueue.SendMessage(TMyMessage.Create(WM_MYMESSAGE_DATAENGINE_WORKING_DONE, FTaskOBJList.Count - FTaskWorkingCount, IP));
 end;
-
 
 procedure TDataEngineManager.StartScanLocalNet();
 var
@@ -180,14 +179,14 @@ begin
     exit;
   end;
 
-  if FTaskWorkingCount >0 then
+  if FTaskWorkingCount > 0 then
   begin
-    Exit;
+    exit;
   end;
   if (FWorkingStatus = 0) then
   begin
     FTaskWorkingCount := 0;
-    FTaskIndex :=0;
+    FTaskIndex := 0;
     FTaskOBJList.Clear;
   end;
 
@@ -207,7 +206,27 @@ begin
   end;
   if Suspended then
   begin
-    Start;
+    start;
+  end;
+end;
+
+function TDataEngineManager.Add(name: String; obj: TObject): TObject;
+begin
+  if FTaskOBJList.IndexOf(name) < 0 then
+  begin
+    FTaskOBJList.AddObject(name, obj);
+  end;
+end;
+
+function TDataEngineManager.Get(name: String): TObject;
+var
+  i: Integer;
+begin
+  Result := nil;
+  i := FTaskOBJList.IndexOf(name);
+  if i >= 0 then
+  begin
+    Result := FTaskOBJList.Objects[i];
   end;
 end;
 
@@ -216,5 +235,7 @@ initialization
 DataSourceCriticalSection := TCriticalSection.Create;
 
 finalization
+
 DataSourceCriticalSection.Free;
+
 end.
