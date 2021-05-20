@@ -135,10 +135,12 @@ procedure WideStringToByte(str: String; var buff: array of byte);
 function GetDefaultLauguageStrByName(Name: String; Lang: String): String;
 procedure SetButtonCaptionLeftAlign(btn: TButton);
 function FormatHexStrToByte(hs: string; var buf: array of byte): string;
-function FormatHexStrToByte2(hs: string; var buf: array of byte): Integer;
+function FormatHexStrToByte2(hs: string;var buf: array of byte): Integer;
 
 function SpaceCompress(s: string): string;
-function FormatHexStr(hs: string): string;
+function FormatHexStr(hs: string;var count:Integer): string;
+function HexStrToBuff(hs: string;var buff:array of byte;Count:Integer): string;
+
 function CharToByte(c1, c2: Char): byte;
 procedure FormatBuff(buf: array of Byte; sl: TStringList; fm: Integer);
 
@@ -202,9 +204,7 @@ begin
   Result := CharToDigit(c1) * 16 + CharToDigit(c2);
 end;
 
-function FormatHexStr(hs: string): string;
-var
-  i, len, bLen: Word;
+function FormatHexStr(hs: string;var count:Integer): string;
 begin
   Result := '';
   hs := StringReplace(hs, '0x', ' ', [rfReplaceAll]); // 替换0x
@@ -214,7 +214,31 @@ begin
   hs := StringReplace(hs, ' ', ' ', [rfReplaceAll]); // 替换 tab
   // hs:=StringReplace(hs, '  ', ' ', [rfReplaceAll]);//删除'  '
   Result := SpaceCompress(hs); // 压缩空格，就是把多个空格替换成一个
+  count := (Length(Result) + 2) div 3;
 end;
+
+function HexStrToBuff(hs: string;var buff:array of byte;Count:Integer): string;
+var
+  i, len: Word;
+begin
+  Result := '';
+  len:=(length(hs) + 2) div 3;
+  if len <> Count then
+    Exit;
+    
+  ZeroMemory(@buff[0], len);
+
+  for i := 1 to len do
+  begin
+    buff[i - 1]:= CharToByte(hs[i * 3 - 2], hs[i * 3 - 1]);
+  end;
+
+  for i := 1 to len do
+  begin
+    Result := Result + Format('%.02x ', [buff[i - 1]]);
+  end;
+end;
+
 
 function FormatHexStrToByte(hs: string; var buf: array of byte): string;
 var
@@ -257,18 +281,6 @@ begin
   hs := StringReplace(hs, '0X', '', [rfReplaceAll]); // 删除0X
 
   hs := SpaceCompress(hs);
-  { Str:='';
-    for I := 1 to Length(hs)-2 do
-    begin
-    if (hs[i]=' ')and(hs[i+1]=' ') then
-    if hs[i+2]=' ' then
-    continue
-    else
-    Str:=Str+hs[i]+' '
-    else
-    Str:=Str+hs[i];
-    end;
-    hs:=trim(Str); }
   len := (length(hs) + 2) div 3;
   bLen := length(buf);
   ZeroMemory(@buf, bLen);
@@ -294,7 +306,7 @@ begin
     else
       hs1 := hs2;
   end;
-  Result := hs1;
+  Result := Trim(hs1);
 end;
 
 procedure SetButtonCaptionLeftAlign(btn: TButton);

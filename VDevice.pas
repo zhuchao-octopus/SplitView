@@ -1,4 +1,4 @@
-unit VDevice;
+﻿unit VDevice;
 
 interface
 
@@ -27,14 +27,14 @@ type
     Password: String;
     MainRTSP: String;
     SubRTSP: String;
-
+    b:Boolean;
   private
     FBuff: array of Byte;
   protected
   public
-    constructor Create(Name: String; ID: String; IP: String; MAC: String;
-      Port: String; Typee: String); Overload;
+    constructor Create(IP: String; Port: String); Overload;
     constructor Create(Buff: array of Byte); Overload;
+    constructor Create(IP: String; Port: String;Buff: array of Byte); Overload;
     constructor Create(); Overload;
     destructor Destroy;
 
@@ -47,25 +47,30 @@ implementation
 uses StrUtils, Unit200;
 { TVDevice }
 
-constructor TVDevice.Create(Name: String; ID: String; IP: String; MAC: String;
-  Port: String; Typee: String);
+constructor TVDevice.Create(IP: String; Port: String);
 begin
-  Self.Name := Name;
-  Self.ID := ID;
   Self.IP := IP;
-  Self.MAC := MAC;
   Self.Port := Port;
-  Self.Typee := Typee;
+  b:=false;
 end;
 
 constructor TVDevice.Create(Buff: array of Byte);
 begin
+  b:=false;
+  SetBuffer(Buff);
+end;
+
+constructor TVDevice.Create(IP: String; Port: String;Buff: array of Byte);
+begin
+  Self.IP := IP;
+  Self.Port := Port;
+  b:=false;
   SetBuffer(Buff);
 end;
 
 constructor TVDevice.Create();
 begin
-
+     b:=false;
 end;
 
 destructor TVDevice.Destroy;
@@ -86,6 +91,7 @@ begin
   //CopyMemory(@Buff[0], @FBuff[0], l);
   for I := 0 to l do
    FBuff[i]:=buff[i];
+
   ParserUpdate_KP();
 end;
 
@@ -158,6 +164,7 @@ begin
   Delete(s,1,2);
   Self.MAC:=Self.MAC +  LeftStr(s, 2);
 
+  SetLength(FBuff,0);
 end;
 
 end.

@@ -5,8 +5,7 @@ interface
 uses
 
   Windows, SysUtils, Classes, Controls, Winsock,
-  StdCtrls, System.Math, IdBaseComponent, IdComponent, IdTCPConnection,
-  IdTCPClient;
+  StdCtrls, System.Math;
 
 type
   PIPOptionInformation = ^TIPOptionInformation;
@@ -33,8 +32,10 @@ type
 
   TIcmpCreateFile = function: THandle; stdcall;
   TIcmpCloseHandle = function(IcmpHandle: THandle): Boolean; stdcall;
-  TIcmpSendEcho = function(IcmpHandle: THandle; DestinationAddress: DWORD; RequestData: Pointer; RequestSize: Word; RequestOptions: PIPOptionInformation; ReplyBuffer: Pointer; ReplySize: DWORD;
-    Timeout: DWORD): DWORD; stdcall;
+  TIcmpSendEcho = function(IcmpHandle: THandle; DestinationAddress: DWORD;
+    RequestData: Pointer; RequestSize: Word;
+    RequestOptions: PIPOptionInformation; ReplyBuffer: Pointer;
+    ReplySize: DWORD; Timeout: DWORD): DWORD; stdcall;
 
   Tping = class(Tobject)
   private
@@ -44,7 +45,7 @@ type
     IcmpCloseHandle: TIcmpCloseHandle;
     IcmpSendEcho: TIcmpSendEcho;
   public
-    procedure pinghost(ip: string; var info: string);
+    procedure pinghost(IP: string; var info: string);
     constructor create;
     destructor destroy; override;
     { Public declarations }
@@ -52,20 +53,54 @@ type
 
 function IsValidIP(astrIP: string): Boolean;
 function CheckPing(DvrIP: string): integer;
-function CheckTelnet(State_Ping: Byte; DvrIP: string; DvrPort: integer): integer;
-function CheckIpPort(ip: string; Port: integer): Boolean;
+function CheckTelnet(State_Ping: Byte; DvrIP: string; DvrPort: integer)
+  : integer;
+function CheckIpPort(IP: string; Port: integer): Boolean;
 function IPToInt64(IPStr: string): Int64;
 function Int64ToIP(IPInt: Int64): string;
 function IncIp(IPStr: string; IpCount: Int64): string;
 function DecIp(IPStr: string; IpCount: Int64): string;
 function CompIp(IPStr1, IPStr2: string): Int64;
-
+function GetIPList(): TStringList;
+function _GetComputerName: String;
 var
   hICMPdll: HMODULE;
 
 implementation
 
+uses IdStackWindows, IdBaseComponent, IdComponent, IdTCPConnection, IdTCPClient;
 // =============================================================================================
+
+function _GetComputerName: String;
+var
+  mPcName: array [0 .. 255] of char;
+  nSize: Cardinal;
+begin
+  nSize := 256;
+  FillChar(mPcName, sizeof(mPcName), 0);
+  GetComputerName(mPcName, nSize);
+  if StrPas(mPcName) = '' then
+    Result := ''
+  else
+    Result := StrPas(mPcName);
+end;
+
+function GetIPList(): TStringList;
+var
+  Isw: TIdStackWindows;
+  slist: TStringList;
+begin
+  Isw := TIdStackWindows.create;
+  slist := TStringList.create;
+  try
+    Isw.AddLocalAddressesToList(slist); // 这个方法可以取出IP
+  finally
+    FreeAndNil(Isw);
+    // FreeAndNil(slist);
+  end;
+  Result := slist;
+end;
+
 function IsValidIP(astrIP: string): Boolean;
 var
   iCount: integer;
@@ -159,7 +194,8 @@ begin
   end;
 end;
 
-function CheckTelnet(State_Ping: Byte; DvrIP: string; DvrPort: integer): integer;
+function CheckTelnet(State_Ping: Byte; DvrIP: string; DvrPort: integer)
+  : integer;
 var
   IdTCPClient: TIdTCPClient;
 var
@@ -173,7 +209,7 @@ begin
   begin
     try
       IdTCPClient := TIdTCPClient.create(nil);
-      //IdTCPClient.ConnectTimeout:=100;
+      // IdTCPClient.ConnectTimeout:=100;
       try
         IdTCPClient.Disconnect;
         IdTCPClient.Host := DvrIP;
@@ -193,12 +229,12 @@ begin
     Result := 0;
 end;
 
-function CheckIpPort(ip: string; Port: integer): Boolean;
+function CheckIpPort(IP: string; Port: integer): Boolean;
 var
   res: integer;
 begin
   Result := False;
-  res := CheckTelnet(0, ip, Port);
+  res := CheckTelnet(0, IP, Port);
   if res > 0 then
   begin
     Result := True;
@@ -217,7 +253,8 @@ begin
   Result := 0;
   for i := 0 to strList.Count - 1 do
   begin
-    Result := Result + StrToInt(strList.Strings[i]) * Trunc(Power(256, strList.Count - 1 - i));
+    Result := Result + StrToInt(strList.Strings[i]) *
+      Trunc(Power(256, strList.Count - 1 - i));
   end;
   strList.Free;
 end;
@@ -228,9 +265,12 @@ var
 begin
   IP1 := IPInt div Trunc(Power(256, 3));
   Ip2 := (IPInt - IP1 * Trunc(Power(256, 3))) div Trunc(Power(256, 2));
-  IP3 := (IPInt - IP1 * Trunc(Power(256, 3)) - Ip2 * Trunc(Power(256, 2))) div Trunc(Power(256, 1));
-  IP4 := IPInt - IP1 * Trunc(Power(256, 3)) - Ip2 * Trunc(Power(256, 2)) - IP3 * Trunc(Power(256, 1));
-  Result := IntToStr(IP1) + '.' + IntToStr(Ip2) + '.' + IntToStr(IP3) + '.' + IntToStr(IP4);
+  IP3 := (IPInt - IP1 * Trunc(Power(256, 3)) - Ip2 * Trunc(Power(256, 2)))
+    div Trunc(Power(256, 1));
+  IP4 := IPInt - IP1 * Trunc(Power(256, 3)) - Ip2 * Trunc(Power(256, 2)) - IP3 *
+    Trunc(Power(256, 1));
+  Result := IntToStr(IP1) + '.' + IntToStr(Ip2) + '.' + IntToStr(IP3) + '.' +
+    IntToStr(IP4);
 end;
 
 function IncIp(IPStr: string; IpCount: Int64): string;
@@ -264,7 +304,7 @@ begin
   inherited destroy;
 end;
 
-procedure Tping.pinghost(ip: string; var info: string);
+procedure Tping.pinghost(IP: string; var info: string);
 var
   // IP Options for packet to send
   IPOpt: TIPOptionInformation;
@@ -278,24 +318,27 @@ var
   BufferSize: DWORD;
 begin
 
-  if ip <> '' then
+  if IP <> '' then
   begin
-    FIPAddress := inet_addr(PAnsiChar(ip));
+    FIPAddress := inet_addr(PAnsiChar(IP));
     FSize := 400;
-    BufferSize := SizeOf(TIcmpEchoReply) + FSize;
+    BufferSize := sizeof(TIcmpEchoReply) + FSize;
     GetMem(pRevData, FSize);
     GetMem(pIPE, BufferSize);
-    FillChar(pIPE^, SizeOf(pIPE^), 0);
+    FillChar(pIPE^, sizeof(pIPE^), 0);
     pIPE^.Data := pRevData;
     MyString := 'Test Net - Sos Admin';
     pReqData := PChar(MyString);
-    FillChar(IPOpt, SizeOf(IPOpt), 0);
+    FillChar(IPOpt, sizeof(IPOpt), 0);
     IPOpt.TTL := 64;
     FTimeOut := 1000;
     try
-      IcmpSendEcho(hICMP, FIPAddress, pReqData, Length(MyString), @IPOpt, pIPE, BufferSize, FTimeOut);
+      IcmpSendEcho(hICMP, FIPAddress, pReqData, Length(MyString), @IPOpt, pIPE,
+        BufferSize, FTimeOut);
       if pReqData^ = pIPE^.Options.OptionsData^ then
-        info := 'Reply from ' + ip + ': bytes=' + IntToStr(pIPE^.DataSize) + ' time<' + IntToStr(pIPE^.RTT) + 'ms TTL=' + IntToStr(pIPE^.Options.TTL);
+        info := 'Reply from ' + IP + ': bytes=' + IntToStr(pIPE^.DataSize) +
+          ' time<' + IntToStr(pIPE^.RTT) + 'ms TTL=' +
+          IntToStr(pIPE^.Options.TTL);
     except
       info := 'FAIL';
       FreeMem(pRevData);

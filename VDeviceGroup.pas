@@ -1,6 +1,7 @@
-unit VDeviceGroup;
+﻿unit VDeviceGroup;
 
 interface
+
 uses
 {$IFDEF UNIX}Unix, {$ENDIF}
 {$IFDEF MSWINDOWS}Windows, {$ENDIF}
@@ -9,37 +10,80 @@ uses
 {$ELSE}
   Messages,
 {$ENDIF}
-  Classes, SysUtils, Controls, ExtCtrls, Graphics;
-
+  Classes, SysUtils, Controls, ExtCtrls, Graphics, VDevice;
 
 type
   TVDeviceGroup = Class
-  Gname:String;
-  Devices:TStringList;
+    Gname: String;
+    DevicesTx: TStringList;
+    DevicesRx: TStringList;
+    FBuff: array of Byte;
   private
   protected
   public
-    constructor Create(name:string);
+    constructor Create(name: string);
     destructor Destroy;
+    procedure Add(Dname: String; Dv: TVDevice);
+    procedure Clear();
+    procedure ParserUpdate_KP();
   end;
 
 implementation
 
 { TVDeviceGroup }
 
-constructor TVDeviceGroup.Create(name:string);
+constructor TVDeviceGroup.Create(name: string);
 begin
-   Devices:=TStringList.Create;
-   Devices.OwnsObjects:=true;
-   Gname:=name;
+  DevicesTx := TStringList.Create;
+  DevicesTx.OwnsObjects := true;
+  DevicesRx := TStringList.Create;
+  DevicesRx.OwnsObjects := true;
+  Gname := name;
 end;
 
 destructor TVDeviceGroup.Destroy;
 begin
-   Devices.Free;
-   Devices.Clear;
-   Devices.Free
+  DevicesTx.Free;
+  DevicesRx.Free
 end;
 
+procedure TVDeviceGroup.Add(Dname: string; Dv: TVDevice);
+var
+  index: Integer;
+begin
+  if Dv.Typee = 'Tx' then
+  begin
+    index := DevicesTx.IndexOf(Dname);
+    if index >= 0 then
+    begin
+      DevicesTx.BeginUpdate;
+      DevicesTx.Delete(index);
+      DevicesTx.EndUpdate;
+    end;
+    DevicesTx.AddObject(Dname, Dv);
+  end
+  else if Dv.Typee = 'Rx' then
+  begin
+    index := DevicesRx.IndexOf(Dname);
+    if index >= 0 then //烧掉原有的
+    begin
+      DevicesRx.BeginUpdate;
+      DevicesRx.Delete(index);
+      DevicesRx.EndUpdate;
+    end;
+    DevicesRx.AddObject(Dname, Dv);
+  end;
+end;
+
+procedure TVDeviceGroup.Clear();
+begin
+   DevicesRx.Clear;
+   DevicesTx.Clear;
+end;
+
+procedure TVDeviceGroup.ParserUpdate_KP();
+begin
+
+end;
 
 end.
