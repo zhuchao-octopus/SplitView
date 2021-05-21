@@ -10,6 +10,7 @@
 
 
 
+
 // This software is Copyright (c) 2015 Embarcadero Technologies, Inc.
 // You may only use this software if you are an authorized licensee
 // of an Embarcadero developer tools product.
@@ -58,7 +59,6 @@ type
     Panel3: TPanel;
     Memo1: TMemo;
     ListView2: TListView;
-    IdUDPServer1: TIdUDPServer;
     IdTCPClient1: TIdTCPClient;
     Notebook2: TNotebook;
     cbxVclStyles: TComboBox;
@@ -95,9 +95,10 @@ type
     ComboBox2: TComboBox;
     Label9: TLabel;
     Button9: TButton;
-    Timer2: TTimer;
+    MessageTimer: TTimer;
     Panel2: TPanel;
     Splitter2: TSplitter;
+    Timer3: TTimer;
 
     procedure FormCreate(Sender: TObject);
     procedure cbxVclStylesChange(Sender: TObject);
@@ -108,13 +109,9 @@ type
     procedure Edit1KeyPress(Sender: TObject; var Key: Char);
     procedure Edit2KeyPress(Sender: TObject; var Key: Char);
     procedure FormResize(Sender: TObject);
-
-    procedure IdUDPServer1UDPRead(AThread: TIdUDPListenerThread;
-      const AData: TIdBytes; ABinding: TIdSocketHandle);
     procedure ListView2Click(Sender: TObject);
     procedure ListView1Click(Sender: TObject);
-    procedure TabSet1Change(Sender: TObject; NewTab: Integer;
-      var AllowChange: Boolean);
+    procedure TabSet1Change(Sender: TObject; NewTab: Integer; var AllowChange: Boolean);
     procedure Button4Click(Sender: TObject);
     procedure Button5Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
@@ -124,45 +121,33 @@ type
     procedure Button8Click(Sender: TObject);
     procedure IdTCPClient1Disconnected(Sender: TObject);
     procedure IdTCPClient1Connected(Sender: TObject);
-    procedure IdTCPClient1Status(ASender: TObject; const AStatus: TIdStatus;
-      const AStatusText: string);
+    procedure IdTCPClient1Status(ASender: TObject; const AStatus: TIdStatus; const AStatusText: string);
     procedure Edit7KeyPress(Sender: TObject; var Key: Char);
     procedure Edit6KeyPress(Sender: TObject; var Key: Char);
-    procedure IdUDPServer1Status(ASender: TObject; const AStatus: TIdStatus;
-      const AStatusText: string);
-    procedure IdUDPServer1UDPException(AThread: TIdUDPListenerThread;
-      ABinding: TIdSocketHandle; const AMessage: string;
-      const AExceptionClass: TClass);
     procedure Edit3KeyPress(Sender: TObject; var Key: Char);
     procedure Edit5KeyPress(Sender: TObject; var Key: Char);
     procedure Edit4KeyPress(Sender: TObject; var Key: Char);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure ComboBox3KeyPress(Sender: TObject; var Key: Char);
     procedure ComboBox2Change(Sender: TObject);
-    procedure IdTCPClient1Work(ASender: TObject; AWorkMode: TWorkMode;
-      AWorkCount: Int64);
     procedure Timer1Timer(Sender: TObject);
     procedure Button9Click(Sender: TObject);
-    procedure Timer2Timer(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
+    procedure MessageTimerTimer(Sender: TObject);
+    procedure Timer3Timer(Sender: TObject);
   private
     procedure Log(const Msg: string);
     procedure SynchroPage(ItemIndex: Integer);
     procedure UpdateListView();
-    procedure UpdateNetDeviceKP(lip: String; Cmd: String);
+    procedure UpdateNetDeviceKP(Cmd: String);
     procedure UpdateLocalDevices(dv: TVDevice);
     procedure InitUDP_S_KP();
-    procedure InitUDP(lip: String; lPort: Integer);
+
     function GetTCPConnection(Ip: String; Port: Integer): TClientObject;
     function GetUDPConnection(Ip: String; Port: Integer): TClientObject;
     procedure St(slot: Integer; Msg: String);
 
-    procedure UDPSendData(lip: String; lPort: Integer; Ip: String;
-      Port: Integer; Cmd: String);
   public
-    DeviceList: TVDeviceGroup;
-    IPList: TStringList;
-    DataEngineManager: TDataEngineManager;
+    // InitFlag:Boolean;
   end;
 
 var
@@ -171,7 +156,7 @@ var
 implementation
 
 uses
-  Vcl.Themes, GlobalConst, GlobalFunctions, Unit200, Ip, MyMessageQueue;
+  Vcl.Themes, GlobalConst, GlobalFunctions, Unit200, Ip, MyMessageQueue,trash;
 
 {$R *.dfm}
 
@@ -180,61 +165,33 @@ var
   i: Integer;
   ClientObject: TClientObject;
 begin
-  for i := 0 to IPList.count - 1 do
+  for i := 0 to LocalIPList.count - 1 do
   begin
-    ClientObject := GetUDPConnection(IPList[i], 3334);
+    ClientObject := GetUDPConnection(LocalIPList[i], 3334);
     if ClientObject <> nil then
     begin
       ClientObject.memo := Memo1;
-      //ClientObject.uiLock := MessageCriticalSection;
+      // ClientObject.uiLock := MessageCriticalSection;
     end;
   end;
 end;
 
-procedure TSplitViewForm.InitUDP(lip: String; lPort: Integer);
-var
-  i: Integer;
-begin
-  try
-    IdUDPServer1.Active := False;
-    IdUDPServer1.BroadcastEnabled := False;
-    IdUDPServer1.Bindings.Clear;
-    IdUDPServer1.Bindings.Add;
-    IdUDPServer1.Bindings[IdUDPServer1.Bindings.count - 1].Ip := lip; // 本地IP
-    IdUDPServer1.Bindings[IdUDPServer1.Bindings.count - 1].Port := lPort;
-    // 本地IP
-    IdUDPServer1.Bindings[IdUDPServer1.Bindings.count - 1].IPVersion := Id_IPv4;
-    IdUDPServer1.DefaultPort := lPort;
-    IdUDPServer1.BroadcastEnabled := true;
-    IdUDPServer1.Active := true;
-    // IdUDPServer1.Broadcast();
-  Except
-    on e: Exception do
-    begin
-      St(1, 'InitUDP' + e.tostring);
-      Exit;
-    end;
-  end;
-
-end;
-
-function TSplitViewForm.GetUDPConnection(Ip: String; Port: Integer)
-  : TClientObject;
+function TSplitViewForm.GetUDPConnection(Ip: String; Port: Integer): TClientObject;
 var
   ClientObject: TClientObject;
 begin
-  Result := TClientObject(DataEngineManager.get(Ip + IntToStr(Port)));
+  Result := TClientObject(DataEngineManager.get(Ip + ':' + IntToStr(Port)));
   if Result <> nil then
     Exit;
   try
     ClientObject := TClientObject.Create(true);
     ClientObject.AssignUDP(nil, Ip, Port);
     // ClientObject.Client.tag := Integer(Pointer(TClientObject(ClientObject)));
-    DataEngineManager.Add(Ip + IntToStr(Port), ClientObject);
+    DataEngineManager.Add(Ip + ':' + IntToStr(Port), ClientObject);
   Except
     on e: Exception do
     begin
-      St(1, 'TCP ' + e.tostring);
+      St(1, '初始化UDP ' + e.tostring);
       Exit;
     end;
 
@@ -242,13 +199,12 @@ begin
   Result := ClientObject;
 end;
 
-function TSplitViewForm.GetTCPConnection(Ip: String; Port: Integer)
-  : TClientObject;
+function TSplitViewForm.GetTCPConnection(Ip: String; Port: Integer): TClientObject;
 var
   ClientObject: TClientObject;
 begin
 
-  Result := TClientObject(DataEngineManager.get(Ip + IntToStr(Port)));
+  Result := TClientObject(DataEngineManager.get(Ip + ':' + IntToStr(Port)));
   if Result <> nil then
   begin
     DataEngineManager.DoIt(ClientObject.Execute);
@@ -261,12 +217,12 @@ begin
     IdTCPClient1.Port := Port;
     ClientObject.AssignTCPClient(IdTCPClient1);
     ClientObject.Client.tag := Integer(Pointer(TClientObject(ClientObject)));
-    DataEngineManager.Add(Ip + IntToStr(Port), ClientObject);
+    DataEngineManager.Add(Ip + ':' + IntToStr(Port), ClientObject);
     DataEngineManager.DoIt(ClientObject.Execute);
   Except
     on e: Exception do
     begin
-      St(1, 'TCP ' + e.tostring);
+      St(1, '初始化TCP ' + e.tostring);
       Exit;
     end;
 
@@ -276,17 +232,8 @@ end;
 
 procedure TSplitViewForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  if IdUDPServer1.Active then
-    IdUDPServer1.Active := False;
   if IdTCPClient1.connected then
     IdTCPClient1.Disconnect;
-
-  if DataEngineManager <> nil then
-  begin
-
-    DataEngineManager.stop;
-    // DataEngineManager.Free;
-  end;
 end;
 
 procedure TSplitViewForm.FormCreate(Sender: TObject);
@@ -294,12 +241,9 @@ var
   StyleName: string;
   S: string;
 begin
-  // sl:=TStringList.Create;
-  IdUDPServer1.Active := False;
   for StyleName in TStyleManager.StyleNames do
     cbxVclStyles.Items.Add(StyleName);
-  cbxVclStyles.ItemIndex := cbxVclStyles.Items.IndexOf
-    (TStyleManager.ActiveStyle.Name);
+  cbxVclStyles.ItemIndex := cbxVclStyles.Items.IndexOf(TStyleManager.ActiveStyle.Name);
 
   GetBuildInfo(Application.ExeName, S);
 
@@ -309,18 +253,17 @@ begin
   SynchroPage(0);
   TabSet1.Tabs := Notebook2.Pages;
   /// ///////////////////////////////////////////////////////////////////////////
-  DeviceList := TVDeviceGroup.Create('');
 
   Edit6.text := _GetComputerName();
-
-  IPList := GetIPList();
-  ComboBox1.Items.AddStrings(IPList);
-  if IPList.count >= 0 then
+  LocalIPList := GetIPList();
+  ComboBox1.Items.AddStrings(LocalIPList);
+  if LocalIPList.count >= 0 then
     ComboBox1.ItemIndex := 0;
 
-  DataEngineManager := TDataEngineManager.Create(Self.Handle);
 
   /// ///////////////////////////////////////////////////////////////////////////
+  // DataEngineManager.doIt(initUI);
+  Timer3.Enabled := true;
 end;
 
 procedure TSplitViewForm.FormResize(Sender: TObject);
@@ -329,61 +272,27 @@ begin
 end;
 
 procedure TSplitViewForm.IdTCPClient1Connected(Sender: TObject);
+var
+  tcp: TClientObject;
+  str: String;
 begin
-  St(1, 'TCP 已连接');
+  tcp := Pointer(TIdTCPClient(Sender).tag);
+  str := tcp.Client.Host + ':' + IntToStr(tcp.Client.Port);
+  // ComboBox3.items.Add(str);
+  St(1, 'TCP 连接成功 --> ' + str);
 end;
 
 procedure TSplitViewForm.IdTCPClient1Disconnected(Sender: TObject);
-begin
-  St(1, 'TCP 已断开');
-end;
-
-procedure TSplitViewForm.IdTCPClient1Status(ASender: TObject;
-  const AStatus: TIdStatus; const AStatusText: string);
-begin
-  Log('TCP:' + AStatusText);
-end;
-
-procedure TSplitViewForm.IdTCPClient1Work(ASender: TObject;
-  AWorkMode: TWorkMode; AWorkCount: Int64);
-begin
-  Log('IdTCPClient1Work:' + IntToStr(AWorkCount));
-  if AWorkMode = wmRead then
-  begin
-    // St(1, '有数据');
-  end;
-end;
-
-procedure TSplitViewForm.IdUDPServer1Status(ASender: TObject;
-  const AStatus: TIdStatus; const AStatusText: string);
-begin
-  St(1, AStatusText);
-end;
-
-procedure TSplitViewForm.IdUDPServer1UDPException(AThread: TIdUDPListenerThread;
-  ABinding: TIdSocketHandle; const AMessage: string;
-  const AExceptionClass: TClass);
-begin
-  St(1, AMessage);
-end;
-
-procedure TSplitViewForm.IdUDPServer1UDPRead(AThread: TIdUDPListenerThread;
-  const AData: TIdBytes; ABinding: TIdSocketHandle);
 var
-  sl: TStringList;
-  dv: TVDevice;
+  tcp: TClientObject;
 begin
-  sl := TStringList.Create;
-  Memo1.Lines.Add(GetSystemDateTimeStr() + ' 接收到数据来自：' + ABinding.PeerIP + ':' +
-    IntToStr(ABinding.PeerPort) + ':' + IntToStr(AThread.ThreadID));
+  tcp := Pointer(TIdTCPClient(Sender).tag);
+  St(1, 'TCP 连接断开' + tcp.Client.Host + ':' + IntToStr(tcp.Client.Port));
+end;
 
-  FormatBuff(AData, sl, 16);
-  Memo1.Lines.AddStrings(sl);
-  sl.Clear;
-  sl.Free;
-
-  UpdateLocalDevices(TVDevice.Create(ABinding.PeerIP,
-    IntToStr(ABinding.PeerPort), AData));
+procedure TSplitViewForm.IdTCPClient1Status(ASender: TObject; const AStatus: TIdStatus; const AStatusText: string);
+begin
+  Log('TCP Status:' + AStatusText);
 end;
 
 procedure TSplitViewForm.UpdateLocalDevices(dv: TVDevice);
@@ -457,59 +366,23 @@ begin
   end;
 
 Lend:
-  StatusBar1.Panels[0].text := 'Rx : ' + IntToStr(DeviceList.DevicesRx.count) +
-    '    Tx : ' + IntToStr(DeviceList.DevicesTx.count)
+  StatusBar1.Panels[0].text := 'Rx : ' + IntToStr(DeviceList.DevicesRx.count) + '    Tx : ' + IntToStr(DeviceList.DevicesTx.count)
 end;
 
-procedure TSplitViewForm.UpdateNetDeviceKP(lip: String; Cmd: String);
+procedure TSplitViewForm.UpdateNetDeviceKP(Cmd: String);
 var
   Ip: String;
   Port, i: Integer;
   udp: TClientObject;
 begin
-  // InitUDP(lip, 3334);
   Ip := '225.1.0.0';
   Port := 3333;
-  for i := 0 to IPList.count - 1 do
+  for i := 0 to LocalIPList.count - 1 do
   begin
-    udp := GetUDPConnection(IPList[i], 3334);
+    udp := GetUDPConnection(LocalIPList[i], 3334);
     if udp <> nil then
     begin
-      udp.UDPSendData(lip, 3334, Ip, Port, Cmd);
-
-    end;
-  end;
-  // UDPSendData(lip, 3334, Ip, Port, Cmd);
-end;
-
-procedure TSplitViewForm.UDPSendData(lip: String; lPort: Integer; Ip: String;
-  Port: Integer; Cmd: String);
-var
-  str1, str2: String;
-  buf: TIdBytes;
-  count: Integer;
-
-begin
-  if IPList.count <= 0 then
-  begin
-    St(1, '没有发现网络');
-    Exit;
-  end;
-
-  str1 := FormatHexStr(trim(Cmd), count);
-  SetLength(buf, count);
-  str2 := HexStrToBuff(str1, buf, count);
-  Log('UDP发送IP:' + lip + ':' + IntToStr(lPort) + ' --> ' + Ip + ':' +
-    IntToStr(Port));
-  Log(str2);
-  try
-    IdUDPServer1.SendBuffer(Ip, Port, buf);
-    St(1, '发送成功');
-  Except
-    on e: Exception do
-    begin
-      St(1, e.tostring);
-      Log(e.tostring);
+      udp.UDPSendHexStr(Ip, Port, Cmd);
     end;
   end;
 end;
@@ -520,31 +393,25 @@ var
 begin
   if ComboBox2.ItemIndex <= 1 then
   begin
-    InitUDP(trim(ComboBox1.text), StrToInt(trim(Edit7.text)));
+    //InitUDP(trim(ComboBox1.text), StrToInt(trim(Edit7.text)));
   end;
   if ComboBox2.ItemIndex > 1 then
   begin
     tcp := GetTCPConnection(trim(ComboBox3.text), StrToInt(trim(Edit5.text)));
-    if tcp = nil then
-    begin
-      Log('连接已经关闭');
-    end;
   end;
-end;
-
-procedure TSplitViewForm.Button1Click(Sender: TObject);
-begin
-  InitUDP_S_KP();
 end;
 
 procedure TSplitViewForm.Button2Click(Sender: TObject);
 var
   tcp: TClientObject;
+  udp: TClientObject;
 begin
   if ComboBox2.ItemIndex <= 1 then
   begin
-    UDPSendData(trim(ComboBox1.text), StrToInt(trim(Edit7.text)),
-      ComboBox3.text, StrToInt(trim(Edit5.text)), Memo2.text);
+    udp := GetTCPConnection(trim(ComboBox1.text), StrToInt(trim(Edit7.text)));
+    udp.UDPSendHexStr(ComboBox3.text, StrToInt(trim(Edit5.text)), Memo2.text);
+    // UDPSendData(trim(ComboBox1.text), StrToInt(trim(Edit7.text)),
+    // ComboBox3.text, StrToInt(trim(Edit5.text)), Memo2.text);
   end;
   if ComboBox2.ItemIndex > 1 then
   begin
@@ -557,9 +424,7 @@ begin
 
     if tcp.Client.connected then
     begin
-      Log('TCP发送IP:' + tcp.Client.Socket.Binding.Ip + ':' +
-        IntToStr(tcp.Client.Socket.Binding.Port) + ' --> ' + tcp.Client.Host +
-        ':' + IntToStr(tcp.Client.Port));
+      Log('TCP发送IP:' + tcp.Client.Socket.Binding.Ip + ':' + IntToStr(tcp.Client.Socket.Binding.Port) + ' --> ' + tcp.Client.Host + ':' + IntToStr(tcp.Client.Port));
       Log(Memo2.text);
       try
         tcp.Client.IOHandler.WriteLn(Memo2.text);
@@ -568,7 +433,6 @@ begin
         begin
           Log(e.tostring);
         end;
-
       end;
     end
     else
@@ -593,15 +457,16 @@ begin
   ListView2.Items.Clear;
   DeviceList.DevicesTx.Clear;
   UpdateListView();
-  UpdateNetDeviceKP(trim(ComboBox1.text), '0x01 0x00 0x00 0x0d');
+  UpdateNetDeviceKP('0x01 0x00 0x00 0x0d');
 end;
 
 procedure TSplitViewForm.Button5Click(Sender: TObject);
 begin
+
   ListView1.Items.Clear;
   DeviceList.DevicesRx.Clear;
   UpdateListView();
-  UpdateNetDeviceKP(trim(ComboBox1.text), '0x02 0x00 0x00 0x0d');
+  UpdateNetDeviceKP('0x02 0x00 0x00 0x0d');
 end;
 
 procedure TSplitViewForm.Button6Click(Sender: TObject);
@@ -623,7 +488,7 @@ begin
   ListView2.Items.Clear;
   DeviceList.Clear;
   UpdateListView();
-  UpdateNetDeviceKP(trim(ComboBox1.text), '0x00 x00 0x00');
+  UpdateNetDeviceKP('0x00 x00 0x00');
 end;
 
 procedure TSplitViewForm.catMenuItemsCategories0Items0Click(Sender: TObject);
@@ -651,36 +516,48 @@ begin
   Notebook1.PageIndex := ItemIndex;
 end;
 
-procedure TSplitViewForm.TabSet1Change(Sender: TObject; NewTab: Integer;
-  var AllowChange: Boolean);
+procedure TSplitViewForm.TabSet1Change(Sender: TObject; NewTab: Integer; var AllowChange: Boolean);
 begin
   Notebook2.PageIndex := NewTab;
 end;
 
 procedure TSplitViewForm.Timer1Timer(Sender: TObject);
 begin
-  if DataEngineManager.HasConnection(trim(ComboBox3.text) + trim(Edit5.text))
-  then
+  if DataEngineManager.Has(trim(ComboBox3.text) + trim(Edit5.text)) then
     Exit;
   St(1, '没有TCP连接');
 end;
 
-procedure TSplitViewForm.Timer2Timer(Sender: TObject);
+procedure TSplitViewForm.MessageTimerTimer(Sender: TObject);
 var
   Msg: TMyMessage;
 begin
-  if MQueue = nil then
-    Exit;
 
   Msg := MQueue.get();
   if Msg <> nil then
   begin
-  if msg.id = 0 then
+    if Msg.ID = 200 then //TCP
+    begin
       Memo1.Lines.Add(Msg.Msg);
-   if msg.id = 100 then
-     UpdateLocalDevices(TVDevice(Msg.obj));
-
+    end;
+    if Msg.ID = 100 then //UDP
+    begin
+      UpdateLocalDevices(TVDevice(Msg.obj));
+    end;
   end;
+end;
+
+procedure TSplitViewForm.Timer3Timer(Sender: TObject);
+begin
+  Button4.Enabled := False;
+  Button5.Enabled := False;
+  Button8.Enabled := False;
+  InitUDP_S_KP();
+  UpdateNetDeviceKP('0x00 x00 0x00');
+  Timer3.Enabled := False;
+  Button4.Enabled := true;
+  Button5.Enabled := true;
+  Button8.Enabled := true;
 end;
 
 procedure TSplitViewForm.ListView1Click(Sender: TObject);

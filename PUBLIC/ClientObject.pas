@@ -46,21 +46,22 @@ type
     procedure Log(msg: String); overload;
     procedure Log(sl: TStringList); overload;
 
-    procedure IdUDPRead(AThread: TIdUDPListenerThread; const AData: TIdBytes;
-      ABinding: TIdSocketHandle);
+    procedure IdUDPRead(AThread: TIdUDPListenerThread; const AData: TIdBytes; ABinding: TIdSocketHandle);
     procedure InitUDP(lip: String; lPort: Integer);
   public
     procedure AssignTCPClient(AClient: TIdTCPClient);
     procedure AssignUDP(AClient: TIdUDPServer; lip: String; lPort: Integer);
     procedure Execute;
+
     Constructor Create(Free: Boolean);
     destructor Destroy; override;
     property SleepTime: Integer read FSleepTime write SetSleepTime;
     property Client: TIdTCPClient read FTCPClient;
     property uiLock: TCriticalSection read FuiLock write SetuiLock;
 
-    procedure UDPSendData(lip: String; lPort: Integer; Ip: String;
-      Port: Integer; Cmd: String);
+    procedure UDPSendHexStr(Ip: String; Port: Integer; hs: String);
+    procedure TCPSendHexStr(hs: String);
+    procedure TCPSendStr(str: String);
   end;
 
 implementation
@@ -68,8 +69,7 @@ implementation
 uses Unit200, VDevice;
 { TClientThread }
 
-procedure TClientObject.AssignUDP(AClient: TIdUDPServer; lip: String;
-  lPort: Integer);
+procedure TClientObject.AssignUDP(AClient: TIdUDPServer; lip: String; lPort: Integer);
 begin
   if not Assigned(FUDP) then
     FUDP := TIdUDPServer.Create(nil);
@@ -112,6 +112,7 @@ procedure TClientObject.AssignTCPClient(AClient: TIdTCPClient);
 begin
   if not Assigned(FTCPClient) then
     FTCPClient := TIdTCPClient.Create(nil);
+    FTCPClient.IOHandler.DefStringEncoding := IndyTextEncoding_UTF8();
   with FTCPClient do
   begin
     Port := AClient.Port;
@@ -149,7 +150,7 @@ begin
   inherited;
 end;
 
-procedure TClientObject.Execute;
+procedure TClientObject.Execute; // TCP 同步柱塞式
 var
   // i: Integer;
   str: String;
@@ -163,51 +164,64 @@ begin
   begin
     try
       str := FTCPClient.IOHandler.ReadLn();
-    finally
+    Except
+    Exit;
     end;
     if (str <> '') then
     begin
       if (Memo <> nil) then
-        Log(str)
-      else
-        MQueue.SendMessage(TMyMessage.Create(0, 0, 0, str));
+      begin
+        Log(GetSystemDateTimeStr() + ' TCP数据来自：' + FTCPClient.Socket.Host + ':' + IntToStr(FTCPClient.Socket.Port));
+
+        Log(str);
+      end;
+      MQueue.SendMessage(TMyMessage.Create(200, 0, 0, str));
     end;
   end;
 end;
 
-procedure TClientObject.IdUDPRead(AThread: TIdUDPListenerThread;
-  const AData: TIdBytes; ABinding: TIdSocketHandle);
+// 一个binding一个线程
+// 一个线程里面有多个套接字 ABinding
+// 一个套接字就是一个设备
+procedure TClientObject.IdUDPRead(AThread: TIdUDPListenerThread; const AData: TIdBytes; ABinding: TIdSocketHandle);
 var
   sl: TStringList;
   dv: TVDevice;
 begin
   sl := TStringList.Create;
-  Log(GetSystemDateTimeStr() + ' 接收到数据来自：' + ABinding.PeerIP + ':' +
-    IntToStr(ABinding.PeerPort) + ':' + IntToStr(AThread.ThreadID));
+  Log(GetSystemDateTimeStr() + ' UDP数据来自：' + ABinding.PeerIP + ':' + IntToStr(ABinding.PeerPort) + ':' + IntToStr(AThread.ThreadID));
 
   FormatBuff(AData, sl, 16);
   Log(sl);
   sl.Clear;
   sl.Free;
-  dv := TVDevice.Create(ABinding.PeerIP, IntToStr(ABinding.PeerPort), AData);
-  // UpdateLocalDevices();
-  MQueue.SendMessage(TMyMessage.Create(100, dv));
+
+  /// ///////////////////////////////////////////////////////////////////////
+  // 解析鲲鹏节点设备
+  if Length(AData) >= 292 then
+  begin
+    dv := TVDevice.Create(ABinding.PeerIP, IntToStr(ABinding.PeerPort), AData);
+    if dv.Parser_Check_KP() then
+    begin
+      MQueue.SendMessage(TMyMessage.Create(100, dv)); // 通知UI跟新设备
+    end
+    else
+    begin
+      dv.Free;
+    end;
+  end;
 end;
 
-procedure TClientObject.UDPSendData(lip: String; lPort: Integer; Ip: String;
-  Port: Integer; Cmd: String);
+procedure TClientObject.UDPSendHexStr(Ip: String; Port: Integer; hs: String);
 var
   str1, str2: String;
   buf: TIdBytes;
   count: Integer;
-
 begin
-
-  str1 := FormatHexStr(trim(Cmd), count);
+  str1 := FormatHexStr(trim(hs), count);
   SetLength(buf, count);
   str2 := HexStrToBuff(str1, buf, count);
-  Log('UDP发送IP:' + FUDP.Bindings[0].Ip + ':' + IntToStr(FUDP.Bindings[0].Port) + ' --> ' + Ip + ':' +
-    IntToStr(Port));
+  Log('UDP发送IP:' + FUDP.Bindings[0].Ip + ':' + IntToStr(FUDP.Bindings[0].Port) + ' --> ' + Ip + ':' + IntToStr(Port));
   Log(str2);
   try
     FUDP.SendBuffer(Ip, Port, buf);
@@ -219,6 +233,30 @@ begin
   end;
 end;
 
+procedure TClientObject.TCPSendHexStr(hs: string);
+var
+  str1, str2: String;
+  buf: TIdBytes;
+  count: Integer;
+begin
+  str1 := FormatHexStr(trim(hs), count);
+  SetLength(buf, count);
+  str2 := HexStrToBuff(str1, buf, count);
+  Log('TCP发送IP:' + FTCPClient.Socket.Binding.Ip + ':' + IntToStr(FTCPClient.Socket.Binding.Port) + ' --> ' + FTCPClient.Host + ':' + IntToStr(FTCPClient.Port));
+  Log(str2);
+  try
+    FTCPClient.IOHandler.Write(buf,count);
+  Except
+    on e: Exception do
+    begin
+      Log(e.tostring);
+    end;
+  end;
+end;
+procedure TClientObject.TCPSendStr(str: string);
+begin
+   FTCPClient.IOHandler.WriteLn(str);
+end;
 procedure TClientObject.Log(sl: TStringList);
 begin
   if (Memo = nil) then

@@ -19,7 +19,9 @@ uses
   IP in 'PUBLIC\IP.pas',
   ueIPEdit in 'PUBLIC\ueIPEdit.pas',
   Unit200 in 'PUBLIC\Unit200.pas',
-  ClientObject in 'PUBLIC\ClientObject.pas';
+  ClientObject in 'PUBLIC\ClientObject.pas',
+  Trash in 'PUBLIC\Trash.pas',
+  Setting in 'Setting.pas' {frmSetting};
 
 {$R *.res}
 
@@ -28,5 +30,6 @@ begin
   Application.MainFormOnTaskbar := True;
 
   Application.CreateForm(TSplitViewForm, SplitViewForm);
+  Application.CreateForm(TfrmSetting, frmSetting);
   Application.Run;
 end.

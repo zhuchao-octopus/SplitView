@@ -27,19 +27,19 @@ type
     Password: String;
     MainRTSP: String;
     SubRTSP: String;
-    b:Boolean;
+    b: Boolean;
   private
     FBuff: array of Byte;
   protected
   public
     constructor Create(IP: String; Port: String); Overload;
     constructor Create(Buff: array of Byte); Overload;
-    constructor Create(IP: String; Port: String;Buff: array of Byte); Overload;
+    constructor Create(IP: String; Port: String; Buff: array of Byte); Overload;
     constructor Create(); Overload;
     destructor Destroy;
 
     procedure SetBuffer(Buff: array of Byte);
-    procedure ParserUpdate_KP();
+    function Parser_Check_KP(): Boolean;
   end;
 
 implementation
@@ -51,26 +51,26 @@ constructor TVDevice.Create(IP: String; Port: String);
 begin
   Self.IP := IP;
   Self.Port := Port;
-  b:=false;
+  b := false;
 end;
 
 constructor TVDevice.Create(Buff: array of Byte);
 begin
-  b:=false;
+  b := false;
   SetBuffer(Buff);
 end;
 
-constructor TVDevice.Create(IP: String; Port: String;Buff: array of Byte);
+constructor TVDevice.Create(IP: String; Port: String; Buff: array of Byte);
 begin
   Self.IP := IP;
   Self.Port := Port;
-  b:=false;
+  b := false;
   SetBuffer(Buff);
 end;
 
 constructor TVDevice.Create();
 begin
-     b:=false;
+  b := false;
 end;
 
 destructor TVDevice.Destroy;
@@ -81,28 +81,29 @@ end;
 procedure TVDevice.SetBuffer(Buff: array of Byte);
 var
   l: Integer;
-  i:Integer;
+  i: Integer;
 begin
   l := Length(Buff);
-  if l <= 0 then
+  if l <= 292 then
     Exit;
 
   SetLength(FBuff, l);
-  //CopyMemory(@Buff[0], @FBuff[0], l);
-  for I := 0 to l do
-   FBuff[i]:=buff[i];
+  // CopyMemory(@Buff[0], @FBuff[0], l);
+  for i := 0 to l do
+    FBuff[i] := Buff[i];
 
-  ParserUpdate_KP();
+  // ParserUpdate_KP();
 end;
 
-procedure TVDevice.ParserUpdate_KP;
+function TVDevice.Parser_Check_KP(): Boolean;
 var
   i, l: Integer;
   pb: PByte;
   Pi: PInteger;
-  s:String;
+  s: String;
 begin
   // i:= MakeLong(MakeWord($CC,$DD),
+  Result := false;
   l := Length(FBuff);
   if l < 292 then
     Exit;
@@ -120,30 +121,31 @@ begin
   else
   begin
     Self.Typee := 'δ֪';
+    Exit;
   end;
   pb := @FBuff[8];
   Self.St := ByteToWideString2(pb, 32);
   pb := @FBuff[40];
   Self.Name := ByteToWideString2(pb, 20);
-  s:='';
-  for I := 1 to  Length(Self.Name)-1 do
+  s := '';
+  for i := 1 to Length(Self.Name) - 1 do
   begin
-     if (Self.Name[i] >=' ') and (Self.Name[i] <= '~') then
-     begin
-        s := s+Self.Name[i];
-     end;
+    if (Self.Name[i] >= ' ') and (Self.Name[i] <= '~') then
+    begin
+      s := s + Self.Name[i];
+    end;
   end;
-  Self.Name :=s;
+  Self.Name := s;
   Self.ID := RightStr(Self.Name, 4);
-  s:='';
-  for I := 1 to  Length(Self.ID) do
+  s := '';
+  for i := 1 to Length(Self.ID) do
   begin
-     if (Self.ID[i] >='0') and (Self.ID[i] <= '9') then
-     begin
-        s := s+Self.ID[i];
-     end;
+    if (Self.ID[i] >= '0') and (Self.ID[i] <= '9') then
+    begin
+      s := s + Self.ID[i];
+    end;
   end;
-  Self.ID:= s;
+  Self.ID := s;
 
   pb := @FBuff[259];
   Self.TxaID := ByteToWideString2(pb, 5);
@@ -151,20 +153,21 @@ begin
   Self.TxaID := ByteToWideString2(pb, 5);
   pb := @FBuff[279];
   s := ByteToWideString2(pb, 13);
-  Self.MAC:='';
-  Self.MAC:=Self.MAC +  LeftStr(s, 2) + '-';
-  Delete(s,1,2);
-  Self.MAC:=Self.MAC +  LeftStr(s, 2) + '-';
-  Delete(s,1,2);
-  Self.MAC:=Self.MAC +  LeftStr(s, 2) + '-';
-  Delete(s,1,2);
-  Self.MAC:=Self.MAC +  LeftStr(s, 2) + '-';
-  Delete(s,1,2);
-  Self.MAC:=Self.MAC +  LeftStr(s, 2) + '-';
-  Delete(s,1,2);
-  Self.MAC:=Self.MAC +  LeftStr(s, 2);
+  Self.MAC := '';
+  Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
+  Delete(s, 1, 2);
+  Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
+  Delete(s, 1, 2);
+  Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
+  Delete(s, 1, 2);
+  Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
+  Delete(s, 1, 2);
+  Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
+  Delete(s, 1, 2);
+  Self.MAC := Self.MAC + LeftStr(s, 2);
 
-  SetLength(FBuff,0);
+  SetLength(FBuff, 0);
+  Result := True;
 end;
 
 end.

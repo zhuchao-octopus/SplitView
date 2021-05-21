@@ -36,6 +36,7 @@ object SplitViewForm: TSplitViewForm
       Height = 609
       Align = alClient
       Ctl3D = False
+      PageIndex = 1
       ParentCtl3D = False
       TabOrder = 0
       object TPage
@@ -98,7 +99,6 @@ object SplitViewForm: TSplitViewForm
             Height = 40
             Caption = #36830#25509#21305#37197#33410#28857
             TabOrder = 2
-            OnClick = Button1Click
           end
           object Button4: TButton
             Left = 123
@@ -111,7 +111,7 @@ object SplitViewForm: TSplitViewForm
           end
           object Button5: TButton
             Left = 3
-            Top = 115
+            Top = 116
             Width = 118
             Height = 40
             Caption = #25628#32034#25509#25910#33410#28857
@@ -133,7 +133,6 @@ object SplitViewForm: TSplitViewForm
         Left = 0
         Top = 0
         Caption = #32593#32476#37197#32622
-        ExplicitHeight = 615
         object Button3: TButton
           Left = 0
           Top = 489
@@ -143,7 +142,6 @@ object SplitViewForm: TSplitViewForm
           Caption = #33719#21462#26412#26426#20449#24687
           TabOrder = 0
           OnClick = Button3Click
-          ExplicitTop = 495
         end
         object GroupBox3: TGroupBox
           AlignWithMargins = True
@@ -251,16 +249,18 @@ object SplitViewForm: TSplitViewForm
             TabOrder = 1
             Text = '225.1.0.0'
             OnKeyPress = ComboBox3KeyPress
+            Items.Strings = (
+              '225.1.0.0')
           end
           object ComboBox2: TComboBox
-            Left = 86
+            Left = 92
             Top = 76
             Width = 155
             Height = 24
             Style = csDropDownList
-            ItemIndex = 0
+            ItemIndex = 2
             TabOrder = 2
-            Text = 'UDP'
+            Text = 'TCP '
             OnChange = ComboBox2Change
             Items.Strings = (
               'UDP'
@@ -287,7 +287,6 @@ object SplitViewForm: TSplitViewForm
           Caption = #28165#26970#35774#22791#21015#34920
           TabOrder = 3
           OnClick = Button6Click
-          ExplicitTop = 535
         end
         object Button7: TButton
           Left = 0
@@ -298,7 +297,6 @@ object SplitViewForm: TSplitViewForm
           Caption = #28165#26970#21382#21490#35760#24405
           TabOrder = 4
           OnClick = Button7Click
-          ExplicitTop = 575
         end
         object Button2: TButton
           Left = 3
@@ -351,12 +349,10 @@ object SplitViewForm: TSplitViewForm
     Height = 642
     Align = alClient
     TabOrder = 1
-    ExplicitWidth = 862
     object TPage
       Left = 0
       Top = 0
       Caption = #33410#28857#35774#22791#31649#29702
-      ExplicitWidth = 862
       object Panel1: TPanel
         Left = 0
         Top = 0
@@ -367,7 +363,6 @@ object SplitViewForm: TSplitViewForm
         Color = clWindow
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 862
         object Splitter1: TSplitter
           Left = 0
           Top = 560
@@ -386,7 +381,6 @@ object SplitViewForm: TSplitViewForm
           Align = alBottom
           ParentColor = True
           TabOrder = 0
-          ExplicitWidth = 862
           object Memo1: TMemo
             AlignWithMargins = True
             Left = 4
@@ -404,10 +398,6 @@ object SplitViewForm: TSplitViewForm
             ReadOnly = True
             ScrollBars = ssBoth
             TabOrder = 0
-            ExplicitLeft = 3
-            ExplicitTop = 56
-            ExplicitWidth = 856
-            ExplicitHeight = 106
           end
         end
         object Panel2: TPanel
@@ -418,10 +408,6 @@ object SplitViewForm: TSplitViewForm
           Align = alClient
           ParentColor = True
           TabOrder = 1
-          ExplicitLeft = 72
-          ExplicitTop = 128
-          ExplicitWidth = 185
-          ExplicitHeight = 41
           object Splitter2: TSplitter
             AlignWithMargins = True
             Left = 416
@@ -497,9 +483,6 @@ object SplitViewForm: TSplitViewForm
             TabOrder = 0
             ViewStyle = vsReport
             OnClick = ListView1Click
-            ExplicitLeft = 3
-            ExplicitTop = 3
-            ExplicitHeight = 468
           end
           object ListView2: TListView
             AlignWithMargins = True
@@ -569,10 +552,6 @@ object SplitViewForm: TSplitViewForm
             TabOrder = 1
             ViewStyle = vsReport
             OnClick = ListView2Click
-            ExplicitLeft = 413
-            ExplicitTop = 3
-            ExplicitWidth = 446
-            ExplicitHeight = 468
           end
         end
       end
@@ -581,19 +560,16 @@ object SplitViewForm: TSplitViewForm
       Left = 0
       Top = 0
       Caption = '1'
-      ExplicitWidth = 862
     end
     object TPage
       Left = 0
       Top = 0
       Caption = '2'
-      ExplicitWidth = 862
     end
     object TPage
       Left = 0
       Top = 0
       Caption = '3'
-      ExplicitWidth = 862
     end
   end
   object StatusBar1: TStatusBar
@@ -610,24 +586,9 @@ object SplitViewForm: TSplitViewForm
         Width = 200
       end>
   end
-  object IdUDPServer1: TIdUDPServer
-    OnStatus = IdUDPServer1Status
-    Bindings = <
-      item
-        IP = '169.254.6.80'
-        Port = 3334
-      end>
-    DefaultPort = 3334
-    ThreadedEvent = True
-    OnUDPRead = IdUDPServer1UDPRead
-    OnUDPException = IdUDPServer1UDPException
-    Left = 304
-    Top = 248
-  end
   object IdTCPClient1: TIdTCPClient
     OnStatus = IdTCPClient1Status
     OnDisconnected = IdTCPClient1Disconnected
-    OnWork = IdTCPClient1Work
     OnConnected = IdTCPClient1Connected
     ConnectTimeout = 3000
     IPVersion = Id_IPv4
@@ -643,13 +604,19 @@ object SplitViewForm: TSplitViewForm
   object Timer1: TTimer
     Interval = 5000
     OnTimer = Timer1Timer
-    Left = 152
-    Top = 248
+    Left = 144
+    Top = 168
   end
-  object Timer2: TTimer
-    Interval = 50
-    OnTimer = Timer2Timer
-    Left = 152
-    Top = 344
+  object MessageTimer: TTimer
+    Interval = 10
+    OnTimer = MessageTimerTimer
+    Left = 192
+    Top = 160
+  end
+  object Timer3: TTimer
+    Enabled = False
+    OnTimer = Timer3Timer
+    Left = 240
+    Top = 160
   end
 end

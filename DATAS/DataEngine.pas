@@ -4,9 +4,8 @@ interface
 
 uses SysUtils, Classes, Windows,
   ExtCtrls, MATH, Messages, SyncObjs, System.Threading,
-  System.json, GlobalConst, GlobalTypes, GlobalFunctions,
-  IdBaseComponent, IdComponent, IdTCPConnection, IdTCPClient,
-  IdHTTP, IdSSLOpenSSL, MyMessageQueue, WinInet, IP, ClientObject;
+   GlobalConst, GlobalTypes, GlobalFunctions,
+   MyMessageQueue, ClientObject;
 
 type
   TProc = procedure() of object;
@@ -18,35 +17,31 @@ type
     FTaskIndex: Integer; // 正在工作的线程计数
     FTaskWorkingCount: Integer;
 
-    FHandle: HWND;
-    // FMaxTaskCount:Integer;
-
     FTaskOBJList: TStringList;
-
+    DataSourceCriticalSection: TCriticalSection;
     Procedure CreateTasksInPool();
     procedure TaskFunction();
     procedure CallActionInterface(IP: String);
   protected
     procedure Execute; override; { 执行 }
   public
-    Constructor Create(Handle: HWND);
+    Constructor Create();
     Destructor Destroy; override;
     procedure Stop();
 
-    procedure StartScanLocalNet();
     procedure DoIt(task: TProc);
 
     function Add(name: String; obj: TObject): TObject;
     function Get(name: String): TObject;
-    function HasConnection(name: String): Boolean;
+    function Has(name: String): Boolean;
   end;
 
 var
-  DataSourceCriticalSection: TCriticalSection;
+  DataEngineManager: TDataEngineManager;
 
 implementation
 
-Constructor TDataEngineManager.Create(Handle: HWND);
+Constructor TDataEngineManager.Create();
 begin
   inherited Create(true);
   FreeOnTerminate := true;
@@ -57,10 +52,11 @@ begin
   FTaskIndex := 0;
   FTaskWorkingCount := 0;
   FWorkingStatus := 0;
-  FHandle := Handle;
+  // FHandle := Handle;
 
   FTaskOBJList := TStringList.Create;
   FTaskOBJList.OwnsObjects := true; // 清空列表自动释放里面的项目
+  DataSourceCriticalSection := TCriticalSection.Create;
 end;
 
 Destructor TDataEngineManager.Destroy;
@@ -72,6 +68,7 @@ begin
   FTaskOBJList.CleanupInstance;
   FTaskOBJList.Clear;
   FTaskOBJList.Free;
+  DataSourceCriticalSection.Free;
 end;
 
 procedure TDataEngineManager.Stop;
@@ -152,8 +149,7 @@ begin
   INC(FTaskIndex);
   DataSourceCriticalSection.Leave;
 
-  MQueue.SendMessage(TMyMessage.Create(WM_MYMESSAGE_DATAENGINE_CREATE,
-    FTaskIndex, ''));
+  MQueue.SendMessage(TMyMessage.Create(WM_MYMESSAGE_DATAENGINE_CREATE, FTaskIndex, ''));
 
   /// //////////////////////////////////////////////////////////////////////////////////
   /// 调用特定功能函数
@@ -167,69 +163,9 @@ end;
 /// //////////////////////////////////////////////////////////////////////////////////
 // 线程池批量最终数据源函数
 procedure TDataEngineManager.CallActionInterface(IP: String);
-var
-  port: Integer;
-  b: Boolean;
-  // rr: String;
-begin
-  port := 554;
-  b := false;
-  // iIP := IPToInt64(IP);
-  if IsValidIP(IP) then
-    b := CheckIpPort(IP, port);
-  if (b) then
-    MQueue.SendMessage(TMyMessage.Create(WM_MYMESSAGE_TASK_COMPLETEOK,
-      port, IP));
-
-  // 任务返回
-  DataSourceCriticalSection.Enter;
-  DEC(FTaskWorkingCount);
-  DataSourceCriticalSection.Leave;
-
-  MQueue.SendMessage(TMyMessage.Create(WM_MYMESSAGE_DATAENGINE_WORKING_DONE,
-    FTaskOBJList.Count - FTaskWorkingCount, IP));
-end;
-
-procedure TDataEngineManager.StartScanLocalNet();
-var
-  i: Integer;
-  IP: String;
 begin
 
-  if FWorkingStatus <> 0 then
-  begin
-    exit;
-  end;
-
-  if FTaskWorkingCount > 0 then
-  begin
-    exit;
-  end;
-  if (FWorkingStatus = 0) then
-  begin
-    FTaskWorkingCount := 0;
-    FTaskIndex := 0;
-    FTaskOBJList.Clear;
-  end;
-
-  if FTaskOBJList.Count <= 0 then
-  begin
-    for i := 0 to 255 do
-    begin
-      IP := '192.168.0.' + IntToStr(i);
-      FTaskOBJList.Add(IP);
-    end;
-  end;
-  // FTaskOBJList.Add('192.168.0.34');
-  // FTaskOBJList.Add('192.168.0.63');
-  if FWorkingStatus <> 2 then
-  begin
-    FWorkingStatus := 2;
-  end;
-  if Suspended then
-  begin
-    start;
-  end;
+  MQueue.SendMessage(TMyMessage.Create(WM_MYMESSAGE_DATAENGINE_WORKING_DONE, FTaskOBJList.Count - FTaskWorkingCount, IP));
 end;
 
 function TDataEngineManager.Add(name: String; obj: TObject): TObject;
@@ -252,7 +188,7 @@ begin
   end;
 end;
 
-function TDataEngineManager.HasConnection(name: String): Boolean;
+function TDataEngineManager.Has(name: String): Boolean;
 var
   i: Integer;
 begin
@@ -266,10 +202,10 @@ end;
 
 initialization
 
-DataSourceCriticalSection := TCriticalSection.Create;
+DataEngineManager := TDataEngineManager.Create();
 
 finalization
-
-DataSourceCriticalSection.Free;
+DataEngineManager.Stop;
+//DataEngineManager.Free;
 
 end.

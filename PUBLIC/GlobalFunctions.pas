@@ -3,8 +3,8 @@
 interface
 
 uses SysUtils, Classes, Windows, GlobalTypes, SyncObjs, ShlObj, GlobalConst,
-  MyMessageQueue,
-  System.Variants,IdGlobal,unit200;
+
+  System.Variants, IdGlobal, unit200;
 
 // 取的汉字拼音的首字母
 function GetHzPy(const AHzStr: string): string;
@@ -12,8 +12,7 @@ Function KModeToJiBie(KLineDateMode: TKLineDateMode): integer;
 function GetBeginTradeTime(KLineDateMode: TKLineDateMode): LongWord;
 function DateTimeToMyLongWord(DateTime: TDateTime; JiBie: integer): LongWord;
 function DateTimeStrToMyLongWord(DateTimeStr: String; JiBie: integer): LongWord;
-function DateTimeStrToMyLongWord2(DateTimeStr: String; JiBie: integer)
-  : LongWord;
+function DateTimeStrToMyLongWord2(DateTimeStr: String; JiBie: integer): LongWord;
 function MyLongWordToDateTimeStr(cDataTime: LongWord; JiBie: SmallInt): String;
 
 function MyMinLongWordToMyDayLongWord(MinLW: LongWord): LongWord;
@@ -39,8 +38,7 @@ function GetWeek: string;
 function GetWeek2: integer;
 function GetWeek3(DataTime: String): String;
 function IsWorkDay: Boolean;
-procedure PrintError(Name: String; Position: integer; Msg: String);
-procedure PrintMsg(Msg: String);
+
 
 function SearchInList(Key: string; SList: TStrings; DList: TStrings): integer;
 
@@ -54,53 +52,52 @@ Function GetLowerLevel(KLineDateMode: TKLineDateMode): TKLineDateMode;
 procedure GetBuildInfo(FileName: string; var vs: string);
 function BytestoHexString(ABytes: TBytes; len: integer): AnsiString;
 function IdBytesToAnsiString(ParamBytes: TIdBytes): AnsiString;
-function Hex2Byte(HexStr: String): TIdBytes;
-function HexStrToBuff(hs: string):TIdBytes;
 
-var
-  MyErrorMsgs: TStringList;
-  MsgLogList: TStringList;
-  MQueue: TMyMessageQueue;
-  // FCriticalSection :TCriticalSection;
+function HexStrToBuff(hs: string): TIdBytes;
+function StrToBuff(s: String; buff: array of byte): integer;
+
 
 implementation
+ 
+function StrToBuff(s: String; buff: array of byte): integer;
+var
+  P: PChar;
+  // B:array of Byte;
+begin
+  // SetLength(buff, Length(s) + 1);
+  P := PChar(s);
+  CopyMemory(@buff, P, Length(s) + 1);
+  Result := Length(buff);
+end;
 
-function HexStrToBuff(hs: string):TIdBytes;
+function HexStrToBuff(hs: string): TIdBytes;
 var
   i, len, bLen: Word;
-  buf:TIdBytes;
+  buf: TIdBytes;
 begin
-  len := (length(hs) + 2) div 3;
-  SetLength(buf,len);
-  bLen := length(buf);
+  len := (Length(hs) + 2) div 3;
+  SetLength(buf, len);
+  bLen := Length(buf);
   ZeroMemory(@buf, bLen);
 
   for i := 1 to len do
   begin
     buf[i - 1] := CharToByte(hs[i * 3 - 2], hs[i * 3 - 1]);
   end;
-    result:=buf;
-end;
-function Hex2Byte(HexStr: String): TIdBytes;
-var
-   Buf: TIdBytes;
-begin
-  SetLength(Buf, Length(HexStr) div 2);
-  HexToBin(PAnsiChar(HexStr), @Buf[0], Length(HexStr) div 2);
-  Result := Buf;
+  Result := buf;
 end;
 
 function IdBytesToAnsiString(ParamBytes: TIdBytes): AnsiString;
 var
   i: integer;
-  S: AnsiString;
+  s: AnsiString;
 begin
-  S := '';
+  s := '';
   for i := 0 to Length(ParamBytes) - 1 do
   begin
-    S := S + AnsiChar(ParamBytes[i]);
+    s := s + AnsiChar(ParamBytes[i]);
   end;
-  Result := S;
+  Result := s;
 end;
 
 function BytestoHexString(ABytes: TBytes; len: integer): AnsiString;
@@ -132,38 +129,16 @@ begin
     V2 := dwFileVersionMS and $FFFF;
     V3 := dwFileVersionLS shr 16;
     V4 := dwFileVersionLS and $FFFF;
-    vs := inttostr(V1) + '.' + inttostr(V2) + '.' + inttostr(V3) + '.' +
-      inttostr(V4);
+    vs := inttostr(V1) + '.' + inttostr(V2) + '.' + inttostr(V3) + '.' + inttostr(V4);
   end;
   FreeMem(VerInfo, VerInfoSize);
 end;
 
-procedure PrintError(Name: String; Position: integer; Msg: String);
-var
-  ErrorMsg: String;
-begin
-  ErrorMsg := GetSystemDateTimeStr + ', ErrorName:' + Name + ', Position:' +
-    inttostr(Position) + ', Msg:' + Msg;
-  MyErrorMsgs.Append(ErrorMsg);
-  MyErrorMsgs.SaveToFile(MyErrorMsgs.Strings[0]);
-end;
-
-procedure PrintMsg(Msg: String);
-begin
-  if MsgLogList = nil then
-    MsgLogList := TStringList.Create;
-  MsgLogList.Add(Msg);
-  MsgLogList.SaveToFile('Debug.log');
-end;
-
 function GetHzPy(const AHzStr: string): string;
 const
-  ChinaCode: array [0 .. 25, 0 .. 1] of integer = ((1601, 1636), (1637, 1832),
-    (1833, 2077), (2078, 2273), (2274, 2301), (2302, 2432), (2433, 2593),
-    (2594, 2786), (9999, 0000), (2787, 3105), (3106, 3211), (3212, 3471),
-    (3472, 3634), (3635, 3722), (3723, 3729), (3730, 3857), (3858, 4026),
-    (4027, 4085), (4086, 4389), (4390, 4557), (9999, 0000), (9999, 0000),
-    (4558, 4683), (4684, 4924), (4925, 5248), (5249, 5589));
+  ChinaCode: array [0 .. 25, 0 .. 1] of integer = ((1601, 1636), (1637, 1832), (1833, 2077), (2078, 2273), (2274, 2301), (2302, 2432), (2433, 2593), (2594, 2786), (9999, 0000), (2787, 3105),
+    (3106, 3211), (3212, 3471), (3472, 3634), (3635, 3722), (3723, 3729), (3730, 3857), (3858, 4026), (4027, 4085), (4086, 4389), (4390, 4557), (9999, 0000), (9999, 0000), (4558, 4683), (4684, 4924),
+    (4925, 5248), (5249, 5589));
 var
   i, j, HzOrd: integer;
 begin
@@ -333,8 +308,7 @@ begin
     wDay := cDataTime shr 11 and $0000001F;
     wHour := ((cDataTime shr 6) and $0000001F);
     wMin := cDataTime and $0000003F;
-    Result := Format('%0.2d-%0.2d-%0.2d %.02d:%.02d',
-      [wYear, wMon, wDay, wHour, wMin])
+    Result := Format('%0.2d-%0.2d-%0.2d %.02d:%.02d', [wYear, wMon, wDay, wHour, wMin])
   end;
 end;
 
@@ -349,25 +323,21 @@ begin
 end;
 
 // showapi 接口用，作废
-function DateTimeStrToMyLongWord2(DateTimeStr: String; JiBie: integer)
-  : LongWord;
+function DateTimeStrToMyLongWord2(DateTimeStr: String; JiBie: integer): LongWord;
 Var
   DateTime: TDateTime;
-  S: String;
+  s: String;
 begin
   // DateTime:=VarToDateTime(DateTimeStr);
   if (JiBie <= 60) then
   begin
-    S := copy(DateTimeStr, 1, 4) + '-' + copy(DateTimeStr, 5, 2) + '-' +
-      copy(DateTimeStr, 7, 2) + ' ' + copy(DateTimeStr, 9, 2) + ':' +
-      copy(DateTimeStr, 11, 2);
+    s := copy(DateTimeStr, 1, 4) + '-' + copy(DateTimeStr, 5, 2) + '-' + copy(DateTimeStr, 7, 2) + ' ' + copy(DateTimeStr, 9, 2) + ':' + copy(DateTimeStr, 11, 2);
   end
   else
   begin
-    S := copy(DateTimeStr, 1, 4) + '-' + copy(DateTimeStr, 5, 2) + '-' +
-      copy(DateTimeStr, 7, 2);
+    s := copy(DateTimeStr, 1, 4) + '-' + copy(DateTimeStr, 5, 2) + '-' + copy(DateTimeStr, 7, 2);
   end;
-  DateTime := StrToMyDateTime(S);
+  DateTime := StrToMyDateTime(s);
   Result := DateTimeToMyLongWord(DateTime, JiBie);
 end;
 
@@ -377,8 +347,7 @@ var
 begin
   Result := '';
 
-  wYear := (cDataTime shr 12 and $0000000F) { + 2008 } +
-    (cDataTime shr 11 and $00000001);
+  wYear := (cDataTime shr 12 and $0000000F) { + 2008 } + (cDataTime shr 11 and $00000001);
   // wYear := cDataTime shr 12 and $0000000F + 2008;
   wMon := cDataTime and $000007FF div 100;
   wDay := cDataTime and $000007FF mod 100;
@@ -402,38 +371,31 @@ begin
   case KLineDateMode of
     KD_MIN:
       begin
-        Result := DateTimeStrToMyLongWord(ss + '09:30',
-          KModeToJiBie(KLineDateMode));
+        Result := DateTimeStrToMyLongWord(ss + '09:30', KModeToJiBie(KLineDateMode));
       end;
     KD_MIN5:
       begin
-        Result := DateTimeStrToMyLongWord(ss + '09:35',
-          KModeToJiBie(KLineDateMode));
+        Result := DateTimeStrToMyLongWord(ss + '09:35', KModeToJiBie(KLineDateMode));
       end;
     KD_MIN10:
       begin
-        Result := DateTimeStrToMyLongWord(ss + '09:40',
-          KModeToJiBie(KLineDateMode));
+        Result := DateTimeStrToMyLongWord(ss + '09:40', KModeToJiBie(KLineDateMode));
       end;
     KD_MIN15:
       begin
-        Result := DateTimeStrToMyLongWord(ss + '09:45',
-          KModeToJiBie(KLineDateMode));
+        Result := DateTimeStrToMyLongWord(ss + '09:45', KModeToJiBie(KLineDateMode));
       end;
     KD_MIN30:
       begin
-        Result := DateTimeStrToMyLongWord(ss + '10:00',
-          KModeToJiBie(KLineDateMode));
+        Result := DateTimeStrToMyLongWord(ss + '10:00', KModeToJiBie(KLineDateMode));
       end;
     KD_MIN60:
       begin
-        Result := DateTimeStrToMyLongWord(ss + '10:30',
-          KModeToJiBie(KLineDateMode));
+        Result := DateTimeStrToMyLongWord(ss + '10:30', KModeToJiBie(KLineDateMode));
       end;
     KD_MIN120:
       begin
-        Result := DateTimeStrToMyLongWord(ss + '11:30',
-          KModeToJiBie(KLineDateMode));
+        Result := DateTimeStrToMyLongWord(ss + '11:30', KModeToJiBie(KLineDateMode));
       end;
     KD_DAY, KD_WEEK, KD_MONTH, KD_DAY45, KD_DAY120, KD_YEAR:
       begin
@@ -626,9 +588,7 @@ begin
   // Getsystemtime(lpSystemTime);
   GetLocalTime(lpSystemTime);
   // Result:=Format('[%0.4d\%0.2d\%0.2d\%0.2d:%0.2d:%0.2d] ',[lpSystemTime.wYear,lpSystemTime.wMonth,lpSystemTime.wDay,lpSystemTime.wHour,lpSystemTime.wMinute,lpSystemTime.wSecond]);
-  Result := Format('[%0.4d-%0.2d-%0.2d %0.2d:%0.2d:%0.2d]',
-    [lpSystemTime.wYear, lpSystemTime.wMonth, lpSystemTime.wDay,
-    lpSystemTime.wHour, lpSystemTime.wMinute, lpSystemTime.wSecond]);
+  Result := Format('[%0.4d-%0.2d-%0.2d %0.2d:%0.2d:%0.2d]', [lpSystemTime.wYear, lpSystemTime.wMonth, lpSystemTime.wDay, lpSystemTime.wHour, lpSystemTime.wMinute, lpSystemTime.wSecond]);
 
 end;
 
@@ -664,8 +624,7 @@ begin
   // Getsystemtime(lpSystemTime);
   GetLocalTime(lpSystemTime);
   // Result:=Format('[%0.4d\%0.2d\%0.2d\%0.2d:%0.2d:%0.2d] ',[lpSystemTime.wYear,lpSystemTime.wMonth,lpSystemTime.wDay,lpSystemTime.wHour,lpSystemTime.wMinute,lpSystemTime.wSecond]);
-  Result := Format('%0.4d%0.2d%0.2d', [lpSystemTime.wYear, lpSystemTime.wMonth,
-    lpSystemTime.wDay]);
+  Result := Format('%0.4d%0.2d%0.2d', [lpSystemTime.wYear, lpSystemTime.wMonth, lpSystemTime.wDay]);
 
 end;
 
@@ -676,8 +635,7 @@ var
 begin
   Result := 2013116;
   GetLocalTime(lpSystemTime);
-  Str := Format('%0.4d%0.2d%0.2d', [lpSystemTime.wYear, lpSystemTime.wMonth,
-    lpSystemTime.wDay]);
+  Str := Format('%0.4d%0.2d%0.2d', [lpSystemTime.wYear, lpSystemTime.wMonth, lpSystemTime.wDay]);
   Result := StrToInt(Str);
 end;
 
@@ -830,16 +788,5 @@ begin
   SHGetPathFromIDList(PIDL, buffer); // 转换成文件系统的路径
   Result := strpas(buffer);
 end;
-
-initialization
-
-MQueue := TMyMessageQueue.Create;
-
-// FCriticalSection := TCriticalSection.Create;
-finalization
-
-// FCriticalSection.Free;
-MQueue.CleanupInstance;
-MQueue.free;
 
 end.
