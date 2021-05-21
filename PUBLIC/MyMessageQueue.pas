@@ -127,5 +127,5 @@ initialization
 MessageCriticalSection := TCriticalSection.Create;
 
 finalization
-
+MessageCriticalSection.Free;
 end.

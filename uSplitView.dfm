@@ -19,21 +19,23 @@ object SplitViewForm: TSplitViewForm
   PixelsPerInch = 96
   TextHeight = 16
   object SV: TSplitView
-    Left = 862
-    Top = 0
+    AlignWithMargins = True
+    Left = 859
+    Top = 3
     Width = 250
-    Height = 642
+    Height = 636
     OpenedWidth = 250
+    ParentBackground = True
+    ParentColor = True
     Placement = svpRight
     TabOrder = 0
     object Notebook2: TNotebook
       Left = 0
       Top = 0
       Width = 250
-      Height = 615
+      Height = 609
       Align = alClient
       Ctl3D = False
-      PageIndex = 1
       ParentCtl3D = False
       TabOrder = 0
       object TPage
@@ -96,9 +98,10 @@ object SplitViewForm: TSplitViewForm
             Height = 40
             Caption = #36830#25509#21305#37197#33410#28857
             TabOrder = 2
+            OnClick = Button1Click
           end
           object Button4: TButton
-            Left = 3
+            Left = 123
             Top = 115
             Width = 118
             Height = 40
@@ -107,7 +110,7 @@ object SplitViewForm: TSplitViewForm
             OnClick = Button4Click
           end
           object Button5: TButton
-            Left = 124
+            Left = 3
             Top = 115
             Width = 118
             Height = 40
@@ -129,16 +132,18 @@ object SplitViewForm: TSplitViewForm
       object TPage
         Left = 0
         Top = 0
-        Caption = #32593#32476#35843#35797
+        Caption = #32593#32476#37197#32622
+        ExplicitHeight = 615
         object Button3: TButton
           Left = 0
-          Top = 495
+          Top = 489
           Width = 250
           Height = 40
           Align = alBottom
           Caption = #33719#21462#26412#26426#20449#24687
           TabOrder = 0
           OnClick = Button3Click
+          ExplicitTop = 495
         end
         object GroupBox3: TGroupBox
           AlignWithMargins = True
@@ -147,38 +152,32 @@ object SplitViewForm: TSplitViewForm
           Width = 244
           Height = 134
           Align = alTop
+          Caption = #26412#26426#20449#24687
           TabOrder = 1
           object Label4: TLabel
             Left = 6
-            Top = 43
+            Top = 64
             Width = 80
             Height = 16
-            Caption = #26412#22320#20027#26426#65306
+            Caption = #26412#26426#22320#22336#65306
           end
           object Label5: TLabel
             Left = 6
-            Top = 74
+            Top = 98
             Width = 80
             Height = 16
             Caption = #26412#22320#31471#21475#65306
           end
           object Label8: TLabel
             Left = 6
-            Top = 14
+            Top = 33
             Width = 80
             Height = 16
-            Caption = #26412#22320#21517#31216#65306
-          end
-          object Label9: TLabel
-            Left = 6
-            Top = 105
-            Width = 80
-            Height = 16
-            Caption = #21327#35758#31867#22411#65306
+            Caption = #26412#26426#21517#31216#65306
           end
           object ComboBox1: TComboBox
             Left = 86
-            Top = 40
+            Top = 61
             Width = 155
             Height = 24
             Style = csDropDownList
@@ -187,7 +186,7 @@ object SplitViewForm: TSplitViewForm
           end
           object Edit6: TEdit
             Left = 86
-            Top = 11
+            Top = 31
             Width = 155
             Height = 22
             Color = clBtnFace
@@ -198,28 +197,12 @@ object SplitViewForm: TSplitViewForm
           end
           object Edit7: TEdit
             Left = 86
-            Top = 70
+            Top = 94
             Width = 155
             Height = 22
             TabOrder = 2
             Text = '3334'
             OnKeyPress = Edit7KeyPress
-          end
-          object ComboBox2: TComboBox
-            Left = 86
-            Top = 100
-            Width = 155
-            Height = 24
-            Style = csDropDownList
-            ItemIndex = 0
-            TabOrder = 3
-            Text = 'UDP'
-            OnChange = ComboBox2Change
-            Items.Strings = (
-              'UDP'
-              'UDP '#26381#21153
-              'TCP '
-              'TCP '#26381#21153)
           end
         end
         object GroupBox2: TGroupBox
@@ -227,7 +210,7 @@ object SplitViewForm: TSplitViewForm
           Left = 3
           Top = 143
           Width = 244
-          Height = 82
+          Height = 153
           Align = alTop
           TabOrder = 2
           object Label3: TLabel
@@ -244,13 +227,20 @@ object SplitViewForm: TSplitViewForm
             Height = 16
             Caption = #36828#31243#31471#21475#65306
           end
+          object Label9: TLabel
+            Left = 6
+            Top = 80
+            Width = 80
+            Height = 16
+            Caption = #36890#35759#31867#22411#65306
+          end
           object Edit5: TEdit
             Left = 86
             Top = 45
             Width = 155
             Height = 22
             TabOrder = 0
-            Text = 'Edit5'
+            Text = '24'
             OnKeyPress = Edit5KeyPress
           end
           object ComboBox3: TComboBox
@@ -259,34 +249,61 @@ object SplitViewForm: TSplitViewForm
             Width = 155
             Height = 24
             TabOrder = 1
-            Text = '255.1.0.0'
+            Text = '225.1.0.0'
             OnKeyPress = ComboBox3KeyPress
+          end
+          object ComboBox2: TComboBox
+            Left = 86
+            Top = 76
+            Width = 155
+            Height = 24
+            Style = csDropDownList
+            ItemIndex = 0
+            TabOrder = 2
+            Text = 'UDP'
+            OnChange = ComboBox2Change
+            Items.Strings = (
+              'UDP'
+              'UDP '#26381#21153
+              'TCP '
+              'TCP '#26381#21153)
+          end
+          object Button9: TButton
+            Left = 6
+            Top = 106
+            Width = 238
+            Height = 40
+            Caption = #36830#25509
+            TabOrder = 3
+            OnClick = Button9Click
           end
         end
         object Button6: TButton
           Left = 0
-          Top = 535
+          Top = 529
           Width = 250
           Height = 40
           Align = alBottom
           Caption = #28165#26970#35774#22791#21015#34920
           TabOrder = 3
           OnClick = Button6Click
+          ExplicitTop = 535
         end
         object Button7: TButton
           Left = 0
-          Top = 575
+          Top = 569
           Width = 250
           Height = 40
           Align = alBottom
           Caption = #28165#26970#21382#21490#35760#24405
           TabOrder = 4
           OnClick = Button7Click
+          ExplicitTop = 575
         end
         object Button2: TButton
-          Left = 6
-          Top = 358
-          Width = 238
+          Left = 3
+          Top = 431
+          Width = 239
           Height = 46
           Caption = #21457#36865#25968#25454
           TabOrder = 5
@@ -294,18 +311,20 @@ object SplitViewForm: TSplitViewForm
         end
         object Memo2: TMemo
           Left = 6
-          Top = 231
+          Top = 303
           Width = 238
           Height = 122
           Lines.Strings = (
-            '0x01 0x00 0x00 0x0d')
+            'root'
+            'e e_devfind_off')
+          ScrollBars = ssVertical
           TabOrder = 6
         end
       end
     end
     object TabSet1: TTabSet
       Left = 0
-      Top = 615
+      Top = 609
       Width = 250
       Height = 27
       Align = alBottom
@@ -328,124 +347,54 @@ object SplitViewForm: TSplitViewForm
   object Notebook1: TNotebook
     Left = 0
     Top = 0
-    Width = 862
+    Width = 856
     Height = 642
     Align = alClient
     TabOrder = 1
+    ExplicitWidth = 862
     object TPage
       Left = 0
       Top = 0
       Caption = #33410#28857#35774#22791#31649#29702
+      ExplicitWidth = 862
       object Panel1: TPanel
         Left = 0
         Top = 0
-        Width = 862
+        Width = 856
         Height = 642
         Align = alClient
         BevelOuter = bvNone
         Color = clWindow
         ParentBackground = False
         TabOrder = 0
+        ExplicitWidth = 862
         object Splitter1: TSplitter
           Left = 0
-          Top = 474
-          Width = 862
-          Height = 3
+          Top = 560
+          Width = 856
+          Height = 8
           Cursor = crVSplit
           Align = alBottom
-          Color = clBtnFace
-          ParentColor = False
-          ExplicitTop = 96
-          ExplicitWidth = 432
-        end
-        object ListView1: TListView
-          AlignWithMargins = True
-          Left = 3
-          Top = 3
-          Width = 408
-          Height = 468
-          Margins.Right = 1
-          Align = alLeft
-          Checkboxes = True
-          Columns = <
-            item
-              Caption = #24207#21495
-              Width = -1
-              WidthType = (
-                -1)
-            end
-            item
-              Caption = #21517#31216
-              Width = -1
-              WidthType = (
-                -1)
-            end
-            item
-              Caption = #35774#22791'ID'
-              Width = -2
-              WidthType = (
-                -2)
-            end
-            item
-              Caption = #32593#32476#22320#22336' IP'
-              Width = -1
-              WidthType = (
-                -1)
-            end
-            item
-              Caption = #31471#21475
-              Width = -1
-              WidthType = (
-                -1)
-            end
-            item
-              Caption = #32593#21345#22320#22336' MAC'
-              Width = -1
-              WidthType = (
-                -1)
-            end
-            item
-              Caption = #31867#22411
-              Width = -2
-              WidthType = (
-                -2)
-            end
-            item
-              Caption = #29366#24577
-              Width = -1
-              WidthType = (
-                -1)
-            end>
-          FlatScrollBars = True
-          GridLines = True
-          HideSelection = False
-          ReadOnly = True
-          RowSelect = True
-          SortType = stBoth
-          TabOrder = 0
-          ViewStyle = vsReport
-          OnClick = ListView1Click
+          ExplicitTop = 563
+          ExplicitWidth = 862
         end
         object Panel3: TPanel
           Left = 0
-          Top = 477
-          Width = 862
-          Height = 165
+          Top = 568
+          Width = 856
+          Height = 74
           Align = alBottom
-          BevelOuter = bvNone
-          Caption = 'Panel3'
-          Ctl3D = False
-          ParentBackground = False
           ParentColor = True
-          ParentCtl3D = False
-          TabOrder = 1
+          TabOrder = 0
+          ExplicitWidth = 862
           object Memo1: TMemo
             AlignWithMargins = True
-            Left = 3
-            Top = 3
-            Width = 856
-            Height = 159
+            Left = 4
+            Top = 4
+            Width = 848
+            Height = 66
             Align = alClient
+            BorderStyle = bsNone
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
             Font.Height = -15
@@ -455,75 +404,176 @@ object SplitViewForm: TSplitViewForm
             ReadOnly = True
             ScrollBars = ssBoth
             TabOrder = 0
+            ExplicitLeft = 3
+            ExplicitTop = 56
+            ExplicitWidth = 856
+            ExplicitHeight = 106
           end
         end
-        object ListView2: TListView
-          AlignWithMargins = True
-          Left = 413
-          Top = 3
-          Width = 446
-          Height = 468
-          Margins.Left = 1
+        object Panel2: TPanel
+          Left = 0
+          Top = 0
+          Width = 856
+          Height = 560
           Align = alClient
-          Checkboxes = True
-          Columns = <
-            item
-              Caption = #24207#21495
-              Width = -1
-              WidthType = (
-                -1)
-            end
-            item
-              Caption = #21517#31216
-              Width = -1
-              WidthType = (
-                -1)
-            end
-            item
-              Caption = #35774#22791'ID'
-              Width = -2
-              WidthType = (
-                -2)
-            end
-            item
-              Caption = #32593#32476#22320#22336' IP'
-              Width = -1
-              WidthType = (
-                -1)
-            end
-            item
-              Caption = #31471#21475
-              Width = -1
-              WidthType = (
-                -1)
-            end
-            item
-              Caption = #32593#21345#22320#22336' MAC'
-              Width = -1
-              WidthType = (
-                -1)
-            end
-            item
-              Caption = #31867#22411
-              Width = -2
-              WidthType = (
-                -2)
-            end
-            item
-              Caption = #29366#24577
-              Width = -1
-              WidthType = (
-                -1)
-            end>
-          FlatScrollBars = True
-          GridLines = True
-          HideSelection = False
-          ReadOnly = True
-          RowSelect = True
-          ShowWorkAreas = True
-          TabOrder = 2
-          ViewStyle = vsReport
-          OnClick = ListView2Click
+          ParentColor = True
+          TabOrder = 1
+          ExplicitLeft = 72
+          ExplicitTop = 128
+          ExplicitWidth = 185
+          ExplicitHeight = 41
+          object Splitter2: TSplitter
+            AlignWithMargins = True
+            Left = 416
+            Top = 4
+            Width = 10
+            Height = 552
+          end
+          object ListView1: TListView
+            AlignWithMargins = True
+            Left = 4
+            Top = 4
+            Width = 408
+            Height = 552
+            Margins.Right = 1
+            Align = alLeft
+            BorderStyle = bsNone
+            Checkboxes = True
+            Columns = <
+              item
+                Caption = #24207#21495
+                Width = -2
+                WidthType = (
+                  -2)
+              end
+              item
+                Caption = #21517#31216
+                Width = -1
+                WidthType = (
+                  -1)
+              end
+              item
+                Caption = #35774#22791'ID'
+                Width = -2
+                WidthType = (
+                  -2)
+              end
+              item
+                Caption = #32593#32476#22320#22336' IP'
+                Width = -1
+                WidthType = (
+                  -1)
+              end
+              item
+                Caption = #31471#21475
+                Width = -1
+                WidthType = (
+                  -1)
+              end
+              item
+                Caption = #32593#21345#22320#22336' MAC'
+                Width = -1
+                WidthType = (
+                  -1)
+              end
+              item
+                Caption = #31867#22411
+                Width = -2
+                WidthType = (
+                  -2)
+              end
+              item
+                Caption = #29366#24577
+                Width = -1
+                WidthType = (
+                  -1)
+              end>
+            FlatScrollBars = True
+            GridLines = True
+            HideSelection = False
+            ReadOnly = True
+            RowSelect = True
+            SortType = stBoth
+            TabOrder = 0
+            ViewStyle = vsReport
+            OnClick = ListView1Click
+            ExplicitLeft = 3
+            ExplicitTop = 3
+            ExplicitHeight = 468
+          end
+          object ListView2: TListView
+            AlignWithMargins = True
+            Left = 430
+            Top = 4
+            Width = 422
+            Height = 552
+            Margins.Left = 1
+            Align = alClient
+            BorderStyle = bsNone
+            Checkboxes = True
+            Columns = <
+              item
+                Caption = #24207#21495
+                Width = -2
+                WidthType = (
+                  -2)
+              end
+              item
+                Caption = #21517#31216
+                Width = -1
+                WidthType = (
+                  -1)
+              end
+              item
+                Caption = #35774#22791'ID'
+                Width = -2
+                WidthType = (
+                  -2)
+              end
+              item
+                Caption = #32593#32476#22320#22336' IP'
+                Width = -1
+                WidthType = (
+                  -1)
+              end
+              item
+                Caption = #31471#21475
+                Width = -1
+                WidthType = (
+                  -1)
+              end
+              item
+                Caption = #32593#21345#22320#22336' MAC'
+                Width = -1
+                WidthType = (
+                  -1)
+              end
+              item
+                Caption = #31867#22411
+                Width = -2
+                WidthType = (
+                  -2)
+              end
+              item
+                Caption = #29366#24577
+                Width = -1
+                WidthType = (
+                  -1)
+              end>
+            FlatScrollBars = True
+            GridLines = True
+            HideSelection = False
+            ReadOnly = True
+            RowSelect = True
+            ShowWorkAreas = True
+            TabOrder = 1
+            ViewStyle = vsReport
+            OnClick = ListView2Click
+            ExplicitLeft = 413
+            ExplicitTop = 3
+            ExplicitWidth = 446
+            ExplicitHeight = 468
+          end
         end
       end
     end
@@ -531,22 +581,19 @@ object SplitViewForm: TSplitViewForm
       Left = 0
       Top = 0
       Caption = '1'
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 862
     end
     object TPage
       Left = 0
       Top = 0
       Caption = '2'
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 862
     end
     object TPage
       Left = 0
       Top = 0
       Caption = '3'
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 862
     end
   end
   object StatusBar1: TStatusBar
@@ -565,8 +612,11 @@ object SplitViewForm: TSplitViewForm
   end
   object IdUDPServer1: TIdUDPServer
     OnStatus = IdUDPServer1Status
-    BroadcastEnabled = True
-    Bindings = <>
+    Bindings = <
+      item
+        IP = '169.254.6.80'
+        Port = 3334
+      end>
     DefaultPort = 3334
     ThreadedEvent = True
     OnUDPRead = IdUDPServer1UDPRead
@@ -589,5 +639,17 @@ object SplitViewForm: TSplitViewForm
   object IdAntiFreeze1: TIdAntiFreeze
     Left = 376
     Top = 248
+  end
+  object Timer1: TTimer
+    Interval = 5000
+    OnTimer = Timer1Timer
+    Left = 152
+    Top = 248
+  end
+  object Timer2: TTimer
+    Interval = 50
+    OnTimer = Timer2Timer
+    Left = 152
+    Top = 344
   end
 end

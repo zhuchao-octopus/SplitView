@@ -31,11 +31,14 @@ type
   public
     Constructor Create(Handle: HWND);
     Destructor Destroy; override;
+    procedure Stop();
+
     procedure StartScanLocalNet();
     procedure DoIt(task: TProc);
 
     function Add(name: String; obj: TObject): TObject;
     function Get(name: String): TObject;
+    function HasConnection(name: String): Boolean;
   end;
 
 var
@@ -46,6 +49,7 @@ implementation
 Constructor TDataEngineManager.Create(Handle: HWND);
 begin
   inherited Create(true);
+  FreeOnTerminate := true;
   FThreadPool := TThreadPool.Create();
   FThreadPool.SetMinWorkerThreads(200);
   FThreadPool.SetMaxWorkerThreads(2000);
@@ -56,6 +60,7 @@ begin
   FHandle := Handle;
 
   FTaskOBJList := TStringList.Create;
+  FTaskOBJList.OwnsObjects := true; // 清空列表自动释放里面的项目
 end;
 
 Destructor TDataEngineManager.Destroy;
@@ -67,6 +72,20 @@ begin
   FTaskOBJList.CleanupInstance;
   FTaskOBJList.Clear;
   FTaskOBJList.Free;
+end;
+
+procedure TDataEngineManager.Stop;
+var
+  i: Integer;
+  ClientObject: TClientObject;
+begin
+  for i := 0 to FTaskOBJList.Count - 1 do
+  begin
+    ClientObject := TClientObject(FTaskOBJList.Objects[i]);
+    if ClientObject <> nil then
+      ClientObject.Free;
+  end;
+  Self.Terminate;
 end;
 
 procedure TDataEngineManager.DoIt(task: TProc);
@@ -133,7 +152,8 @@ begin
   INC(FTaskIndex);
   DataSourceCriticalSection.Leave;
 
-  MQueue.SendMessage(TMyMessage.Create(WM_MYMESSAGE_DATAENGINE_CREATE, FTaskIndex, ''));
+  MQueue.SendMessage(TMyMessage.Create(WM_MYMESSAGE_DATAENGINE_CREATE,
+    FTaskIndex, ''));
 
   /// //////////////////////////////////////////////////////////////////////////////////
   /// 调用特定功能函数
@@ -149,7 +169,7 @@ end;
 procedure TDataEngineManager.CallActionInterface(IP: String);
 var
   port: Integer;
-  b: boolean;
+  b: Boolean;
   // rr: String;
 begin
   port := 554;
@@ -158,14 +178,16 @@ begin
   if IsValidIP(IP) then
     b := CheckIpPort(IP, port);
   if (b) then
-    MQueue.SendMessage(TMyMessage.Create(WM_MYMESSAGE_TASK_COMPLETEOK, port, IP));
+    MQueue.SendMessage(TMyMessage.Create(WM_MYMESSAGE_TASK_COMPLETEOK,
+      port, IP));
 
   // 任务返回
   DataSourceCriticalSection.Enter;
   DEC(FTaskWorkingCount);
   DataSourceCriticalSection.Leave;
 
-  MQueue.SendMessage(TMyMessage.Create(WM_MYMESSAGE_DATAENGINE_WORKING_DONE, FTaskOBJList.Count - FTaskWorkingCount, IP));
+  MQueue.SendMessage(TMyMessage.Create(WM_MYMESSAGE_DATAENGINE_WORKING_DONE,
+    FTaskOBJList.Count - FTaskWorkingCount, IP));
 end;
 
 procedure TDataEngineManager.StartScanLocalNet();
@@ -227,6 +249,18 @@ begin
   if i >= 0 then
   begin
     Result := FTaskOBJList.Objects[i];
+  end;
+end;
+
+function TDataEngineManager.HasConnection(name: String): Boolean;
+var
+  i: Integer;
+begin
+  Result := false;
+  i := FTaskOBJList.IndexOf(name);
+  if i >= 0 then
+  begin
+    Result := true;
   end;
 end;
 
