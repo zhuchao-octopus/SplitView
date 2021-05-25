@@ -25,13 +25,13 @@ object frmSetting: TfrmSetting
     ActivePage = TabSheet2
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 1013
-    ExplicitHeight = 522
     object TabSheet2: TTabSheet
       Caption = #22352#24109#20027#26426#36830#25509#26435#38480
       ImageIndex = 1
-      ExplicitWidth = 1005
-      ExplicitHeight = 490
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ListView1: TListView
         AlignWithMargins = True
         Left = 3
@@ -51,9 +51,6 @@ object frmSetting: TfrmSetting
           end>
         TabOrder = 0
         ViewStyle = vsReport
-        ExplicitLeft = 96
-        ExplicitTop = 144
-        ExplicitHeight = 150
       end
       object ListView2: TListView
         AlignWithMargins = True
@@ -74,9 +71,6 @@ object frmSetting: TfrmSetting
           end>
         TabOrder = 1
         ViewStyle = vsReport
-        ExplicitLeft = 368
-        ExplicitTop = 144
-        ExplicitHeight = 150
       end
       object ListView3: TListView
         AlignWithMargins = True
@@ -97,9 +91,6 @@ object frmSetting: TfrmSetting
           end>
         TabOrder = 2
         ViewStyle = vsReport
-        ExplicitLeft = 728
-        ExplicitTop = 200
-        ExplicitHeight = 150
       end
       object Button4: TButton
         Left = 832
@@ -118,41 +109,63 @@ object frmSetting: TfrmSetting
         Caption = #20445#23384#22352#24109
         TabOrder = 4
       end
+      object Memo1: TMemo
+        Left = 304
+        Top = 256
+        Width = 433
+        Height = 145
+        Lines.Strings = (
+          'Memo1')
+        TabOrder = 5
+      end
     end
     object TabSheet3: TTabSheet
       Caption = #22352#24109#20027#26426#25512#36865#26435#38480
       ImageIndex = 2
-      ExplicitWidth = 1005
-      ExplicitHeight = 490
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object TabSheet4: TTabSheet
       Caption = #22352#24109#25509#31649#26435#38480
       ImageIndex = 3
-      ExplicitWidth = 722
-      ExplicitHeight = 340
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object TabSheet5: TTabSheet
       Caption = #22352#24109#20027#26426'OSD'#31649#29702
       ImageIndex = 4
-      ExplicitWidth = 1005
-      ExplicitHeight = 490
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object TabSheet6: TTabSheet
       Caption = #22352#24109#36328#23631#35774#32622
       ImageIndex = 5
-      ExplicitWidth = 1005
-      ExplicitHeight = 490
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object TabSheet7: TTabSheet
       Caption = #22352#24109#36830#25509#20027#26426#31649#29702
       ImageIndex = 6
-      ExplicitWidth = 1005
-      ExplicitHeight = 490
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object TabSheet8: TTabSheet
       Caption = #20854#23427
       ImageIndex = 7
       ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GroupBox1: TGroupBox
         Left = 19
         Top = 19

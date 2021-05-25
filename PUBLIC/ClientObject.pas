@@ -62,8 +62,7 @@ type
     procedure Log(msg: String); overload;
     procedure Log(sl: TStringlist); overload;
 
-    procedure IdUDPRead(AThread: TIdUDPListenerThread; const AData: TIdBytes;
-      ABinding: TIdSocketHandle);
+    procedure IdUDPRead(AThread: TIdUDPListenerThread; const AData: TIdBytes; ABinding: TIdSocketHandle);
     procedure InitUDP(lip: String; lPort: Integer);
     procedure DoWork(w: TWork);
   public
@@ -98,6 +97,8 @@ end;
 
 procedure TClientObject.SetWork(Data: string; Id: Integer);
 begin
+  if FWorkList.Count > 0 then // 事务阻塞模式
+    Exit;
   cs.Enter;
   FWorkList.Add(TWork.Create(Data, Id));
   cs.Leave;
@@ -111,7 +112,7 @@ begin
     begin
       cs.Enter;
       Result := FWorkList.First;
-      FWorkList.Remove(Result);
+      // FWorkList.Remove(Result); //事务做完了才移走
       cs.Leave;
     end;
   finally
@@ -124,8 +125,7 @@ begin
   FDataCallBack := DataCallBack;
 end;
 
-procedure TClientObject.AssignUDP(AClient: TIdUDPServer; lip: String;
-  lPort: Integer);
+procedure TClientObject.AssignUDP(AClient: TIdUDPServer; lip: String; lPort: Integer);
 begin
   if not Assigned(FUDP) then
     FUDP := TIdUDPServer.Create(nil);
@@ -182,6 +182,7 @@ begin
     OnWorkEnd := AClient.OnWorkEnd;
     ConnectTimeout := AClient.ConnectTimeout;
   end;
+  FTCPClient.ReadTimeout := 1000;
 end;
 
 Constructor TClientObject.Create(Free: Boolean);
@@ -211,63 +212,80 @@ end;
 
 procedure TClientObject.OpenTCP; // TCP 同步柱塞式
 var
-  w: TWork;
+  w, ww: TWork;
   i: Integer;
+  str,temp: String;
 begin
-  if FTCPClient.Connected then
+  if FTCPClient.Connected then // 一个连接一个线程
     Exit;
   if (not FTCPClient.Connected) then
   begin
     FTCPClient.Connect;
+    FTCPClient.IOHandler.WriteLn('root' + #13#10);
   end;
-
+  ww := nil; temp:='';
   while not FFree do
   begin
     w := GetWork();
     if w <> nil then
     begin
       DoWork(w);
-      w.Free;
+      ww := w;
     end;
+
+    str := FTCPClient.IOHandler.ReadLn();
+    if (str <> '') then
+    begin
+      temp:=temp + str;
+      if Assigned(FDataCallBack) then
+        if ww <> nil then
+          FDataCallBack(str, ww.Id)
+        else
+          FDataCallBack(str, 0);
+
+      Log('TCP数据来自：' + FTCPClient.Socket.Host + ':' + inttostr(FTCPClient.Socket.Port));
+      Log(str);
+    end
+    else
+    begin
+     if Assigned(FDataCallBack) then
+       FDataCallBack(temp, -1);
+      temp:='';
+      cs.Enter;
+      FWorkList.Remove(ww);
+      ww.Free;
+      cs.Leave;
+    end;
+
   end;
 end;
 
 procedure TClientObject.DoWork(w: TWork);
-var
-  str: String;
 begin
-  FTCPClient.IOHandler.WriteLn(w.Data);
-  str := FTCPClient.IOHandler.ReadLn();
-  if (str <> '') then
-  begin
-    if (Memo <> nil) then
-    begin
-      Log(GetSystemDateTimeStr() + ' TCP数据来自：' + FTCPClient.Socket.Host + ':' +
-        inttostr(FTCPClient.Socket.Port));
+  FTCPClient.IOHandler.WriteLn(w.Data + #13#10);
 
-      Log(str);
-    end;
+  // while FTCPClient.IOHandler.InputBuffer.Size > 0 do
+  // begin
+  // str := FTCPClient.IOHandler.ReadLn();
+  // end;
 
-    if Assigned(FDataCallBack) then
-      FDataCallBack(str, w.Id);
 
-    MQueue.SendMessage(TMyMessage.Create(200, 0, w.Id, str));
-  end;
+
+
+  // MQueue.SendMessage(TMyMessage.Create(200, 0, w.Id, str));
 
 end;
 
 // 一个binding一个线程
 // 一个线程里面有多个套接字 ABinding
 // 一个套接字就是一个设备
-procedure TClientObject.IdUDPRead(AThread: TIdUDPListenerThread;
-  const AData: TIdBytes; ABinding: TIdSocketHandle);
+procedure TClientObject.IdUDPRead(AThread: TIdUDPListenerThread; const AData: TIdBytes; ABinding: TIdSocketHandle);
 var
   sl: TStringlist;
   dv: TVDevice;
 begin
   sl := TStringlist.Create;
-  Log(GetSystemDateTimeStr() + ' UDP数据来自：' + ABinding.PeerIP + ':' +
-    inttostr(ABinding.PeerPort) + ':' + inttostr(AThread.ThreadID));
+  Log(GetSystemDateTimeStr() + ' UDP数据来自：' + ABinding.PeerIP + ':' + inttostr(ABinding.PeerPort) + ':' + inttostr(AThread.ThreadID));
 
   FormatBuff(AData, sl, 16);
   Log(sl);
@@ -299,8 +317,7 @@ begin
   str1 := FormatHexStr(trim(hs), Count);
   SetLength(buf, Count);
   str2 := HexStrToBuff(str1, buf, Count);
-  Log('UDP发送IP:' + FUDP.Bindings[0].Ip + ':' + inttostr(FUDP.Bindings[0].Port) +
-    ' --> ' + Ip + ':' + inttostr(Port));
+  Log('UDP发送IP:' + FUDP.Bindings[0].Ip + ':' + inttostr(FUDP.Bindings[0].Port) + ' --> ' + Ip + ':' + inttostr(Port));
   Log(str2);
   try
     FUDP.SendBuffer(Ip, Port, buf);
@@ -321,9 +338,7 @@ begin
   str1 := FormatHexStr(trim(hs), Count);
   SetLength(buf, Count);
   str2 := HexStrToBuff(str1, buf, Count);
-  Log('TCP发送IP:' + FTCPClient.Socket.Binding.Ip + ':' +
-    inttostr(FTCPClient.Socket.Binding.Port) + ' --> ' + FTCPClient.Host + ':' +
-    inttostr(FTCPClient.Port));
+  Log('TCP发送IP:' + FTCPClient.Socket.Binding.Ip + ':' + inttostr(FTCPClient.Socket.Binding.Port) + ' --> ' + FTCPClient.Host + ':' + inttostr(FTCPClient.Port));
   Log(str2);
   try
     FTCPClient.IOHandler.Write(buf, Count);

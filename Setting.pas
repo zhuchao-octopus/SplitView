@@ -30,6 +30,7 @@ type
     ListView3: TListView;
     Button4: TButton;
     Button5: TButton;
+    Memo1: TMemo;
     procedure Edit1KeyPress(Sender: TObject; var Key: Char);
     procedure FormShow(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -37,8 +38,9 @@ type
     procedure Button3Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
   private
+    // FStr:String;
     { Private declarations }
-    procedure TCPReadData(const data:String);
+    procedure TCPReadData(const data: String; id: Integer);
   public
     { Public declarations }
     dv: TVDevice;
@@ -66,7 +68,7 @@ end;
 
 procedure TfrmSetting.Button2Click(Sender: TObject);
 begin
-if tcp.Client.Connected then
+  if tcp.Client.Connected then
   begin
     tcp.TCPSendStr('root' + #10#13);
     tcp.TCPSendStr('e e_devfind_on' + #10#13);
@@ -75,7 +77,7 @@ end;
 
 procedure TfrmSetting.Button3Click(Sender: TObject);
 begin
-if tcp.Client.Connected then
+  if tcp.Client.Connected then
   begin
     tcp.TCPSendStr('root' + #10#13);
     tcp.TCPSendStr('e e_devfind_off' + #10#13);
@@ -84,11 +86,10 @@ end;
 
 procedure TfrmSetting.Button4Click(Sender: TObject);
 begin
- if tcp.Client.Connected then
+  if tcp.Client.Connected then
   begin
-    //tcp.SetCallBack(TCPReadData);
-    tcp.TCPSendStr('root' + #10#13);
-    tcp.TCPSendStr('astparam g pullperm' + #10#13);
+    tcp.SetCallBack(TCPReadData);
+    tcp.SetWork('astparam g pullperm', 100);
   end;
 end;
 
@@ -99,16 +100,39 @@ begin
     Key := #0; // #0 表示没有输入
   End;
 end;
-procedure TfrmSetting.TCPReadData(const data: string);
-begin
 
+procedure TfrmSetting.TCPReadData(const data: string; id: Integer);
+var
+  str: String;
+  SL:   TStringList;
+  Buf: array of byte;
+begin
+   SL   :=   TStringList.Create;
+  if (id = 100) or (id = 0) then // astparam g pullperm
+  begin
+    // memo1.Lines.Add(data+ ' id:=' +inttostr(id));
+    str := str + data;
+  end;
+  if (id = -1) then
+  begin
+    if pos('astparam g pullperm', data) > 0 then
+    begin
+        ExtractStrings([ ' '],   [],   PChar(data),   SL);
+
+        SetLength(Buf,24);
+        HexToBin(PAnsiChar(SL[sl.Count-1]), @Buf[0],24);
+        ShowMessage(SL.Text);
+        SL.Free;
+    end;
+  end;
 end;
+
 procedure TfrmSetting.FormShow(Sender: TObject);
 begin
   if dv <> nil then
   begin
     Self.Caption := '兆科音视频坐席管理设置' + ' : ' + dv.name + ', ' + dv.ip;
-    edit1.Text:=dv.IP;
+    Edit1.Text := dv.ip;
 
   end;
 end;

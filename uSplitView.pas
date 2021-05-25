@@ -1,5 +1,6 @@
 // ---------------------------------------------------------------------------
 
+
 // This software is Copyright (c) 2015 Embarcadero Technologies, Inc.
 // You may only use this software if you are an authorized licensee
 // of an Embarcadero developer tools product.
@@ -100,8 +101,7 @@ type
     procedure FormResize(Sender: TObject);
     procedure ListView2Click(Sender: TObject);
     procedure ListView1Click(Sender: TObject);
-    procedure TabSet1Change(Sender: TObject; NewTab: Integer;
-      var AllowChange: Boolean);
+    procedure TabSet1Change(Sender: TObject; NewTab: Integer; var AllowChange: Boolean);
     procedure Button4Click(Sender: TObject);
     procedure Button5Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
@@ -111,8 +111,7 @@ type
     procedure Button8Click(Sender: TObject);
     procedure IdTCPClient1Disconnected(Sender: TObject);
     procedure IdTCPClient1Connected(Sender: TObject);
-    procedure IdTCPClient1Status(ASender: TObject; const AStatus: TIdStatus;
-      const AStatusText: string);
+    procedure IdTCPClient1Status(ASender: TObject; const AStatus: TIdStatus; const AStatusText: string);
     procedure Edit7KeyPress(Sender: TObject; var Key: Char);
     procedure Edit6KeyPress(Sender: TObject; var Key: Char);
     procedure Edit3KeyPress(Sender: TObject; var Key: Char);
@@ -169,8 +168,7 @@ begin
   end;
 end;
 
-function TSplitViewForm.GetUDPConnection(Ip: String; Port: Integer)
-  : TClientObject;
+function TSplitViewForm.GetUDPConnection(Ip: String; Port: Integer): TClientObject;
 var
   ClientObject: TClientObject;
 begin
@@ -193,8 +191,7 @@ begin
   Result := ClientObject;
 end;
 
-function TSplitViewForm.GetTCPConnection(Ip: String; Port: Integer)
-  : TClientObject;
+function TSplitViewForm.GetTCPConnection(Ip: String; Port: Integer): TClientObject;
 var
   ClientObject: TClientObject;
 begin
@@ -202,7 +199,7 @@ begin
   Result := TClientObject(DataEngineManager.get(Ip + ':' + IntToStr(Port)));
   if Result <> nil then
   begin
-   if not Result.Client.connected then
+    if not Result.Client.connected then
       DataEngineManager.DoIt(ClientObject.OpenTCP);
     Exit;
   end;
@@ -239,8 +236,7 @@ var
 begin
   for StyleName in TStyleManager.StyleNames do
     cbxVclStyles.Items.Add(StyleName);
-  cbxVclStyles.ItemIndex := cbxVclStyles.Items.IndexOf
-    (TStyleManager.ActiveStyle.Name);
+  cbxVclStyles.ItemIndex := cbxVclStyles.Items.IndexOf(TStyleManager.ActiveStyle.Name);
 
   GetBuildInfo(Application.ExeName, S);
 
@@ -286,8 +282,7 @@ begin
   St(1, 'TCP 连接断开' + tcp.Client.Host + ':' + IntToStr(tcp.Client.Port));
 end;
 
-procedure TSplitViewForm.IdTCPClient1Status(ASender: TObject;
-  const AStatus: TIdStatus; const AStatusText: string);
+procedure TSplitViewForm.IdTCPClient1Status(ASender: TObject; const AStatus: TIdStatus; const AStatusText: string);
 begin
   Log('TCP Status:' + AStatusText);
 end;
@@ -365,8 +360,7 @@ begin
   end;
 
 Lend:
-  StatusBar1.Panels[0].text := 'Rx : ' + IntToStr(DeviceList.DevicesRx.count) +
-    '    Tx : ' + IntToStr(DeviceList.DevicesTx.count)
+  StatusBar1.Panels[0].text := 'Rx : ' + IntToStr(DeviceList.DevicesRx.count) + '    Tx : ' + IntToStr(DeviceList.DevicesTx.count)
 end;
 
 procedure TSplitViewForm.UpdateNetDeviceKP(Cmd: String);
@@ -416,6 +410,7 @@ begin
   if ComboBox2.ItemIndex > 1 then
   begin
     tcp := GetTCPConnection(trim(ComboBox3.text), StrToInt(trim(Edit5.text)));
+    tcp.memo := Memo1;
     if tcp = nil then
     begin
       Log('没有建立可用的连接！！');
@@ -424,13 +419,11 @@ begin
 
     if tcp.Client.connected then
     begin
-      Log('TCP发送IP:' + tcp.Client.Socket.Binding.Ip + ':' +
-        IntToStr(tcp.Client.Socket.Binding.Port) + ' --> ' + tcp.Client.Host +
-        ':' + IntToStr(tcp.Client.Port));
+      Log('TCP发送IP:' + tcp.Client.Socket.Binding.Ip + ':' + IntToStr(tcp.Client.Socket.Binding.Port) + ' --> ' + tcp.Client.Host + ':' + IntToStr(tcp.Client.Port));
       Log(Memo2.text);
       try
-        //tcp.Client.IOHandler.WriteLn(Memo2.text);
-        tcp.SetWork(Memo2.text,0);
+        // tcp.Client.IOHandler.WriteLn(Memo2.text);
+        tcp.SetWork(Memo2.text, 0);
       Except
         on e: Exception do
         begin
@@ -519,15 +512,14 @@ begin
   Notebook1.PageIndex := ItemIndex;
 end;
 
-procedure TSplitViewForm.TabSet1Change(Sender: TObject; NewTab: Integer;
-  var AllowChange: Boolean);
+procedure TSplitViewForm.TabSet1Change(Sender: TObject; NewTab: Integer; var AllowChange: Boolean);
 begin
   Notebook2.PageIndex := NewTab;
 end;
 
 procedure TSplitViewForm.Timer1Timer(Sender: TObject);
 begin
-  if DataEngineManager.Has(trim(ComboBox3.text) +':'+ trim(Edit5.text)) then
+  if DataEngineManager.Has(trim(ComboBox3.text) + ':' + trim(Edit5.text)) then
     Exit;
   St(1, '没有TCP连接');
 end;
@@ -596,9 +588,12 @@ begin
   if (dv <> nil) then
   begin
     frmSetting.dv := dv;
-    frmSetting.tcp:=Self.GetTCPConnection(dv.ip,24);
+    frmSetting.tcp := Self.GetTCPConnection(dv.Ip, 24);
     if frmSetting.tcp <> nil then
-    frmSetting.showmodal;
+    begin
+      frmSetting.tcp.Memo := Memo1;
+      frmSetting.showmodal;
+    end;
   end;
 end;
 

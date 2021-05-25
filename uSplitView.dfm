@@ -612,7 +612,6 @@ object SplitViewForm: TSplitViewForm
     OnDisconnected = IdTCPClient1Disconnected
     OnConnected = IdTCPClient1Connected
     ConnectTimeout = 3000
-    IPVersion = Id_IPv4
     Port = 0
     ReadTimeout = -1
     Left = 216
