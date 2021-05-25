@@ -22,9 +22,11 @@ object frmSetting: TfrmSetting
     Top = 3
     Width = 1040
     Height = 523
-    ActivePage = TabSheet8
+    ActivePage = TabSheet2
     Align = alClient
     TabOrder = 0
+    ExplicitLeft = -2
+    ExplicitTop = -2
     object TabSheet2: TTabSheet
       Caption = #22352#24109#20027#26426#36830#25509#26435#38480
       ImageIndex = 1
@@ -299,13 +301,14 @@ object frmSetting: TfrmSetting
         ViewStyle = vsReport
       end
     end
-    object TabSheet6: TTabSheet
+    object TabSheet5: TTabSheet
       Caption = #22352#24109#36328#23631#35774#32622
       ImageIndex = 5
     end
     object TabSheet8: TTabSheet
       Caption = #20854#23427
       ImageIndex = 7
+      ExplicitLeft = 0
       object GroupBox1: TGroupBox
         Left = 19
         Top = 19

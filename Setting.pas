@@ -14,7 +14,7 @@ type
     TabSheet3: TTabSheet;
     TabSheet4: TTabSheet;
     TabSheet2: TTabSheet;
-    TabSheet6: TTabSheet;
+    TabSheet5: TTabSheet;
     TabSheet8: TTabSheet;
     GroupBox1: TGroupBox;
     Label1: TLabel;
