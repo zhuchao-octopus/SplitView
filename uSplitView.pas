@@ -1,6 +1,7 @@
 // ---------------------------------------------------------------------------
 
 
+
 // This software is Copyright (c) 2015 Embarcadero Technologies, Inc.
 // You may only use this software if you are an authorized licensee
 // of an Embarcadero developer tools product.
@@ -89,6 +90,7 @@ type
     Panel2: TPanel;
     Splitter2: TSplitter;
     Timer3: TTimer;
+    Button10: TButton;
 
     procedure FormCreate(Sender: TObject);
     procedure cbxVclStylesChange(Sender: TObject);
@@ -125,6 +127,9 @@ type
     procedure MessageTimerTimer(Sender: TObject);
     procedure Timer3Timer(Sender: TObject);
     procedure ListView1DblClick(Sender: TObject);
+    procedure Button10Click(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure ListView2DblClick(Sender: TObject);
   private
     procedure Log(const Msg: string);
     procedure SynchroPage(ItemIndex: Integer);
@@ -143,6 +148,8 @@ type
 
 var
   SplitViewForm: TSplitViewForm;
+
+  srx, stx: TVDevice;
 
 implementation
 
@@ -395,6 +402,24 @@ begin
   end;
 end;
 
+procedure TSplitViewForm.Button10Click(Sender: TObject);
+begin
+  frmSetting.SHOW;
+end;
+
+procedure TSplitViewForm.Button1Click(Sender: TObject);
+var
+  tcp: TClientObject;
+  // txid:Integer;
+begin
+
+  tcp := GetTCPConnection(trim(srx.Ip), StrToInt(trim(srx.Port)));
+  if tcp <> nil then
+  begin
+    tcp.SetWork('e e_reconnec ' + stx.ID, 200);
+  end;
+end;
+
 procedure TSplitViewForm.Button2Click(Sender: TObject);
 var
   tcp: TClientObject;
@@ -402,7 +427,7 @@ var
 begin
   if ComboBox2.ItemIndex <= 1 then
   begin
-    udp := GetTCPConnection(trim(ComboBox1.text), StrToInt(trim(Edit7.text)));
+    udp := GetUDPConnection(trim(ComboBox1.text), StrToInt(trim(Edit7.text)));
     udp.UDPSendHexStr(ComboBox3.text, StrToInt(trim(Edit5.text)), Memo2.text);
     // UDPSendData(trim(ComboBox1.text), StrToInt(trim(Edit7.text)),
     // ComboBox3.text, StrToInt(trim(Edit5.text)), Memo2.text);
@@ -569,6 +594,7 @@ begin
   ID := ListItem.subitems.Strings[1];
   Edit2.text := ID;
   ComboBox3.text := ListItem.subitems.Strings[2];
+  srx := DeviceList.get(nanme);
 end;
 
 procedure TSplitViewForm.ListView1DblClick(Sender: TObject);
@@ -591,7 +617,12 @@ begin
     frmSetting.tcp := Self.GetTCPConnection(dv.Ip, 24);
     if frmSetting.tcp <> nil then
     begin
-      frmSetting.tcp.Memo := Memo1;
+      frmSetting.tcp.memo := Memo1;
+      frmSetting.TabSheet2.tabvisible := true;
+      frmSetting.TabSheet3.tabvisible := true;
+      frmSetting.TabSheet4.tabvisible := true;
+      frmSetting.TabSheet5.tabvisible := true;
+      frmSetting.TabSheet8.tabvisible := true;
       frmSetting.showmodal;
     end;
   end;
@@ -610,6 +641,38 @@ begin
   ID := ListItem.subitems.Strings[1];
   Edit1.text := ID;
   ComboBox3.text := ListItem.subitems.Strings[2];
+  stx := DeviceList.get(nanme);
+end;
+
+procedure TSplitViewForm.ListView2DblClick(Sender: TObject);
+var
+  ListItem: TListItem;
+  nanme: String;
+  ID: String;
+  dv: TVDevice;
+begin
+  ListItem := ListView2.Selected;
+  if ListItem = nil then
+    Exit;
+  nanme := ListItem.subitems.Strings[0];
+  ID := ListItem.subitems.Strings[1];
+  Edit2.text := ID;
+  dv := DeviceList.get(nanme);
+  if (dv <> nil) then
+  begin
+    frmSetting.dv := dv;
+    frmSetting.tcp := Self.GetTCPConnection(dv.Ip, 24);
+    if frmSetting.tcp <> nil then
+    begin
+      frmSetting.tcp.memo := Memo1;
+      frmSetting.TabSheet2.tabvisible := false;
+      frmSetting.TabSheet3.tabvisible := false;
+      frmSetting.TabSheet4.tabvisible := false;
+      frmSetting.TabSheet5.tabvisible := false;
+      frmSetting.TabSheet8.tabvisible := true;
+      frmSetting.showmodal;
+    end;
+  end;
 end;
 
 procedure TSplitViewForm.Log(const Msg: string);

@@ -36,9 +36,10 @@ object SplitViewForm: TSplitViewForm
       Height = 609
       Align = alClient
       Ctl3D = False
-      PageIndex = 1
       ParentCtl3D = False
       TabOrder = 0
+      ExplicitLeft = -1
+      ExplicitTop = -6
       object TPage
         Left = 0
         Top = 0
@@ -94,11 +95,12 @@ object SplitViewForm: TSplitViewForm
           end
           object Button1: TButton
             Left = 3
-            Top = 73
+            Top = 70
             Width = 239
             Height = 40
             Caption = #36830#25509#21305#37197#33410#28857
             TabOrder = 2
+            OnClick = Button1Click
           end
           object Button4: TButton
             Left = 123
@@ -127,6 +129,15 @@ object SplitViewForm: TSplitViewForm
             TabOrder = 5
             OnClick = Button8Click
           end
+        end
+        object Button10: TButton
+          Left = 112
+          Top = 472
+          Width = 75
+          Height = 25
+          Caption = 'Button10'
+          TabOrder = 2
+          OnClick = Button10Click
         end
       end
       object TPage
@@ -498,6 +509,7 @@ object SplitViewForm: TSplitViewForm
             ViewStyle = vsReport
             OnClick = ListView1Click
             OnDblClick = ListView1DblClick
+            ExplicitTop = 2
           end
           object ListView2: TListView
             AlignWithMargins = True
@@ -567,6 +579,8 @@ object SplitViewForm: TSplitViewForm
             TabOrder = 1
             ViewStyle = vsReport
             OnClick = ListView2Click
+            OnDblClick = ListView2DblClick
+            ExplicitTop = 2
           end
         end
       end
@@ -612,6 +626,7 @@ object SplitViewForm: TSplitViewForm
     OnDisconnected = IdTCPClient1Disconnected
     OnConnected = IdTCPClient1Connected
     ConnectTimeout = 3000
+    IPVersion = Id_IPv4
     Port = 0
     ReadTimeout = -1
     Left = 216

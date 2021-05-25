@@ -50,7 +50,7 @@ function GetCFGDir(DirName: String): String;
 Function GetUpperLevel(KLineDateMode: TKLineDateMode): TKLineDateMode;
 Function GetLowerLevel(KLineDateMode: TKLineDateMode): TKLineDateMode;
 procedure GetBuildInfo(FileName: string; var vs: string);
-function BytestoHexString(ABytes: TBytes; len: integer): AnsiString;
+function BytestoHexString(ABytes: array of Byte; len: integer): AnsiString;
 function IdBytesToAnsiString(ParamBytes: TIdBytes): AnsiString;
 
 function HexStrToBuff(hs: string): TIdBytes;
@@ -100,7 +100,7 @@ begin
   Result := s;
 end;
 
-function BytestoHexString(ABytes: TBytes; len: integer): AnsiString;
+function BytestoHexString(ABytes: array of Byte; len: integer): AnsiString;
 begin
   SetLength(Result, len * 2);
   BinToHex(@ABytes[0], PAnsiChar(Result), len);
