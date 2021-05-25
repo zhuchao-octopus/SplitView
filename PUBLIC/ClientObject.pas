@@ -32,13 +32,16 @@ uses
   GlobalFunctions;
 
 type
-  TWork = record
+  TWork = class
     Data: string;
     Id: Integer;
+  public
+
+    Constructor Create(Data: String; Id: Integer);
   end;
 
 type
-  TTCPWorkEent = procedure(const AData: String; id: Integer) of object;
+  TTCPWorkEent = procedure(const AData: String; Id: Integer) of object;
 
   TClientObject = class(TObject)
     Memo: TMemo;
@@ -52,22 +55,22 @@ type
     FSleepTime: Integer;
     FDataCallBack: TTCPWorkEent;
 
-    FDataStr: String;
-    FWorkID: Integer;
+    FWorkList: TStringlist;
     procedure SetuiLock(const Value: TCriticalSection);
     procedure SetSleepTime(const Value: Integer);
     procedure Log(msg: String); overload;
-    procedure Log(sl: TStringList); overload;
+    procedure Log(sl: TStringlist); overload;
 
     procedure IdUDPRead(AThread: TIdUDPListenerThread; const AData: TIdBytes;
       ABinding: TIdSocketHandle);
     procedure InitUDP(lip: String; lPort: Integer);
+    procedure DoWork(w: TWork);
   public
     procedure AssignTCPClient(AClient: TIdTCPClient);
     procedure AssignUDP(AClient: TIdUDPServer; lip: String; lPort: Integer);
     procedure OpenTCP;
-    procedure StartWork();
-    Procedure SetWork(data: String; id: Integer);
+
+    Procedure SetWork(Data: String; Id: Integer);
     Constructor Create(Free: Boolean);
     destructor Destroy; override;
     property SleepTime: Integer read FSleepTime write SetSleepTime;
@@ -85,10 +88,15 @@ implementation
 uses Unit200, VDevice;
 { TClientThread }
 
-procedure TClientObject.SetWork(data: string; id: Integer);
+Constructor TWork.Create(Data: String; Id: Integer);
 begin
-  FDataStr := data;
-  FWorkID := id;
+  Self.Data := Data;
+  Self.Id := Id;
+end;
+
+procedure TClientObject.SetWork(Data: string; Id: Integer);
+begin
+  FWorkList.AddObject(inttostr(Id), TWork.Create(Data, Id));
 end;
 
 procedure TClientObject.SetCallBack(DataCallBack: TTCPWorkEent);
@@ -160,6 +168,7 @@ Constructor TClientObject.Create(Free: Boolean);
 begin
   FFree := Free;
   Memo := nil;
+  FWorkList := TStringlist.Create;
   // inherited;
 end;
 
@@ -180,8 +189,8 @@ end;
 
 procedure TClientObject.OpenTCP; // TCP 同步柱塞式
 var
-  // i: Integer;
-  str: String;
+  w: TWork;
+  i: Integer;
 begin
   if FTCPClient.Connected then
     Exit;
@@ -190,54 +199,37 @@ begin
     FTCPClient.Connect;
   end;
 
-  { while not FFree do
+  while not FFree do
+  begin
+    for i := 0 to FWorkList.count - 1 do
     begin
-    try
-    str := FTCPClient.IOHandler.ReadLn();
-    Except
-    Exit;
-    end;
-    if (str <> '') then
-    begin
-    if (Memo <> nil) then
-    begin
-    Log(GetSystemDateTimeStr() + ' TCP数据来自：' + FTCPClient.Socket.Host + ':'
-    + IntToStr(FTCPClient.Socket.Port));
 
-    Log(str);
     end;
-
-    if Assigned(FDataCallBack) then
-    FDataCallBack(str);
-
-    MQueue.SendMessage(TMyMessage.Create(200, 0, 0, str));
-    end;
-    end; }
+  end;
 end;
 
-procedure TClientObject.StartWork();
+procedure TClientObject.DoWork(w: TWork);
 var
   str: String;
 begin
-  FTCPClient.IOHandler.WriteLn(FDataStr);
+  FTCPClient.IOHandler.WriteLn(w.Data);
   str := FTCPClient.IOHandler.ReadLn();
   if (str <> '') then
   begin
     if (Memo <> nil) then
     begin
       Log(GetSystemDateTimeStr() + ' TCP数据来自：' + FTCPClient.Socket.Host + ':' +
-        IntToStr(FTCPClient.Socket.Port));
+        inttostr(FTCPClient.Socket.Port));
 
       Log(str);
     end;
 
     if Assigned(FDataCallBack) then
-      FDataCallBack(str, FWorkID);
+      FDataCallBack(str, w.Id);
 
-    MQueue.SendMessage(TMyMessage.Create(200, 0, FWorkID, str));
+    MQueue.SendMessage(TMyMessage.Create(200, 0, w.Id, str));
   end;
-  FWorkID := 0;
-  FDataStr := '';
+
 end;
 
 // 一个binding一个线程
@@ -246,12 +238,12 @@ end;
 procedure TClientObject.IdUDPRead(AThread: TIdUDPListenerThread;
   const AData: TIdBytes; ABinding: TIdSocketHandle);
 var
-  sl: TStringList;
+  sl: TStringlist;
   dv: TVDevice;
 begin
-  sl := TStringList.Create;
+  sl := TStringlist.Create;
   Log(GetSystemDateTimeStr() + ' UDP数据来自：' + ABinding.PeerIP + ':' +
-    IntToStr(ABinding.PeerPort) + ':' + IntToStr(AThread.ThreadID));
+    inttostr(ABinding.PeerPort) + ':' + inttostr(AThread.ThreadID));
 
   FormatBuff(AData, sl, 16);
   Log(sl);
@@ -262,7 +254,7 @@ begin
   // 解析鲲鹏节点设备
   if Length(AData) >= 292 then
   begin
-    dv := TVDevice.Create(ABinding.PeerIP, IntToStr(ABinding.PeerPort), AData);
+    dv := TVDevice.Create(ABinding.PeerIP, inttostr(ABinding.PeerPort), AData);
     if dv.Parser_Check_KP() then
     begin
       MQueue.SendMessage(TMyMessage.Create(100, dv)); // 通知UI跟新设备
@@ -283,8 +275,8 @@ begin
   str1 := FormatHexStr(trim(hs), count);
   SetLength(buf, count);
   str2 := HexStrToBuff(str1, buf, count);
-  Log('UDP发送IP:' + FUDP.Bindings[0].Ip + ':' + IntToStr(FUDP.Bindings[0].Port) +
-    ' --> ' + Ip + ':' + IntToStr(Port));
+  Log('UDP发送IP:' + FUDP.Bindings[0].Ip + ':' + inttostr(FUDP.Bindings[0].Port) +
+    ' --> ' + Ip + ':' + inttostr(Port));
   Log(str2);
   try
     FUDP.SendBuffer(Ip, Port, buf);
@@ -306,8 +298,8 @@ begin
   SetLength(buf, count);
   str2 := HexStrToBuff(str1, buf, count);
   Log('TCP发送IP:' + FTCPClient.Socket.Binding.Ip + ':' +
-    IntToStr(FTCPClient.Socket.Binding.Port) + ' --> ' + FTCPClient.Host + ':' +
-    IntToStr(FTCPClient.Port));
+    inttostr(FTCPClient.Socket.Binding.Port) + ' --> ' + FTCPClient.Host + ':' +
+    inttostr(FTCPClient.Port));
   Log(str2);
   try
     FTCPClient.IOHandler.Write(buf, count);
@@ -324,7 +316,7 @@ begin
   FTCPClient.IOHandler.WriteLn(str);
 end;
 
-procedure TClientObject.Log(sl: TStringList);
+procedure TClientObject.Log(sl: TStringlist);
 begin
   if (Memo = nil) then
     Exit;
