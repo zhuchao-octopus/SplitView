@@ -429,7 +429,8 @@ begin
         ':' + IntToStr(tcp.Client.Port));
       Log(Memo2.text);
       try
-        tcp.Client.IOHandler.WriteLn(Memo2.text);
+        //tcp.Client.IOHandler.WriteLn(Memo2.text);
+        tcp.SetWork(Memo2.text,0);
       Except
         on e: Exception do
         begin

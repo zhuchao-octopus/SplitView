@@ -54,8 +54,9 @@ type
     FuiLock: TCriticalSection;
     FSleepTime: Integer;
     FDataCallBack: TTCPWorkEent;
+    cs: TCriticalSection;
 
-    FWorkList: TStringlist;
+    FWorkList: TList;
     procedure SetuiLock(const Value: TCriticalSection);
     procedure SetSleepTime(const Value: Integer);
     procedure Log(msg: String); overload;
@@ -81,6 +82,7 @@ type
     procedure TCPSendHexStr(hs: String);
     procedure TCPSendStr(str: String);
     procedure SetCallBack(DataCallBack: TTCPWorkEent);
+    function GetWork(): TWork;
   end;
 
 implementation
@@ -96,7 +98,25 @@ end;
 
 procedure TClientObject.SetWork(Data: string; Id: Integer);
 begin
-  FWorkList.AddObject(inttostr(Id), TWork.Create(Data, Id));
+  cs.Enter;
+  FWorkList.Add(TWork.Create(Data, Id));
+  cs.Leave;
+end;
+
+function TClientObject.GetWork(): TWork;
+begin
+  Result := nil;
+  try
+    if FWorkList.Count > 0 then
+    begin
+      cs.Enter;
+      Result := FWorkList.First;
+      FWorkList.Remove(Result);
+      cs.Leave;
+    end;
+  finally
+  end;
+
 end;
 
 procedure TClientObject.SetCallBack(DataCallBack: TTCPWorkEent);
@@ -127,10 +147,10 @@ begin
     FUDP.BroadcastEnabled := False;
     FUDP.Bindings.Clear;
     FUDP.Bindings.Add;
-    FUDP.Bindings[FUDP.Bindings.count - 1].Ip := lip; // 本地IP
-    FUDP.Bindings[FUDP.Bindings.count - 1].Port := lPort;
+    FUDP.Bindings[FUDP.Bindings.Count - 1].Ip := lip; // 本地IP
+    FUDP.Bindings[FUDP.Bindings.Count - 1].Port := lPort;
     // 本地IP
-    FUDP.Bindings[FUDP.Bindings.count - 1].IPVersion := Id_IPv4;
+    FUDP.Bindings[FUDP.Bindings.Count - 1].IPVersion := Id_IPv4;
     FUDP.DefaultPort := lPort;
     FUDP.BroadcastEnabled := true;
     FUDP.Active := true;
@@ -168,7 +188,8 @@ Constructor TClientObject.Create(Free: Boolean);
 begin
   FFree := Free;
   Memo := nil;
-  FWorkList := TStringlist.Create;
+  FWorkList := TList.Create;
+  cs := TCriticalSection.Create;
   // inherited;
 end;
 
@@ -184,6 +205,7 @@ begin
 
   if FUDP <> nil then
     FUDP.Free;
+  cs.Free;
   inherited;
 end;
 
@@ -201,10 +223,11 @@ begin
 
   while not FFree do
   begin
-    for i := 0 to FWorkList.count - 1 do
+    w := GetWork();
+    if w <> nil then
     begin
-       w:= TWork(FWorkList.Objects[i]);
-       DoWork(w);
+      DoWork(w);
+      w.Free;
     end;
   end;
 end;
@@ -271,11 +294,11 @@ procedure TClientObject.UDPSendHexStr(Ip: String; Port: Integer; hs: String);
 var
   str1, str2: String;
   buf: TIdBytes;
-  count: Integer;
+  Count: Integer;
 begin
-  str1 := FormatHexStr(trim(hs), count);
-  SetLength(buf, count);
-  str2 := HexStrToBuff(str1, buf, count);
+  str1 := FormatHexStr(trim(hs), Count);
+  SetLength(buf, Count);
+  str2 := HexStrToBuff(str1, buf, Count);
   Log('UDP发送IP:' + FUDP.Bindings[0].Ip + ':' + inttostr(FUDP.Bindings[0].Port) +
     ' --> ' + Ip + ':' + inttostr(Port));
   Log(str2);
@@ -293,17 +316,17 @@ procedure TClientObject.TCPSendHexStr(hs: string);
 var
   str1, str2: String;
   buf: TIdBytes;
-  count: Integer;
+  Count: Integer;
 begin
-  str1 := FormatHexStr(trim(hs), count);
-  SetLength(buf, count);
-  str2 := HexStrToBuff(str1, buf, count);
+  str1 := FormatHexStr(trim(hs), Count);
+  SetLength(buf, Count);
+  str2 := HexStrToBuff(str1, buf, Count);
   Log('TCP发送IP:' + FTCPClient.Socket.Binding.Ip + ':' +
     inttostr(FTCPClient.Socket.Binding.Port) + ' --> ' + FTCPClient.Host + ':' +
     inttostr(FTCPClient.Port));
   Log(str2);
   try
-    FTCPClient.IOHandler.Write(buf, count);
+    FTCPClient.IOHandler.Write(buf, Count);
   Except
     on e: Exception do
     begin
