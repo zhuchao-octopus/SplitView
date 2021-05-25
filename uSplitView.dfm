@@ -414,6 +414,8 @@ object SplitViewForm: TSplitViewForm
             Top = 4
             Width = 10
             Height = 552
+            Color = clBtnFace
+            ParentColor = False
           end
           object ListView1: TListView
             AlignWithMargins = True
@@ -473,6 +475,18 @@ object SplitViewForm: TSplitViewForm
                 Width = -1
                 WidthType = (
                   -1)
+              end
+              item
+                Caption = #38899#39057'TX ID'
+                Width = -2
+                WidthType = (
+                  -2)
+              end
+              item
+                Caption = #35270#39057'TX ID'
+                Width = -2
+                WidthType = (
+                  -2)
               end>
             FlatScrollBars = True
             GridLines = True
@@ -483,6 +497,7 @@ object SplitViewForm: TSplitViewForm
             TabOrder = 0
             ViewStyle = vsReport
             OnClick = ListView1Click
+            OnDblClick = ListView1DblClick
           end
           object ListView2: TListView
             AlignWithMargins = True
@@ -560,16 +575,22 @@ object SplitViewForm: TSplitViewForm
       Left = 0
       Top = 0
       Caption = '1'
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object TPage
       Left = 0
       Top = 0
       Caption = '2'
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object TPage
       Left = 0
       Top = 0
       Caption = '3'
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
   end
   object StatusBar1: TStatusBar

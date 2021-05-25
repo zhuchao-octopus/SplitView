@@ -1,16 +1,5 @@
 // ---------------------------------------------------------------------------
 
-
-
-
-
-
-
-
-
-
-
-
 // This software is Copyright (c) 2015 Embarcadero Technologies, Inc.
 // You may only use this software if you are an authorized licensee
 // of an Embarcadero developer tools product.
@@ -111,7 +100,8 @@ type
     procedure FormResize(Sender: TObject);
     procedure ListView2Click(Sender: TObject);
     procedure ListView1Click(Sender: TObject);
-    procedure TabSet1Change(Sender: TObject; NewTab: Integer; var AllowChange: Boolean);
+    procedure TabSet1Change(Sender: TObject; NewTab: Integer;
+      var AllowChange: Boolean);
     procedure Button4Click(Sender: TObject);
     procedure Button5Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
@@ -121,7 +111,8 @@ type
     procedure Button8Click(Sender: TObject);
     procedure IdTCPClient1Disconnected(Sender: TObject);
     procedure IdTCPClient1Connected(Sender: TObject);
-    procedure IdTCPClient1Status(ASender: TObject; const AStatus: TIdStatus; const AStatusText: string);
+    procedure IdTCPClient1Status(ASender: TObject; const AStatus: TIdStatus;
+      const AStatusText: string);
     procedure Edit7KeyPress(Sender: TObject; var Key: Char);
     procedure Edit6KeyPress(Sender: TObject; var Key: Char);
     procedure Edit3KeyPress(Sender: TObject; var Key: Char);
@@ -134,6 +125,7 @@ type
     procedure Button9Click(Sender: TObject);
     procedure MessageTimerTimer(Sender: TObject);
     procedure Timer3Timer(Sender: TObject);
+    procedure ListView1DblClick(Sender: TObject);
   private
     procedure Log(const Msg: string);
     procedure SynchroPage(ItemIndex: Integer);
@@ -156,7 +148,8 @@ var
 implementation
 
 uses
-  Vcl.Themes, GlobalConst, GlobalFunctions, Unit200, Ip, MyMessageQueue,trash;
+  Vcl.Themes, GlobalConst, GlobalFunctions, Unit200, Ip, MyMessageQueue, trash,
+  Setting;
 
 {$R *.dfm}
 
@@ -176,7 +169,8 @@ begin
   end;
 end;
 
-function TSplitViewForm.GetUDPConnection(Ip: String; Port: Integer): TClientObject;
+function TSplitViewForm.GetUDPConnection(Ip: String; Port: Integer)
+  : TClientObject;
 var
   ClientObject: TClientObject;
 begin
@@ -199,7 +193,8 @@ begin
   Result := ClientObject;
 end;
 
-function TSplitViewForm.GetTCPConnection(Ip: String; Port: Integer): TClientObject;
+function TSplitViewForm.GetTCPConnection(Ip: String; Port: Integer)
+  : TClientObject;
 var
   ClientObject: TClientObject;
 begin
@@ -207,7 +202,8 @@ begin
   Result := TClientObject(DataEngineManager.get(Ip + ':' + IntToStr(Port)));
   if Result <> nil then
   begin
-    DataEngineManager.DoIt(ClientObject.Execute);
+   if not Result.Client.connected then
+      DataEngineManager.DoIt(ClientObject.OpenTCP);
     Exit;
   end;
 
@@ -218,7 +214,7 @@ begin
     ClientObject.AssignTCPClient(IdTCPClient1);
     ClientObject.Client.tag := Integer(Pointer(TClientObject(ClientObject)));
     DataEngineManager.Add(Ip + ':' + IntToStr(Port), ClientObject);
-    DataEngineManager.DoIt(ClientObject.Execute);
+    DataEngineManager.DoIt(ClientObject.OpenTCP);
   Except
     on e: Exception do
     begin
@@ -243,7 +239,8 @@ var
 begin
   for StyleName in TStyleManager.StyleNames do
     cbxVclStyles.Items.Add(StyleName);
-  cbxVclStyles.ItemIndex := cbxVclStyles.Items.IndexOf(TStyleManager.ActiveStyle.Name);
+  cbxVclStyles.ItemIndex := cbxVclStyles.Items.IndexOf
+    (TStyleManager.ActiveStyle.Name);
 
   GetBuildInfo(Application.ExeName, S);
 
@@ -259,7 +256,6 @@ begin
   ComboBox1.Items.AddStrings(LocalIPList);
   if LocalIPList.count >= 0 then
     ComboBox1.ItemIndex := 0;
-
 
   /// ///////////////////////////////////////////////////////////////////////////
   // DataEngineManager.doIt(initUI);
@@ -290,7 +286,8 @@ begin
   St(1, 'TCP 连接断开' + tcp.Client.Host + ':' + IntToStr(tcp.Client.Port));
 end;
 
-procedure TSplitViewForm.IdTCPClient1Status(ASender: TObject; const AStatus: TIdStatus; const AStatusText: string);
+procedure TSplitViewForm.IdTCPClient1Status(ASender: TObject;
+  const AStatus: TIdStatus; const AStatusText: string);
 begin
   Log('TCP Status:' + AStatusText);
 end;
@@ -360,13 +357,16 @@ begin
         ListItem.subitems.Add(dv.MAC);
         ListItem.subitems.Add(dv.typee);
         ListItem.subitems.Add(dv.St);
+        ListItem.subitems.Add(dv.TxaID);
+        ListItem.subitems.Add(dv.TxvID);
         dv.b := true;
       end;
     end;
   end;
 
 Lend:
-  StatusBar1.Panels[0].text := 'Rx : ' + IntToStr(DeviceList.DevicesRx.count) + '    Tx : ' + IntToStr(DeviceList.DevicesTx.count)
+  StatusBar1.Panels[0].text := 'Rx : ' + IntToStr(DeviceList.DevicesRx.count) +
+    '    Tx : ' + IntToStr(DeviceList.DevicesTx.count)
 end;
 
 procedure TSplitViewForm.UpdateNetDeviceKP(Cmd: String);
@@ -393,7 +393,7 @@ var
 begin
   if ComboBox2.ItemIndex <= 1 then
   begin
-    //InitUDP(trim(ComboBox1.text), StrToInt(trim(Edit7.text)));
+    // InitUDP(trim(ComboBox1.text), StrToInt(trim(Edit7.text)));
   end;
   if ComboBox2.ItemIndex > 1 then
   begin
@@ -424,7 +424,9 @@ begin
 
     if tcp.Client.connected then
     begin
-      Log('TCP发送IP:' + tcp.Client.Socket.Binding.Ip + ':' + IntToStr(tcp.Client.Socket.Binding.Port) + ' --> ' + tcp.Client.Host + ':' + IntToStr(tcp.Client.Port));
+      Log('TCP发送IP:' + tcp.Client.Socket.Binding.Ip + ':' +
+        IntToStr(tcp.Client.Socket.Binding.Port) + ' --> ' + tcp.Client.Host +
+        ':' + IntToStr(tcp.Client.Port));
       Log(Memo2.text);
       try
         tcp.Client.IOHandler.WriteLn(Memo2.text);
@@ -516,14 +518,15 @@ begin
   Notebook1.PageIndex := ItemIndex;
 end;
 
-procedure TSplitViewForm.TabSet1Change(Sender: TObject; NewTab: Integer; var AllowChange: Boolean);
+procedure TSplitViewForm.TabSet1Change(Sender: TObject; NewTab: Integer;
+  var AllowChange: Boolean);
 begin
   Notebook2.PageIndex := NewTab;
 end;
 
 procedure TSplitViewForm.Timer1Timer(Sender: TObject);
 begin
-  if DataEngineManager.Has(trim(ComboBox3.text) + trim(Edit5.text)) then
+  if DataEngineManager.Has(trim(ComboBox3.text) +':'+ trim(Edit5.text)) then
     Exit;
   St(1, '没有TCP连接');
 end;
@@ -536,11 +539,11 @@ begin
   Msg := MQueue.get();
   if Msg <> nil then
   begin
-    if Msg.ID = 200 then //TCP
+    if Msg.ID = 200 then // TCP
     begin
       Memo1.Lines.Add(Msg.Msg);
     end;
-    if Msg.ID = 100 then //UDP
+    if Msg.ID = 100 then // UDP
     begin
       UpdateLocalDevices(TVDevice(Msg.obj));
     end;
@@ -569,10 +572,33 @@ begin
   ListItem := ListView1.Selected;
   if ListItem = nil then
     Exit;
-  nanme := ListItem.subitems.Strings[1];
+  nanme := ListItem.subitems.Strings[0];
   ID := ListItem.subitems.Strings[1];
   Edit2.text := ID;
   ComboBox3.text := ListItem.subitems.Strings[2];
+end;
+
+procedure TSplitViewForm.ListView1DblClick(Sender: TObject);
+var
+  ListItem: TListItem;
+  nanme: String;
+  ID: String;
+  dv: TVDevice;
+begin
+  ListItem := ListView1.Selected;
+  if ListItem = nil then
+    Exit;
+  nanme := ListItem.subitems.Strings[0];
+  ID := ListItem.subitems.Strings[1];
+  Edit2.text := ID;
+  dv := DeviceList.get(nanme);
+  if (dv <> nil) then
+  begin
+    frmSetting.dv := dv;
+    frmSetting.tcp:=Self.GetTCPConnection(dv.ip,24);
+    if frmSetting.tcp <> nil then
+    frmSetting.showmodal;
+  end;
 end;
 
 procedure TSplitViewForm.ListView2Click(Sender: TObject);

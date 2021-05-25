@@ -21,7 +21,8 @@ uses
   Unit200 in 'PUBLIC\Unit200.pas',
   ClientObject in 'PUBLIC\ClientObject.pas',
   Trash in 'PUBLIC\Trash.pas',
-  Setting in 'Setting.pas' {frmSetting};
+  Setting in 'Setting.pas' {frmSetting},
+  ObjManager in 'ObjManager.pas';
 
 {$R *.res}
 

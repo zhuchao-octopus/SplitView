@@ -15,16 +15,17 @@ uses
 type
   TVDeviceGroup = Class
     Gname: String;
-    Tag:Integer;
+    Tag: Integer;
     DevicesTx: TStringList;
     DevicesRx: TStringList;
     FBuff: array of Byte;
   private
   protected
   public
-    constructor Create(name: string;tag:Integer);
+    constructor Create(name: string; Tag: Integer);
     destructor Destroy;
     procedure Add(Dname: String; Dv: TVDevice);
+    function get(Dname: String): TVDevice;
     procedure Clear();
     procedure ParserUpdate_KP();
   end;
@@ -36,14 +37,14 @@ implementation
 
 { TVDeviceGroup }
 
-constructor TVDeviceGroup.Create(name: string;tag:Integer);
+constructor TVDeviceGroup.Create(name: string; Tag: Integer);
 begin
   DevicesTx := TStringList.Create;
   DevicesTx.OwnsObjects := true;
   DevicesRx := TStringList.Create;
   DevicesRx.OwnsObjects := true;
   Gname := name;
-  Tag:=tag;
+  Tag := Tag;
 end;
 
 destructor TVDeviceGroup.Destroy;
@@ -80,6 +81,33 @@ begin
   end;
 end;
 
+function TVDeviceGroup.get(Dname: string): TVDevice;
+var
+  i, index: Integer;
+begin
+  Result := nil;
+  for i := 0 to DevicesRx.Count - 1 do
+  begin
+    index := DevicesRx.IndexOf(Dname);
+    if index >= 0 then
+    begin
+      Result := TVDevice(DevicesRx.Objects[index]);
+      break;
+    end;
+  end;
+  if Result <> nil then
+    Exit;
+  for i := 0 to DevicesTx.Count - 1 do
+  begin
+    index := DevicesTx.IndexOf(Dname);
+    if index >= 0 then
+    begin
+      Result := TVDevice(DevicesTx.Objects[index]);
+      break;
+    end;
+  end;
+end;
+
 procedure TVDeviceGroup.Clear();
 begin
   DevicesRx.Clear;
@@ -93,7 +121,7 @@ end;
 
 initialization
 
-DeviceList := TVDeviceGroup.Create('',24);
+DeviceList := TVDeviceGroup.Create('', 24);
 
 finalization
 
