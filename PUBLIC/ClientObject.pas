@@ -203,7 +203,8 @@ begin
   begin
     for i := 0 to FWorkList.count - 1 do
     begin
-
+       w:= TWork(FWorkList.Objects[i]);
+       DoWork(w);
     end;
   end;
 end;
