@@ -71,12 +71,16 @@ uses ObjManager, GlobalFunctions;
 {$R *.dfm}
 
 procedure TfrmSetting.Button1Click(Sender: TObject);
+var
+   str:String;
 begin
   if tcp.Client.Connected then
   begin
-    tcp.TCPSendStr('root' + #10#13);
-    tcp.TCPSendStr('astparam s MY_IP' + trim(Edit1.Text) + #10#13);
-    tcp.TCPSendStr('astparam save' + #10#13);
+    //e e_reconnect::4;astparam s reset_ch_on_boot n;astparam save
+    //tcp.TCPSendStr('astparam s MY_IP' + trim(Edit1.Text) + #10#13);
+    //tcp.TCPSendStr('astparam save' + #10#13);
+    str:='astparam s MY_IP ' + trim(Edit1.Text)+';astparam s reset_ch_on_boot y;astparam save';
+    tcp.SetWork(str,900);
   end;
 end;
 
@@ -100,12 +104,12 @@ end;
 
 procedure TfrmSetting.Button4Click(Sender: TObject);
 begin
-  { if tcp.Client.Connected then
-    begin
+  if tcp.Client.Connected then
+  begin
     tcp.SetCallBack(TCPReadData);
     tcp.SetWork('astparam g pullperm', 100);
-    end; }
-  TCPReadData('astparam g pullperm FFFFFFFFFFFFFFFFFFFFFFFF', -1);
+  end;
+  // TCPReadData('astparam g pullperm FFFFFFFFFFFFFFFFFFFFFFFF', -1);
 end;
 
 procedure TfrmSetting.Button5Click(Sender: TObject);
@@ -141,20 +145,20 @@ begin
   // tcp.SetCallBack(TCPReadData);
   if tcp <> nil then
   begin
-    tcp.SetWork('astparam s pushperm ' + str, 102);
-    tcp.SetWork('astparam save', 102);
+    tcp.SetWork('astparam s pushperm ' + str, 103);
+    tcp.SetWork('astparam save', 103);
   end;
 
 end;
 
 procedure TfrmSetting.Button7Click(Sender: TObject);
 begin
-  { if tcp.Client.Connected then
-    begin
+  if tcp.Client.Connected then
+  begin
     tcp.SetCallBack(TCPReadData);
-    tcp.SetWork('astparam g pullperm', 100);
-    end; }
-  TCPReadData('astparam g pushperm FFFFFFFFFFFFFFFFFFFFFFFF', -1);
+    tcp.SetWork('astparam g pushperm', 102);
+  end;
+  // TCPReadData('astparam g pushperm FFFFFFFFFFFFFFFFFFFFFFFF', -1);
 end;
 
 procedure TfrmSetting.Button8Click(Sender: TObject);
@@ -171,20 +175,20 @@ begin
   // tcp.SetCallBack(TCPReadData);
   if tcp <> nil then
   begin
-    tcp.SetWork('astparam s getperm ' + str, 103);
-    tcp.SetWork('astparam save', 103);
+    tcp.SetWork('astparam s getperm ' + str, 105);
+    tcp.SetWork('astparam save', 105);
   end;
 
 end;
 
 procedure TfrmSetting.Button9Click(Sender: TObject);
 begin
-{ if tcp.Client.Connected then
-    begin
+  if tcp.Client.Connected then
+  begin
     tcp.SetCallBack(TCPReadData);
-    tcp.SetWork('astparam g pullperm', 100);
-    end; }
-  TCPReadData('astparam g getperm FFFFFFFFFFFFFFFFFFFFFFFF', -1);
+    tcp.SetWork('astparam g getperm', 104);
+  end;
+  // TCPReadData('astparam g getperm FFFFFFFFFFFFFFFFFFFFFFFF', -1);
 end;
 
 procedure TfrmSetting.Edit1KeyPress(Sender: TObject; var Key: Char);
@@ -197,7 +201,7 @@ end;
 
 procedure TfrmSetting.GetZX(ListView: TListView; var buf: array of Byte; offset: Integer);
 var
-  i, j: Integer;
+  i: Integer;
   Item: TListItem;
   b: Byte;
   mask: Byte;
@@ -230,14 +234,18 @@ begin
   mask := $80;
   for i := 0 to 7 do
   begin
-    mask := mask shr i;
+
     Item := ListView.Items.Add;
     Item.Caption := inttostr(i + ZXId);
     Item.SubItems.Add('×øÏ¯' + Item.Caption);
+
     bb := b and mask;
     if bb = mask then
-      Item.Checked := true;
+      Item.Checked := true
+    else
+      Item.Checked:=false;
 
+     mask := mask shr 1;
   end;
 end;
 
@@ -248,20 +256,28 @@ var
   buf: array of Byte;
   bc, i: Integer;
 begin
+  if Length(data)<=2 then
+     Exit;
   SL := TStringList.Create;
   if (id = 100) or (id = 0) then // astparam g pullperm
   begin
   end;
   if (id = -1) then
   begin
-    if pos('astparam g pullperm', data) > 0 then
+    str:= StringReplace(data,'/','',[rfReplaceAll]);
+    str:= StringReplace(str,'#','',[rfReplaceAll]);
+    str:=trim(str);
+    if pos('astparam g pullperm', str) > 0 then
     begin
-      ExtractStrings([' '], [], PChar(data), SL);
+      ExtractStrings([' '], [], PChar(str), SL);
       str := LowerCase(SL[SL.Count - 1]);
       bc := Length(str) div 2;
+      //if bc<12 then Exit;
+
       SetLength(buf, bc);
 
-      HexToBin(PChar(str), @buf[0], bc);
+      i:=HexToBin(PChar(str), @buf[0], bc);
+      if i<>bc then exit;
 
       UpdateZX(Self.ListView1, buf[0], 0);
       UpdateZX(Self.ListView1, buf[1], 8);
@@ -280,9 +296,9 @@ begin
       // ShowMessage(SL.Text);
       SL.Free;
     end;
-     if pos('astparam g pushperm', data) > 0 then
+    if pos('astparam g pushperm', str) > 0 then
     begin
-      ExtractStrings([' '], [], PChar(data), SL);
+      ExtractStrings([' '], [], PChar(str), SL);
       str := LowerCase(SL[SL.Count - 1]);
       bc := Length(str) div 2;
       SetLength(buf, bc);
@@ -307,9 +323,9 @@ begin
       SL.Free;
     end;
 
-     if pos('astparam g getperm', data) > 0 then
+    if pos('astparam g getperm', str) > 0 then
     begin
-      ExtractStrings([' '], [], PChar(data), SL);
+      ExtractStrings([' '], [], PChar(str), SL);
       str := LowerCase(SL[SL.Count - 1]);
       bc := Length(str) div 2;
       SetLength(buf, bc);

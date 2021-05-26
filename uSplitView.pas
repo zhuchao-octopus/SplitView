@@ -52,7 +52,6 @@ type
     ListView2: TListView;
     IdTCPClient1: TIdTCPClient;
     Notebook2: TNotebook;
-    cbxVclStyles: TComboBox;
     GroupBox1: TGroupBox;
     Label1: TLabel;
     Label2: TLabel;
@@ -90,7 +89,10 @@ type
     Panel2: TPanel;
     Splitter2: TSplitter;
     Timer3: TTimer;
-    Button10: TButton;
+    pnlToolbar: TPanel;
+    imgMenu: TImage;
+    lblTitle: TLabel;
+    cbxVclStyles: TComboBox;
 
     procedure FormCreate(Sender: TObject);
     procedure cbxVclStylesChange(Sender: TObject);
@@ -127,9 +129,9 @@ type
     procedure MessageTimerTimer(Sender: TObject);
     procedure Timer3Timer(Sender: TObject);
     procedure ListView1DblClick(Sender: TObject);
-    procedure Button10Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure ListView2DblClick(Sender: TObject);
+    procedure imgMenuClick(Sender: TObject);
   private
     procedure Log(const Msg: string);
     procedure SynchroPage(ItemIndex: Integer);
@@ -202,12 +204,14 @@ function TSplitViewForm.GetTCPConnection(Ip: String; Port: Integer): TClientObje
 var
   ClientObject: TClientObject;
 begin
-
+  ClientObject:=nil;
   Result := TClientObject(DataEngineManager.get(Ip + ':' + IntToStr(Port)));
   if Result <> nil then
   begin
     if not Result.Client.connected then
-      DataEngineManager.DoIt(ClientObject.OpenTCP);
+      DataEngineManager.DoIt(ClientObject.OpenTCP)
+    else
+      St(1, 'TCP -->' + Result.Client.Host+':'+ InttoStr(Result.Client.Port));
     Exit;
   end;
 
@@ -232,8 +236,8 @@ end;
 
 procedure TSplitViewForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  if IdTCPClient1.connected then
-    IdTCPClient1.Disconnect;
+  //if IdTCPClient1.connected then
+  //  IdTCPClient1.Disconnect;
 end;
 
 procedure TSplitViewForm.FormCreate(Sender: TObject);
@@ -267,7 +271,7 @@ end;
 
 procedure TSplitViewForm.FormResize(Sender: TObject);
 begin
-  ListView1.width := Panel1.width div 2;
+  ListView1.width := SplitViewForm.width div 2;
 end;
 
 procedure TSplitViewForm.IdTCPClient1Connected(Sender: TObject);
@@ -292,6 +296,14 @@ end;
 procedure TSplitViewForm.IdTCPClient1Status(ASender: TObject; const AStatus: TIdStatus; const AStatusText: string);
 begin
   Log('TCP Status:' + AStatusText);
+end;
+
+procedure TSplitViewForm.imgMenuClick(Sender: TObject);
+begin
+//  if sv.opened then
+//     sv.Close
+//  else
+//     sv.open;
 end;
 
 procedure TSplitViewForm.UpdateLocalDevices(dv: TVDevice);
@@ -402,22 +414,33 @@ begin
   end;
 end;
 
-procedure TSplitViewForm.Button10Click(Sender: TObject);
-begin
-  frmSetting.SHOW;
-end;
-
 procedure TSplitViewForm.Button1Click(Sender: TObject);
 var
   tcp: TClientObject;
   // txid:Integer;
+  t:Integer;
+  str:String;
 begin
+  if srx = nil then Exit;
+  if stx = nil then Exit;
+  
+  t:=strtoint(edit1.text);
 
-  tcp := GetTCPConnection(trim(srx.Ip), StrToInt(trim(srx.Port)));
-  if tcp <> nil then
+  tcp := GetTCPConnection(trim(srx.Ip), 24);
+  if tcp = nil then
   begin
-    tcp.SetWork('e e_reconnec ' + stx.ID, 200);
+    Showmessage('没有建立有效的TCP连接。');
   end;
+  if tcp.Client.connected then
+  begin
+    tcp.Memo:=Memo1;
+    tcp.SetCallBack(nil);
+
+    str:='e e_reconnect::'+IntToStr(t)+';astparam s reset_ch_on_boot n;astparam save';
+    tcp.SetWork(str,900);
+  end
+  else
+    Showmessage('TCP 连接不成功。');
 end;
 
 procedure TSplitViewForm.Button2Click(Sender: TObject);
@@ -546,7 +569,7 @@ procedure TSplitViewForm.Timer1Timer(Sender: TObject);
 begin
   if DataEngineManager.Has(trim(ComboBox3.text) + ':' + trim(Edit5.text)) then
     Exit;
-  St(1, '没有TCP连接');
+ // St(1, '');
 end;
 
 procedure TSplitViewForm.MessageTimerTimer(Sender: TObject);
@@ -637,7 +660,7 @@ begin
   ListItem := ListView2.Selected;
   if ListItem = nil then
     Exit;
-  nanme := ListItem.subitems.Strings[1];
+  nanme := ListItem.subitems.Strings[0];
   ID := ListItem.subitems.Strings[1];
   Edit1.text := ID;
   ComboBox3.text := ListItem.subitems.Strings[2];
@@ -677,11 +700,15 @@ end;
 
 procedure TSplitViewForm.Log(const Msg: string);
 begin
-  Memo1.Lines.Add(Msg);
+  if memo1<>nil then
+    Memo1.Lines.Add(Msg);
 end;
 
 procedure TSplitViewForm.St(slot: Integer; Msg: String);
 begin
+  if StatusBar1=nil then Exit;
+  if Timer1=nil then exit;
+  
   Timer1.Enabled := False;
   StatusBar1.Panels[slot].text := Msg;
   Timer1.Enabled := true;

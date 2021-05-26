@@ -126,7 +126,7 @@ begin
   pb := @FBuff[8];
   Self.St := ByteToWideString2(pb, 32);
   pb := @FBuff[40];
-  Self.Name := ByteToWideString2(pb, 20);
+  Self.Name := Trim(ByteToWideString2(pb, 20));
   s := '';
   for i := 1 to Length(Self.Name) - 1 do
   begin
@@ -136,6 +136,26 @@ begin
     end;
   end;
   Self.Name := s;
+  for i := Length(Self.Name) - 1 downto 1 do
+  begin
+    if (Self.Name[i] >= '0') and (Self.Name[i] <= '9') then
+    begin
+     break;
+    end;
+  end;
+
+  if i < (Length(Self.Name) - 1) then
+    Self.Name := copy(Name,1,i+1);
+
+
+  {for i := Length(Self.Name) - 1 downto 1 do
+  begin
+    if (Self.Name[i] < '0') and (Self.Name[i] > '9') then
+    begin
+      break;
+    end;
+  end;}
+
   Self.ID := RightStr(Self.Name, 4);
   s := '';
   for i := 1 to Length(Self.ID) do
@@ -149,8 +169,10 @@ begin
 
   pb := @FBuff[259];
   Self.TxaID := ByteToWideString2(pb, 5);
+
   pb := @FBuff[269];
-  Self.TxaID := ByteToWideString2(pb, 5);
+  Self.TxvID := ByteToWideString2(pb, 5);
+
   pb := @FBuff[279];
   s := ByteToWideString2(pb, 13);
   Self.MAC := '';

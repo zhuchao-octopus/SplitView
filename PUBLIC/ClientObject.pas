@@ -97,8 +97,8 @@ end;
 
 procedure TClientObject.SetWork(Data: string; Id: Integer);
 begin
-  if FWorkList.Count > 0 then // 事务阻塞模式
-    Exit;
+  // if FWorkList.Count > 0 then // 事务阻塞模式
+  // Exit;
   cs.Enter;
   FWorkList.Add(TWork.Create(Data, Id));
   cs.Leave;
@@ -196,6 +196,7 @@ end;
 
 destructor TClientObject.Destroy;
 begin
+ try
   FFree := true;
   if FTCPClient <> nil then
     if FTCPClient.Connected then
@@ -207,6 +208,9 @@ begin
   if FUDP <> nil then
     FUDP.Free;
   cs.Free;
+ finally
+
+ end;
   inherited;
 end;
 
@@ -214,7 +218,7 @@ procedure TClientObject.OpenTCP; // TCP 同步柱塞式
 var
   w, ww: TWork;
   i: Integer;
-  str,temp: String;
+  str, temp: String;
 begin
   if FTCPClient.Connected then // 一个连接一个线程
     Exit;
@@ -223,20 +227,29 @@ begin
     FTCPClient.Connect;
     FTCPClient.IOHandler.WriteLn('root' + #13#10);
   end;
-  ww := nil; temp:='';
+  ww := nil;
+  temp := '';
   while not FFree do
   begin
-    w := GetWork();
-    if w <> nil then
+    for i := 0 to FWorkList.Count - 1 do
     begin
-      DoWork(w);
-      ww := w;
+      w := GetWork();
+      if (w <> nil) and ((ww = nil) or (ww.Id = w.Id)) then
+      begin
+        DoWork(w);
+        FWorkList.Remove(w);//移除已经完成的任务
+        ww := w;
+      end
+      else
+      begin
+        break;
+      end;
     end;
 
     str := FTCPClient.IOHandler.ReadLn();
     if (str <> '') then
     begin
-      temp:=temp + str;
+      temp := temp +' '+ str;
       if Assigned(FDataCallBack) then
         if ww <> nil then
           FDataCallBack(str, ww.Id)
@@ -248,12 +261,13 @@ begin
     end
     else
     begin
-     if Assigned(FDataCallBack) then
-       FDataCallBack(temp, -1);
-      temp:='';
+      if Assigned(FDataCallBack) then
+        FDataCallBack(temp, -1);
+      temp := '';
       cs.Enter;
       FWorkList.Remove(ww);
       ww.Free;
+      ww:=nil;
       cs.Leave;
     end;
 
@@ -269,9 +283,6 @@ begin
   // str := FTCPClient.IOHandler.ReadLn();
   // end;
 
-
-
-
   // MQueue.SendMessage(TMyMessage.Create(200, 0, w.Id, str));
 
 end;
@@ -283,10 +294,11 @@ procedure TClientObject.IdUDPRead(AThread: TIdUDPListenerThread; const AData: TI
 var
   sl: TStringlist;
   dv: TVDevice;
+  //s:String;
 begin
   sl := TStringlist.Create;
   Log(GetSystemDateTimeStr() + ' UDP数据来自：' + ABinding.PeerIP + ':' + inttostr(ABinding.PeerPort) + ':' + inttostr(AThread.ThreadID));
-
+  //s:=BytesToString(AData,IndyTextEncoding_UTF8);
   FormatBuff(AData, sl, 16);
   Log(sl);
   sl.Clear;
