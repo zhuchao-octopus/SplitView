@@ -281,8 +281,6 @@ object SplitViewForm: TSplitViewForm
             Caption = #36830#25509
             TabOrder = 3
             OnClick = Button9Click
-            ExplicitLeft = 10
-            ExplicitTop = 110
           end
         end
         object Button6: TButton
@@ -336,7 +334,7 @@ object SplitViewForm: TSplitViewForm
           Lines.Strings = (
             'root'
             'e e_devfind_off')
-          ScrollBars = ssVertical
+          ScrollBars = ssBoth
           TabOrder = 6
         end
       end

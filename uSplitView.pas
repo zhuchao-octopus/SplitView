@@ -2,6 +2,7 @@
 
 
 
+
 // This software is Copyright (c) 2015 Embarcadero Technologies, Inc.
 // You may only use this software if you are an authorized licensee
 // of an Embarcadero developer tools product.
@@ -204,14 +205,14 @@ function TSplitViewForm.GetTCPConnection(Ip: String; Port: Integer): TClientObje
 var
   ClientObject: TClientObject;
 begin
-  ClientObject:=nil;
+  ClientObject := nil;
   Result := TClientObject(DataEngineManager.get(Ip + ':' + IntToStr(Port)));
   if Result <> nil then
   begin
     if not Result.Client.connected then
       DataEngineManager.DoIt(ClientObject.OpenTCP)
     else
-      St(1, 'TCP -->' + Result.Client.Host+':'+ InttoStr(Result.Client.Port));
+      St(1, 'TCP -->' + Result.Client.Host + ':' + IntToStr(Result.Client.Port));
     Exit;
   end;
 
@@ -236,8 +237,8 @@ end;
 
 procedure TSplitViewForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  //if IdTCPClient1.connected then
-  //  IdTCPClient1.Disconnect;
+  // if IdTCPClient1.connected then
+  // IdTCPClient1.Disconnect;
 end;
 
 procedure TSplitViewForm.FormCreate(Sender: TObject);
@@ -300,10 +301,10 @@ end;
 
 procedure TSplitViewForm.imgMenuClick(Sender: TObject);
 begin
-//  if sv.opened then
-//     sv.Close
-//  else
-//     sv.open;
+  // if sv.opened then
+  // sv.Close
+  // else
+  // sv.open;
 end;
 
 procedure TSplitViewForm.UpdateLocalDevices(dv: TVDevice);
@@ -418,13 +419,15 @@ procedure TSplitViewForm.Button1Click(Sender: TObject);
 var
   tcp: TClientObject;
   // txid:Integer;
-  t:Integer;
-  str:String;
+  t: Integer;
+  str: String;
 begin
-  if srx = nil then Exit;
-  if stx = nil then Exit;
-  
-  t:=strtoint(edit1.text);
+  if srx = nil then
+    Exit;
+  if stx = nil then
+    Exit;
+
+  t := StrToInt(Edit1.text);
 
   tcp := GetTCPConnection(trim(srx.Ip), 24);
   if tcp = nil then
@@ -433,11 +436,11 @@ begin
   end;
   if tcp.Client.connected then
   begin
-    tcp.Memo:=Memo1;
+    tcp.memo := Memo1;
     tcp.SetCallBack(nil);
 
-    str:='e e_reconnect::'+IntToStr(t)+';astparam s reset_ch_on_boot n;astparam save';
-    tcp.SetWork(str,900);
+    str := 'e e_reconnect::' + IntToStr(t) + ';astparam s reset_ch_on_boot n;astparam save';
+    tcp.SetWork(str, 900);
   end
   else
     Showmessage('TCP 连接不成功。');
@@ -447,6 +450,8 @@ procedure TSplitViewForm.Button2Click(Sender: TObject);
 var
   tcp: TClientObject;
   udp: TClientObject;
+  //str: String;
+  //i: Integer;
 begin
   if ComboBox2.ItemIndex <= 1 then
   begin
@@ -469,9 +474,9 @@ begin
     begin
       Log('TCP发送IP:' + tcp.Client.Socket.Binding.Ip + ':' + IntToStr(tcp.Client.Socket.Binding.Port) + ' --> ' + tcp.Client.Host + ':' + IntToStr(tcp.Client.Port));
       Log(Memo2.text);
+      log('####################################');
       try
-        // tcp.Client.IOHandler.WriteLn(Memo2.text);
-        tcp.SetWork(Memo2.text, 0);
+        tcp.addworks(Memo2.Lines, random(20000));
       Except
         on e: Exception do
         begin
@@ -569,7 +574,7 @@ procedure TSplitViewForm.Timer1Timer(Sender: TObject);
 begin
   if DataEngineManager.Has(trim(ComboBox3.text) + ':' + trim(Edit5.text)) then
     Exit;
- // St(1, '');
+  // St(1, '');
 end;
 
 procedure TSplitViewForm.MessageTimerTimer(Sender: TObject);
@@ -688,10 +693,10 @@ begin
     if frmSetting.tcp <> nil then
     begin
       frmSetting.tcp.memo := Memo1;
-      frmSetting.TabSheet2.tabvisible := false;
-      frmSetting.TabSheet3.tabvisible := false;
-      frmSetting.TabSheet4.tabvisible := false;
-      frmSetting.TabSheet5.tabvisible := false;
+      frmSetting.TabSheet2.tabvisible := False;
+      frmSetting.TabSheet3.tabvisible := False;
+      frmSetting.TabSheet4.tabvisible := False;
+      frmSetting.TabSheet5.tabvisible := False;
       frmSetting.TabSheet8.tabvisible := true;
       frmSetting.showmodal;
     end;
@@ -700,15 +705,17 @@ end;
 
 procedure TSplitViewForm.Log(const Msg: string);
 begin
-  if memo1<>nil then
+  if Memo1 <> nil then
     Memo1.Lines.Add(Msg);
 end;
 
 procedure TSplitViewForm.St(slot: Integer; Msg: String);
 begin
-  if StatusBar1=nil then Exit;
-  if Timer1=nil then exit;
-  
+  if StatusBar1 = nil then
+    Exit;
+  if Timer1 = nil then
+    Exit;
+
   Timer1.Enabled := False;
   StatusBar1.Panels[slot].text := Msg;
   Timer1.Enabled := true;

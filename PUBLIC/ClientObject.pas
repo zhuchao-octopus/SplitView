@@ -71,6 +71,7 @@ type
     procedure OpenTCP;
 
     Procedure SetWork(Data: String; Id: Integer);
+    procedure addWorks(StringLsit:TStrings;id:Integer);
     Constructor Create(Free: Boolean);
     destructor Destroy; override;
     property SleepTime: Integer read FSleepTime write SetSleepTime;
@@ -103,7 +104,17 @@ begin
   FWorkList.Add(TWork.Create(Data, Id));
   cs.Leave;
 end;
-
+procedure TClientObject.AddWorks(StringLsit:TStrings;id:Integer);
+var
+  i:Integer;
+begin
+  // if FWorkList.Count > 0 then // 事务阻塞模式
+  // Exit;
+  cs.Enter;
+  for i := 0 to StringLsit.count-1 do
+    FWorkList.Add(TWork.Create(StringLsit[i], Id));
+  cs.Leave;
+end;
 function TClientObject.GetWork(): TWork;
 begin
   Result := nil;
@@ -256,8 +267,8 @@ begin
         else
           FDataCallBack(str, 0);
 
-      Log('TCP数据来自：' + FTCPClient.Socket.Host + ':' + inttostr(FTCPClient.Socket.Port));
-      Log(str);
+      //Log('TCP数据来自：' + FTCPClient.Socket.Host + ':' + inttostr(FTCPClient.Socket.Port));
+      //Log(str);
     end
     else
     begin
