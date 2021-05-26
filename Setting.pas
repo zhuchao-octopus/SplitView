@@ -55,6 +55,7 @@ type
     procedure TCPReadData(const data: String; id: Integer);
     procedure UpdateZX(ListView: TListView; b: Byte; ZXId: Integer);
     procedure GetZX(ListView: TListView; var buf: array of Byte; offset: Integer);
+    procedure SaveToFile(ListView:TListView;fileName:String);
   public
     { Public declarations }
     dv: TVDevice;
@@ -69,7 +70,20 @@ implementation
 
 uses ObjManager, GlobalFunctions;
 {$R *.dfm}
-
+procedure TfrmSetting.SaveToFile(ListView:TListView;fileName: string);
+var
+  lList: Tstrings;
+  i: integer;
+begin
+   lList:= TStringList.Create;
+   try
+     for i:=0 to ListView.Items.Count -1 do
+      LList.add(listview1.items[i].caption + '|' + listview1.items[i].subitems.strings[0]);
+      LList.SavetoFile(fileName);
+   finally
+      lList.Free;
+   end;
+end;
 procedure TfrmSetting.Button1Click(Sender: TObject);
 var
    str:String;
@@ -117,6 +131,7 @@ var
   buff: array of Byte;
   str: string;
 begin
+  SaveToFile(Listview1,'Listview1.dat');
   SetLength(buff, 12);
   GetZX(Self.ListView1, buff, 0);
   GetZX(Self.ListView2, buff, 4);

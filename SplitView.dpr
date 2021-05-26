@@ -22,9 +22,7 @@ uses
   ClientObject in 'PUBLIC\ClientObject.pas',
   Trash in 'PUBLIC\Trash.pas',
   Setting in 'Setting.pas' {frmSetting},
-  ObjManager in 'ObjManager.pas',
-  Vcl.Themes,
-  Vcl.Styles;
+  ObjManager in 'ObjManager.pas';
 
 {$R *.res}
 
@@ -32,7 +30,6 @@ begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
 
-  TStyleManager.TrySetStyle('Windows10');
   Application.CreateForm(TSplitViewForm, SplitViewForm);
   Application.CreateForm(TfrmSetting, frmSetting);
   Application.Run;

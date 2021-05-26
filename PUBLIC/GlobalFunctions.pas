@@ -39,7 +39,6 @@ function GetWeek2: integer;
 function GetWeek3(DataTime: String): String;
 function IsWorkDay: Boolean;
 
-
 function SearchInList(Key: string; SList: TStrings; DList: TStrings): integer;
 
 function GetNowTimeNN(): integer;
@@ -54,12 +53,54 @@ function BytestoHexString(ABytes: array of Byte; len: integer): AnsiString;
 function IdBytesToAnsiString(ParamBytes: TIdBytes): AnsiString;
 
 function HexStrToBuff(hs: string): TIdBytes;
-function StrToBuff(s: String; buff: array of byte): integer;
-
+function StrToBuff(s: String; buff: array of Byte): integer;
+function UnicodeToChinese(inputstr: string): string;
+function ChineseToUniCode(sStr: string): string;
 
 implementation
- 
-function StrToBuff(s: String; buff: array of byte): integer;
+
+function ChineseToUniCode(sStr: string): string;
+// 汉字的 UniCode 编码范围是: $4E00..$9FA5
+var
+  w: Word;
+  hz: WideString;
+  i: integer;
+  s: string;
+begin
+  hz := sStr;
+  for i := 1 to Length(hz) do
+  begin
+    w := Ord(hz[i]);
+    s := IntToHex(w, 4);
+    Result := Result + '\u' + LowerCase(s);
+  end;
+end;
+
+function UnicodeToChinese(inputstr: string): string;
+var
+  i: integer;
+  index: integer;
+  temp, top, last: string;
+begin
+  index := 1;
+  while index >= 0 do
+  begin
+    index := inputstr.IndexOf('\u');
+    if index < 0 then
+    begin
+      last := inputstr;
+      Result := Result + last;
+      Exit;
+    end;
+    top := Copy(inputstr, 1, index); // 取出 编码字符前的 非 unic 编码的字符，如数字
+    temp := Copy(inputstr, index + 1, 6); // 取出编码，包括 \u    ,如\u4e3f
+    Delete(temp, 1, 2);
+    Delete(inputstr, 1, index + 6);
+    Result := Result + top + WideChar(StrToInt('$' + temp));
+  end;
+end;
+
+function StrToBuff(s: String; buff: array of Byte): integer;
 var
   P: PChar;
   // B:array of Byte;
@@ -115,13 +156,13 @@ var
 begin
   vs := '';
   if not FileExists(FileName) then
-    exit;
+    Exit;
   VerInfoSize := GetFileVersionInfoSize(PChar(FileName), Dummy);
   if VerInfoSize = 0 then
-    exit;
+    Exit;
   GetMem(VerInfo, VerInfoSize);
   if not GetFileVersionInfo(PChar(FileName), 0, VerInfoSize, VerInfo) then
-    exit;
+    Exit;
   VerQueryValue(VerInfo, '\', Pointer(VerValue), VerValueSize);
   with VerValue^ do
   begin
@@ -152,7 +193,7 @@ begin
       begin
         if (HzOrd >= ChinaCode[j][0]) and (HzOrd <= ChinaCode[j][1]) then
         begin
-          Result := Result + char(byte('A') + j);
+          Result := Result + char(Byte('A') + j);
           break;
         end;
       end;
@@ -170,8 +211,8 @@ function GetWindowsVersion: string;
 var
   Info: OSVERSIONINFO;
 begin
-  FillChar(Info, SizeOf(Info), 0);
-  Info.dwOSVersionInfoSize := SizeOf(OSVERSIONINFO);
+  FillChar(Info, sizeof(Info), 0);
+  Info.dwOSVersionInfoSize := sizeof(OSVERSIONINFO);
   GetVersionEx(Info);
 end;
 
@@ -245,7 +286,7 @@ begin
     60:
       Result := 3;
   else
-    exit;
+    Exit;
   end;
 end;
 
@@ -331,11 +372,11 @@ begin
   // DateTime:=VarToDateTime(DateTimeStr);
   if (JiBie <= 60) then
   begin
-    s := copy(DateTimeStr, 1, 4) + '-' + copy(DateTimeStr, 5, 2) + '-' + copy(DateTimeStr, 7, 2) + ' ' + copy(DateTimeStr, 9, 2) + ':' + copy(DateTimeStr, 11, 2);
+    s := Copy(DateTimeStr, 1, 4) + '-' + Copy(DateTimeStr, 5, 2) + '-' + Copy(DateTimeStr, 7, 2) + ' ' + Copy(DateTimeStr, 9, 2) + ':' + Copy(DateTimeStr, 11, 2);
   end
   else
   begin
-    s := copy(DateTimeStr, 1, 4) + '-' + copy(DateTimeStr, 5, 2) + '-' + copy(DateTimeStr, 7, 2);
+    s := Copy(DateTimeStr, 1, 4) + '-' + Copy(DateTimeStr, 5, 2) + '-' + Copy(DateTimeStr, 7, 2);
   end;
   DateTime := StrToMyDateTime(s);
   Result := DateTimeToMyLongWord(DateTime, JiBie);
@@ -741,7 +782,7 @@ begin
     Result := '星期' + Result;
     // DateTimeToSystemTime(DateTime, date);
   except
-    exit;
+    Exit;
   end;
 end;
 
@@ -762,7 +803,7 @@ var
 begin
   Result := 0;
   if Key = '' then
-    exit;
+    Exit;
   for i := 0 to SList.Count - 1 do
   begin
     if (Pos(Key, SList.Strings[i]) > 0) then

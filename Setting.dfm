@@ -26,39 +26,29 @@ object frmSetting: TfrmSetting
     Margins.Top = 5
     Margins.Right = 5
     Margins.Bottom = 5
-    ActivePage = TabSheet8
+    ActivePage = TabSheet2
     Align = alClient
     TabOrder = 0
-    ExplicitLeft = 3
-    ExplicitTop = 3
-    ExplicitWidth = 1040
-    ExplicitHeight = 523
     object TabSheet2: TTabSheet
       Caption = #22352#24109#20027#26426#36830#25509#26435#38480
       ImageIndex = 1
-      ExplicitWidth = 1032
-      ExplicitHeight = 491
       object ListView1: TListView
         AlignWithMargins = True
-        Left = 3
+        Left = 291
         Top = 3
-        Width = 250
+        Width = 286
         Height = 481
         Align = alLeft
         BorderStyle = bsNone
         Checkboxes = True
         Columns = <
           item
-            Caption = #20027#26426'TX'#21517#31216
-            Width = -1
-            WidthType = (
-              -1)
+            Caption = 'ID'
+            Width = 80
           end
           item
-            Caption = 'ID'
-            Width = -1
-            WidthType = (
-              -1)
+            Caption = #20027#26426'TX'#21517#31216
+            Width = 200
           end>
         GridLines = True
         RowSelect = True
@@ -67,25 +57,21 @@ object frmSetting: TfrmSetting
       end
       object ListView2: TListView
         AlignWithMargins = True
-        Left = 259
+        Left = 3
         Top = 3
-        Width = 250
+        Width = 282
         Height = 481
         Align = alLeft
         BorderStyle = bsNone
         Checkboxes = True
         Columns = <
           item
-            Caption = #20027#26426'TX'#21517#31216
-            Width = -1
-            WidthType = (
-              -1)
+            Caption = 'ID'
+            Width = 80
           end
           item
-            Caption = 'ID'
-            Width = -1
-            WidthType = (
-              -1)
+            Caption = #20027#26426'TX'#21517#31216
+            Width = 200
           end>
         GridLines = True
         RowSelect = True
@@ -94,7 +80,7 @@ object frmSetting: TfrmSetting
       end
       object ListView3: TListView
         AlignWithMargins = True
-        Left = 515
+        Left = 583
         Top = 3
         Width = 250
         Height = 481
@@ -103,18 +89,15 @@ object frmSetting: TfrmSetting
         Checkboxes = True
         Columns = <
           item
-            Caption = #20027#26426'TX'#21517#31216
-            Width = -1
-            WidthType = (
-              -1)
+            Caption = 'ID'
+            Width = 80
           end
           item
-            Caption = 'ID'
-            Width = -1
-            WidthType = (
-              -1)
+            Caption = #20027#26426'TX'#21517#31216
+            Width = 200
           end>
         GridLines = True
+        ReadOnly = True
         RowSelect = True
         TabOrder = 2
         ViewStyle = vsReport
@@ -163,7 +146,7 @@ object frmSetting: TfrmSetting
         AlignWithMargins = True
         Left = 515
         Top = 3
-        Width = 250
+        Width = 294
         Height = 481
         Align = alLeft
         BorderStyle = bsNone
@@ -178,6 +161,7 @@ object frmSetting: TfrmSetting
             Width = 200
           end>
         GridLines = True
+        ReadOnly = True
         RowSelect = True
         TabOrder = 2
         ViewStyle = vsReport
@@ -201,6 +185,7 @@ object frmSetting: TfrmSetting
             Width = 200
           end>
         GridLines = True
+        ReadOnly = True
         RowSelect = True
         TabOrder = 3
         ViewStyle = vsReport
@@ -224,6 +209,7 @@ object frmSetting: TfrmSetting
             Width = 200
           end>
         GridLines = True
+        ReadOnly = True
         RowSelect = True
         TabOrder = 4
         ViewStyle = vsReport
@@ -232,8 +218,6 @@ object frmSetting: TfrmSetting
     object TabSheet4: TTabSheet
       Caption = #22352#24109#25509#31649#26435#38480
       ImageIndex = 3
-      ExplicitWidth = 1032
-      ExplicitHeight = 491
       object Button8: TButton
         Left = 832
         Top = 75
@@ -256,7 +240,7 @@ object frmSetting: TfrmSetting
         AlignWithMargins = True
         Left = 3
         Top = 3
-        Width = 250
+        Width = 286
         Height = 481
         Align = alLeft
         BorderStyle = bsNone
@@ -271,16 +255,16 @@ object frmSetting: TfrmSetting
             Width = 200
           end>
         GridLines = True
+        ReadOnly = True
         RowSelect = True
         TabOrder = 2
         ViewStyle = vsReport
-        ExplicitHeight = 485
       end
       object ListView8: TListView
         AlignWithMargins = True
-        Left = 259
+        Left = 295
         Top = 3
-        Width = 250
+        Width = 282
         Height = 481
         Align = alLeft
         BorderStyle = bsNone
@@ -295,16 +279,16 @@ object frmSetting: TfrmSetting
             Width = 200
           end>
         GridLines = True
+        ReadOnly = True
         RowSelect = True
         TabOrder = 3
         ViewStyle = vsReport
-        ExplicitHeight = 485
       end
       object ListView9: TListView
         AlignWithMargins = True
-        Left = 515
+        Left = 583
         Top = 3
-        Width = 250
+        Width = 282
         Height = 481
         Align = alLeft
         BorderStyle = bsNone
@@ -319,10 +303,10 @@ object frmSetting: TfrmSetting
             Width = 200
           end>
         GridLines = True
+        ReadOnly = True
         RowSelect = True
         TabOrder = 4
         ViewStyle = vsReport
-        ExplicitHeight = 485
       end
     end
     object TabSheet5: TTabSheet

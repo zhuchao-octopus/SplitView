@@ -33,8 +33,6 @@ object SplitViewForm: TSplitViewForm
     ParentColor = True
     Placement = svpRight
     TabOrder = 0
-    ExplicitLeft = 862
-    ExplicitHeight = 592
     object Notebook2: TNotebook
       Left = 0
       Top = 0
@@ -45,12 +43,10 @@ object SplitViewForm: TSplitViewForm
       PageIndex = 1
       ParentCtl3D = False
       TabOrder = 0
-      ExplicitHeight = 565
       object TPage
         Left = 0
         Top = 0
         Caption = #22352#24109#36830#25509
-        ExplicitHeight = 565
         object GroupBox1: TGroupBox
           AlignWithMargins = True
           Left = 5
@@ -135,7 +131,6 @@ object SplitViewForm: TSplitViewForm
         Left = 0
         Top = 0
         Caption = #32593#32476#35843#35797
-        ExplicitHeight = 565
         object Button3: TButton
           AlignWithMargins = True
           Left = 10
@@ -148,7 +143,6 @@ object SplitViewForm: TSplitViewForm
           Caption = #33719#21462#26412#26426#20449#24687
           TabOrder = 0
           OnClick = Button3Click
-          ExplicitTop = 430
         end
         object GroupBox3: TGroupBox
           AlignWithMargins = True
@@ -287,6 +281,8 @@ object SplitViewForm: TSplitViewForm
             Caption = #36830#25509
             TabOrder = 3
             OnClick = Button9Click
+            ExplicitLeft = 10
+            ExplicitTop = 110
           end
         end
         object Button6: TButton
@@ -301,7 +297,6 @@ object SplitViewForm: TSplitViewForm
           Caption = #28165#26970#35774#22791#21015#34920
           TabOrder = 3
           OnClick = Button6Click
-          ExplicitTop = 476
         end
         object Button7: TButton
           AlignWithMargins = True
@@ -315,7 +310,6 @@ object SplitViewForm: TSplitViewForm
           Caption = #28165#26970#21382#21490#35760#24405
           TabOrder = 4
           OnClick = Button7Click
-          ExplicitTop = 522
         end
         object Button2: TButton
           AlignWithMargins = True
@@ -329,7 +323,6 @@ object SplitViewForm: TSplitViewForm
           Caption = #21457#36865#25968#25454
           TabOrder = 5
           OnClick = Button2Click
-          ExplicitTop = 378
         end
         object Memo2: TMemo
           AlignWithMargins = True
@@ -345,7 +338,6 @@ object SplitViewForm: TSplitViewForm
             'e e_devfind_off')
           ScrollBars = ssVertical
           TabOrder = 6
-          ExplicitHeight = 73
         end
       end
     end
@@ -370,7 +362,6 @@ object SplitViewForm: TSplitViewForm
         #32593#32476#35843#35797)
       TabIndex = 0
       OnChange = TabSet1Change
-      ExplicitTop = 565
     end
   end
   object Notebook1: TNotebook
@@ -380,12 +371,10 @@ object SplitViewForm: TSplitViewForm
     Height = 592
     Align = alClient
     TabOrder = 1
-    ExplicitWidth = 862
     object TPage
       Left = 0
       Top = 0
       Caption = #33410#28857#35774#22791#31649#29702
-      ExplicitWidth = 862
       object Panel1: TPanel
         Left = 0
         Top = 0
@@ -396,7 +385,6 @@ object SplitViewForm: TSplitViewForm
         Color = clWindow
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 862
         object Splitter1: TSplitter
           Left = 0
           Top = 370
@@ -416,7 +404,6 @@ object SplitViewForm: TSplitViewForm
           Align = alBottom
           ParentColor = True
           TabOrder = 0
-          ExplicitWidth = 862
           object Memo1: TMemo
             AlignWithMargins = True
             Left = 4
@@ -434,10 +421,6 @@ object SplitViewForm: TSplitViewForm
             ReadOnly = True
             ScrollBars = ssBoth
             TabOrder = 0
-            ExplicitLeft = 1
-            ExplicitTop = -2
-            ExplicitWidth = 860
-            ExplicitHeight = 75
           end
         end
         object Panel2: TPanel
@@ -448,8 +431,6 @@ object SplitViewForm: TSplitViewForm
           Align = alClient
           ParentColor = True
           TabOrder = 1
-          ExplicitWidth = 862
-          ExplicitHeight = 510
           object Splitter2: TSplitter
             Left = 594
             Top = 1
@@ -548,7 +529,6 @@ object SplitViewForm: TSplitViewForm
             ViewStyle = vsReport
             OnClick = ListView1Click
             OnDblClick = ListView1DblClick
-            ExplicitHeight = 502
           end
           object ListView2: TListView
             AlignWithMargins = True
@@ -625,8 +605,6 @@ object SplitViewForm: TSplitViewForm
             ViewStyle = vsReport
             OnClick = ListView2Click
             OnDblClick = ListView2DblClick
-            ExplicitWidth = 255
-            ExplicitHeight = 502
           end
         end
       end
@@ -2352,6 +2330,7 @@ object SplitViewForm: TSplitViewForm
     OnDisconnected = IdTCPClient1Disconnected
     OnConnected = IdTCPClient1Connected
     ConnectTimeout = 3000
+    IPVersion = Id_IPv4
     Port = 0
     ReadTimeout = -1
     Left = 216
