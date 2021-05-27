@@ -297,6 +297,7 @@ end;
 procedure TSplitViewForm.IdTCPClient1Status(ASender: TObject; const AStatus: TIdStatus; const AStatusText: string);
 begin
   Log('TCP Status:' + AStatusText);
+  st(1,'TCP Status:' + AStatusText);
 end;
 
 procedure TSplitViewForm.imgMenuClick(Sender: TObject);
@@ -433,17 +434,19 @@ begin
   if tcp = nil then
   begin
     Showmessage('没有建立有效的TCP连接。');
+    Exit;
   end;
-  if tcp.Client.connected then
+
+  //if tcp.Client.connected then
   begin
     tcp.memo := Memo1;
     tcp.SetCallBack(nil);
 
     str := 'e e_reconnect::' + IntToStr(t) + ';astparam s reset_ch_on_boot n;astparam save';
     tcp.SetWork(str, 900);
-  end
-  else
-    Showmessage('TCP 连接不成功。');
+  end;
+  //else
+  //  Showmessage('TCP 连接不成功。');
 end;
 
 procedure TSplitViewForm.Button2Click(Sender: TObject);

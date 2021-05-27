@@ -70,8 +70,8 @@ type
     procedure AssignUDP(AClient: TIdUDPServer; lip: String; lPort: Integer);
     procedure OpenTCP;
 
-    Procedure SetWork(Data: String; Id: Integer);
-    procedure addWorks(StringLsit:TStrings;id:Integer);
+    Procedure SetWork(Data: String; Id: Integer = 0);
+    procedure addWorks(StringLsit: TStrings; Id: Integer);
     Constructor Create(Free: Boolean);
     destructor Destroy; override;
     property SleepTime: Integer read FSleepTime write SetSleepTime;
@@ -96,7 +96,7 @@ begin
   Self.Id := Id;
 end;
 
-procedure TClientObject.SetWork(Data: string; Id: Integer);
+procedure TClientObject.SetWork(Data: string; Id: Integer = 0);
 begin
   // if FWorkList.Count > 0 then // 事务阻塞模式
   // Exit;
@@ -104,22 +104,24 @@ begin
   FWorkList.Add(TWork.Create(Data, Id));
   cs.Leave;
 end;
-procedure TClientObject.AddWorks(StringLsit:TStrings;id:Integer);
+
+procedure TClientObject.addWorks(StringLsit: TStrings; Id: Integer);
 var
-  i:Integer;
+  i: Integer;
 begin
   // if FWorkList.Count > 0 then // 事务阻塞模式
   // Exit;
   cs.Enter;
-  for i := 0 to StringLsit.count-1 do
+  for i := 0 to StringLsit.count - 1 do
     FWorkList.Add(TWork.Create(StringLsit[i], Id));
   cs.Leave;
 end;
+
 function TClientObject.GetWork(): TWork;
 begin
   Result := nil;
   try
-    if FWorkList.Count > 0 then
+    if FWorkList.count > 0 then
     begin
       cs.Enter;
       Result := FWorkList.First;
@@ -158,10 +160,10 @@ begin
     FUDP.BroadcastEnabled := False;
     FUDP.Bindings.Clear;
     FUDP.Bindings.Add;
-    FUDP.Bindings[FUDP.Bindings.Count - 1].Ip := lip; // 本地IP
-    FUDP.Bindings[FUDP.Bindings.Count - 1].Port := lPort;
+    FUDP.Bindings[FUDP.Bindings.count - 1].Ip := lip; // 本地IP
+    FUDP.Bindings[FUDP.Bindings.count - 1].Port := lPort;
     // 本地IP
-    FUDP.Bindings[FUDP.Bindings.Count - 1].IPVersion := Id_IPv4;
+    FUDP.Bindings[FUDP.Bindings.count - 1].IPVersion := Id_IPv4;
     FUDP.DefaultPort := lPort;
     FUDP.BroadcastEnabled := true;
     FUDP.Active := true;
@@ -207,21 +209,21 @@ end;
 
 destructor TClientObject.Destroy;
 begin
- try
-  FFree := true;
-  if FTCPClient <> nil then
-    if FTCPClient.Connected then
-      FTCPClient.Disconnect;
+  try
+    FFree := true;
+    if FTCPClient <> nil then
+      if FTCPClient.Connected then
+        FTCPClient.Disconnect;
 
-  if FTCPClient <> nil then
-    FTCPClient.Free;
+    if FTCPClient <> nil then
+      FTCPClient.Free;
 
-  if FUDP <> nil then
-    FUDP.Free;
-  cs.Free;
- finally
+    if FUDP <> nil then
+      FUDP.Free;
+    cs.Free;
+  finally
 
- end;
+  end;
   inherited;
 end;
 
@@ -231,55 +233,70 @@ var
   i: Integer;
   str, temp: String;
 begin
-  if FTCPClient.Connected then // 一个连接一个线程
+  try
+  if FTCPClient.Connected then // 一个连接一个线程，连接断开推出线程
     Exit;
   if (not FTCPClient.Connected) then
   begin
     FTCPClient.Connect;
     FTCPClient.IOHandler.WriteLn('root' + #13#10);
   end;
+  except
+    Log('OpenTCP 失败，无法打开 TCP.');
+    exit;
+  end;
   ww := nil;
   temp := '';
   while not FFree do
   begin
-    for i := 0 to FWorkList.Count - 1 do
-    begin
-      w := GetWork();
-      if (w <> nil) and ((ww = nil) or (ww.Id = w.Id)) then
+    try
+      if (not FTCPClient.Connected) then
       begin
-        DoWork(w);
-        FWorkList.Remove(w);//移除已经完成的任务
-        ww := w;
-      end
-      else
-      begin
+        FFree:=false;
+        Log('连接已经断开：'+FTCPClient.Socket.Host + ':' + inttostr(FTCPClient.Socket.Port));
         break;
       end;
+      for i := 0 to FWorkList.count - 1 do
+      begin
+        w := GetWork();
+        if (w <> nil) and ((ww = nil) or (ww.Id = w.Id)) then
+        begin
+          DoWork(w);
+          FWorkList.Remove(w); // 移除已经完成的任务
+          ww := w;
+        end
+        else
+        begin
+          break;
+        end;
+      end;
+
+      str := FTCPClient.IOHandler.ReadLn();
+    except
+
     end;
 
-    str := FTCPClient.IOHandler.ReadLn();
     if (str <> '') then
     begin
-      temp := temp +' '+ str;
+      temp := temp + ' ' + str;
       if Assigned(FDataCallBack) then
         if ww <> nil then
           FDataCallBack(str, ww.Id)
         else
           FDataCallBack(str, 0);
 
-      //Log('TCP数据来自：' + FTCPClient.Socket.Host + ':' + inttostr(FTCPClient.Socket.Port));
-      //Log(str);
+      // Log('TCP数据来自：' + FTCPClient.Socket.Host + ':' + inttostr(FTCPClient.Socket.Port));
+      Log(str);
     end
     else
     begin
-      if Assigned(FDataCallBack) then
+      if Assigned(FDataCallBack) and (temp <> '') then
+      begin
         FDataCallBack(temp, -1);
-      temp := '';
-      cs.Enter;
-      FWorkList.Remove(ww);
+        temp := '';
+      end;
       ww.Free;
-      ww:=nil;
-      cs.Leave;
+      ww := nil;
     end;
 
   end;
@@ -305,11 +322,11 @@ procedure TClientObject.IdUDPRead(AThread: TIdUDPListenerThread; const AData: TI
 var
   sl: TStringlist;
   dv: TVDevice;
-  //s:String;
+  // s:String;
 begin
   sl := TStringlist.Create;
   Log(GetSystemDateTimeStr() + ' UDP数据来自：' + ABinding.PeerIP + ':' + inttostr(ABinding.PeerPort) + ':' + inttostr(AThread.ThreadID));
-  //s:=BytesToString(AData,IndyTextEncoding_UTF8);
+  // s:=BytesToString(AData,IndyTextEncoding_UTF8);
   FormatBuff(AData, sl, 16);
   Log(sl);
   sl.Clear;
@@ -335,11 +352,11 @@ procedure TClientObject.UDPSendHexStr(Ip: String; Port: Integer; hs: String);
 var
   str1, str2: String;
   buf: TIdBytes;
-  Count: Integer;
+  count: Integer;
 begin
-  str1 := FormatHexStr(trim(hs), Count);
-  SetLength(buf, Count);
-  str2 := HexStrToBuff(str1, buf, Count);
+  str1 := FormatHexStr(trim(hs), count);
+  SetLength(buf, count);
+  str2 := HexStrToBuff(str1, buf, count);
   Log('UDP发送IP:' + FUDP.Bindings[0].Ip + ':' + inttostr(FUDP.Bindings[0].Port) + ' --> ' + Ip + ':' + inttostr(Port));
   Log(str2);
   try
@@ -356,15 +373,15 @@ procedure TClientObject.TCPSendHexStr(hs: string);
 var
   str1, str2: String;
   buf: TIdBytes;
-  Count: Integer;
+  count: Integer;
 begin
-  str1 := FormatHexStr(trim(hs), Count);
-  SetLength(buf, Count);
-  str2 := HexStrToBuff(str1, buf, Count);
+  str1 := FormatHexStr(trim(hs), count);
+  SetLength(buf, count);
+  str2 := HexStrToBuff(str1, buf, count);
   Log('TCP发送IP:' + FTCPClient.Socket.Binding.Ip + ':' + inttostr(FTCPClient.Socket.Binding.Port) + ' --> ' + FTCPClient.Host + ':' + inttostr(FTCPClient.Port));
   Log(str2);
   try
-    FTCPClient.IOHandler.Write(buf, Count);
+    FTCPClient.IOHandler.Write(buf, count);
   Except
     on e: Exception do
     begin
@@ -375,6 +392,8 @@ end;
 
 procedure TClientObject.TCPSendStr(str: string);
 begin
+  if not FTCPClient.Connected then
+    FTCPClient.Connect;
   FTCPClient.IOHandler.WriteLn(str);
 end;
 

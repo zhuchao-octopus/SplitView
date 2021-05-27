@@ -35,7 +35,8 @@ type
   TIcmpSendEcho = function(IcmpHandle: THandle; DestinationAddress: DWORD; RequestData: Pointer; RequestSize: Word; RequestOptions: PIPOptionInformation; ReplyBuffer: Pointer; ReplySize: DWORD;
     Timeout: DWORD): DWORD; stdcall;
 
-  Tping = class(Tobject)
+  TIP = class(Tobject)
+    ip1, ip2, ip3, ip4: String;
   private
     { Private declarations }
     hICMP: THandle;
@@ -44,8 +45,10 @@ type
     IcmpSendEcho: TIcmpSendEcho;
   public
     procedure pinghost(IP: string; var info: string);
-    constructor create;
+    constructor create; overload;
+    constructor create(IP: String); overload;
     destructor destroy; override;
+    function parserIP(IP: String): Boolean;
     { Public declarations }
   end;
 
@@ -166,14 +169,14 @@ end;
 
 function CheckPing(DvrIP: string): integer;
 var
-  NetPing: Tping;
+  NetPing: TIP;
   pinginfo: string;
   i, failCount: integer;
 begin
   Result := -1;
   try
     try
-      NetPing := Tping.create;
+      NetPing := TIP.create;
       if IsValidIP(DvrIP) then
       begin
         pinginfo := '';
@@ -258,13 +261,13 @@ end;
 
 function Int64ToIP(IPInt: Int64): string;
 var
-  IP1, Ip2, IP3, IP4: Int64;
+  ip1, ip2, ip3, ip4: Int64;
 begin
-  IP1 := IPInt div Trunc(Power(256, 3));
-  Ip2 := (IPInt - IP1 * Trunc(Power(256, 3))) div Trunc(Power(256, 2));
-  IP3 := (IPInt - IP1 * Trunc(Power(256, 3)) - Ip2 * Trunc(Power(256, 2))) div Trunc(Power(256, 1));
-  IP4 := IPInt - IP1 * Trunc(Power(256, 3)) - Ip2 * Trunc(Power(256, 2)) - IP3 * Trunc(Power(256, 1));
-  Result := IntToStr(IP1) + '.' + IntToStr(Ip2) + '.' + IntToStr(IP3) + '.' + IntToStr(IP4);
+  ip1 := IPInt div Trunc(Power(256, 3));
+  ip2 := (IPInt - ip1 * Trunc(Power(256, 3))) div Trunc(Power(256, 2));
+  ip3 := (IPInt - ip1 * Trunc(Power(256, 3)) - ip2 * Trunc(Power(256, 2))) div Trunc(Power(256, 1));
+  ip4 := IPInt - ip1 * Trunc(Power(256, 3)) - ip2 * Trunc(Power(256, 2)) - ip3 * Trunc(Power(256, 1));
+  Result := IntToStr(ip1) + '.' + IntToStr(ip2) + '.' + IntToStr(ip3) + '.' + IntToStr(ip4);
 end;
 
 function IncIp(IPStr: string; IpCount: Int64): string;
@@ -282,7 +285,7 @@ begin
   Result := IPToInt64(IPStr1) - IPToInt64(IPStr2);
 end;
 
-constructor Tping.create;
+constructor TIP.create;
 begin
   inherited create;
   hICMPdll := LoadLibrary('icmp.dll');
@@ -292,13 +295,37 @@ begin
   hICMP := IcmpCreateFile;
 end;
 
-destructor Tping.destroy;
+constructor TIP.create(IP: String);
+begin
+    parserIP(ip);
+end;
+
+destructor TIP.destroy;
 begin
   FreeLibrary(hICMPdll);
   inherited destroy;
 end;
 
-procedure Tping.pinghost(IP: string; var info: string);
+function TIP.parserIP(IP: String): Boolean;
+var
+  sl: TStrings;
+begin
+  Result := IsValidIP(IP);
+  if Result = false then
+    exit;
+  sl := TStringList.create;
+  ExtractStrings(['.'], [], PChar(IP), sl);
+
+  ip1 := sl[0];
+  ip2 := sl[1];
+  ip3 := sl[2];
+  ip4 := sl[3];
+
+  sl.Clear;
+  sl.Free;
+end;
+
+procedure TIP.pinghost(IP: string; var info: string);
 var
   // IP Options for packet to send
   IPOpt: TIPOptionInformation;

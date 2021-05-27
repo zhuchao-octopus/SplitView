@@ -19,6 +19,8 @@ type
     IP: String;
     MAC: String;
     Port: String;
+    MASK: String;
+    Gateway: String;
     Typee: String;
     St: String;
     TxaID: String;
@@ -140,21 +142,20 @@ begin
   begin
     if (Self.Name[i] >= '0') and (Self.Name[i] <= '9') then
     begin
-     break;
+      break;
     end;
   end;
 
   if i < (Length(Self.Name) - 1) then
-    Self.Name := copy(Name,1,i+1);
+    Self.Name := copy(Name, 1, i + 1);
 
-
-  {for i := Length(Self.Name) - 1 downto 1 do
-  begin
+  { for i := Length(Self.Name) - 1 downto 1 do
+    begin
     if (Self.Name[i] < '0') and (Self.Name[i] > '9') then
     begin
-      break;
+    break;
     end;
-  end;}
+    end; }
 
   Self.ID := RightStr(Self.Name, 4);
   s := '';
@@ -166,6 +167,12 @@ begin
     end;
   end;
   Self.ID := s;
+
+  // 修正设备名称
+  i := pos(ID,name);
+  Name := copy(Name, 1, i-1 );
+  Name:=Name+ID;
+
 
   pb := @FBuff[259];
   Self.TxaID := ByteToWideString2(pb, 5);
