@@ -135,35 +135,49 @@ procedure WideStringToByte(str: String; var buff: array of byte);
 function GetDefaultLauguageStrByName(Name: String; Lang: String): String;
 procedure SetButtonCaptionLeftAlign(btn: TButton);
 function FormatHexStrToByte(hs: string; var buf: array of byte): string;
-function FormatHexStrToByte2(hs: string;var buf: array of byte): Integer;
+function FormatHexStrToByte2(hs: string; var buf: array of byte): Integer;
 
 function SpaceCompress(s: string): string;
-function FormatHexStr(hs: string;var count:Integer): string;
-function HexStrToBuff(hs: string;var buff:array of byte;Count:Integer): string;
+function FormatHexStr(hs: string; var count: Integer): string;
+function HexStrToBuff(hs: string; var buff: array of byte; count: Integer): string;
 
 function CharToByte(c1, c2: Char): byte;
-procedure FormatBuff(buf: array of Byte; sl: TStringList; fm: Integer);
+procedure FormatBuff(buf: array of byte; sl: TStringList; fm: Integer);
+function BuffToHexStr(buf: array of byte): String;
+
 
 implementation
 
-
-procedure FormatBuff(buf: array of Byte; sl: TStringList; fm: Integer);
+function BuffToHexStr(buf: array of byte): String;
 var
-  i,j, l: Integer;
+  i, L: Integer;
+begin
+  result := '';
+  L := Length(buf);
+  for i := 0 to L - 1 do
+  begin
+    result := result + Format('0x%.02x ', [buf[i]]);
+  end;
+  result:=Trim(result);
+end;
+
+procedure FormatBuff(buf: array of byte; sl: TStringList; fm: Integer);
+var
+  i, j, L: Integer;
   s: String;
 begin
-  l := Length(buf);
+  L := Length(buf);
   sl.Clear;
   s := '';
-  j:=0;
-  for i := 0 to l - 1 do
+  j := 0;
+  for i := 0 to L - 1 do
   begin
     s := s + Format('%.02x ', [buf[i]]);
     if fm >= 16 then
     begin
       if (i + 1) mod fm = 0 then
       begin
-         j:=i+1;
+        j := i + 1;
         s := Trim(s) + '        ' + ByteToWideString2(@buf[i - fm + 1], fm);
         sl.Add(s);
         s := '';
@@ -174,7 +188,7 @@ begin
   begin
     if fm >= 16 then
     begin
-      s := Format('%-' + IntToStr(fm * 3-1) + 's', [s]);
+      s := Format('%-' + IntToStr(fm * 3 - 1) + 's', [s]);
       s := s + '        ' + ByteToWideString2(@buf[j], fm);
       sl.Add(s);
     end
@@ -189,62 +203,61 @@ function CharToDigit(c: Char): byte; // 字符表示的数，而不是对应的ASCII 值
 begin
   case c of
     '0' .. '9':
-      Result := Ord(c) - 48;
+      result := Ord(c) - 48;
     'A' .. 'F':
-      Result := Ord(c) - Ord('A') + 10;
+      result := Ord(c) - Ord('A') + 10;
     'a' .. 'f':
-      Result := Ord(c) - Ord('a') + 10;
+      result := Ord(c) - Ord('a') + 10;
   else
-    Result := 0;
+    result := 0;
   end;
 end;
 
 function CharToByte(c1, c2: Char): byte;
 begin
-  Result := CharToDigit(c1) * 16 + CharToDigit(c2);
+  result := CharToDigit(c1) * 16 + CharToDigit(c2);
 end;
 
-function FormatHexStr(hs: string;var count:Integer): string;
+function FormatHexStr(hs: string; var count: Integer): string;
 begin
-  Result := '';
+  result := '';
   hs := StringReplace(hs, '0x', ' ', [rfReplaceAll]); // 替换0x
   hs := StringReplace(hs, '0X', ' ', [rfReplaceAll]); // 替换0X
   hs := StringReplace(hs, ',', ' ', [rfReplaceAll]); // 替换 ,号
   hs := StringReplace(hs, '，', ' ', [rfReplaceAll]); // 替换 ,号
   hs := StringReplace(hs, ' ', ' ', [rfReplaceAll]); // 替换 tab
   // hs:=StringReplace(hs, '  ', ' ', [rfReplaceAll]);//删除'  '
-  Result := SpaceCompress(hs); // 压缩空格，就是把多个空格替换成一个
-  count := (Length(Result) + 2) div 3;
+  result := SpaceCompress(hs); // 压缩空格，就是把多个空格替换成一个
+  count := (Length(result) + 2) div 3;
 end;
 
-function HexStrToBuff(hs: string;var buff:array of byte;Count:Integer): string;
+function HexStrToBuff(hs: string; var buff: array of byte; count: Integer): string;
 var
   i, len: Word;
 begin
-  Result := '';
-  len:=(length(hs) + 2) div 3;
-  if len <> Count then
+  result := '';
+  len := (Length(hs) + 2) div 3;
+  if len <> count then
     Exit;
-    
+
   ZeroMemory(@buff[0], len);
 
   for i := 1 to len do
   begin
-    buff[i - 1]:= CharToByte(hs[i * 3 - 2], hs[i * 3 - 1]);
+    buff[i - 1] := CharToByte(hs[i * 3 - 2], hs[i * 3 - 1]);
   end;
 
   for i := 1 to len do
   begin
-    Result := Result + Format('%.02x ', [buff[i - 1]]);
+    result := result + Format('%.02x ', [buff[i - 1]]);
   end;
 end;
-
 
 function FormatHexStrToByte(hs: string; var buf: array of byte): string;
 var
   i, len, bLen: Word;
 begin
-  Result := '';
+  result := '';
   hs := StringReplace(hs, '0x', ' ', [rfReplaceAll]); // 替换0x
   hs := StringReplace(hs, '0X', ' ', [rfReplaceAll]); // 替换0X
   hs := StringReplace(hs, ',', ' ', [rfReplaceAll]); // 替换 ,号
@@ -254,11 +267,11 @@ begin
 
   hs := SpaceCompress(hs); // 压缩空格，就是把多个空格替换成一个
 
-  len := (length(hs) + 2) div 3;
-  //if Length(buf) = 0 then
-  //   SetLength(buf,len);
+  len := (Length(hs) + 2) div 3;
+  // if Length(buf) = 0 then
+  // SetLength(buf,len);
 
-  bLen := length(buf);
+  bLen := Length(buf);
   ZeroMemory(@buf, bLen);
 
   for i := 1 to len do
@@ -268,7 +281,7 @@ begin
 
   for i := 1 to len do
   begin
-    Result := Result + Format('%.02x ', [buf[i - 1]]);
+    result := result + Format('%.02x ', [buf[i - 1]]);
   end;
 end;
 
@@ -281,8 +294,8 @@ begin
   hs := StringReplace(hs, '0X', '', [rfReplaceAll]); // 删除0X
 
   hs := SpaceCompress(hs);
-  len := (length(hs) + 2) div 3;
-  bLen := length(buf);
+  len := (Length(hs) + 2) div 3;
+  bLen := Length(buf);
   ZeroMemory(@buf, bLen);
 
   for i := 1 to len do
@@ -290,7 +303,7 @@ begin
     buf[i - 1] := CharToByte(hs[i * 3 - 2], hs[i * 3 - 1]);
   end;
 
-  Result := len;
+  result := len;
 end;
 
 function SpaceCompress(s: string): string;
@@ -306,7 +319,7 @@ begin
     else
       hs1 := hs2;
   end;
-  Result := Trim(hs1);
+  result := Trim(hs1);
 end;
 
 procedure SetButtonCaptionLeftAlign(btn: TButton);
@@ -330,7 +343,7 @@ begin
     CopyMemory(buffer, buff, len);
     // Move(buffer, str[1], len);
     CopyMemory(@str[1], buffer, len);
-    Result := str;
+    result := str;
   Except
   end;
 end;
@@ -338,17 +351,17 @@ end;
 function ByteToWideString2(buff: pbyte; len: Integer): String;
 var
   str: AnsiString;
-  //buffer: array of byte;
+  // buffer: array of byte;
 begin
   try
-    //SetLength(buffer, len);
+    // SetLength(buffer, len);
     SetLength(str, len);
     // Move(buff, buffer, len);
-    //CopyMemory(buffer, buff, len);
+    // CopyMemory(buffer, buff, len);
     // Move(buffer, str[1], len);
     CopyMemory(@str[1], buff, len);
-    //str := StringReplace(str, chr(13) + chr(10), '', [rfReplaceAll]); // 删除回车
-    Result := trim(str);
+    // str := StringReplace(str, chr(13) + chr(10), '', [rfReplaceAll]); // 删除回车
+    result := Trim(str);
   Except
   end;
 end;
@@ -360,7 +373,7 @@ var
 begin
   astr := str;
   // setLength(@buff[0],Length(astr));
-  CopyMemory(@buff, @astr[1], length(astr));
+  CopyMemory(@buff, @astr[1], Length(astr));
   // for i := 0 to sizeof(str)-1 do
   // buff[i+1]:=Byte(str[i]);
 end;
@@ -403,7 +416,7 @@ end;
 
 function GetStyle(i: Integer): String;
 begin
-  Result := TStyleManager.StyleNames[i];
+  result := TStyleManager.StyleNames[i];
 end;
 
 procedure AdjustSetStyle(Style: String);
@@ -509,15 +522,15 @@ function GetDefaultLauguageStrByName(Name: String; Lang: String): String;
 var
   i: Integer;
 begin
-  Result := '';
+  result := '';
   for i := Low(DefaultLauguageStr) to High(DefaultLauguageStr) do
   begin
     if DefaultLauguageStr[i].Name = Name then
     begin
       if (Lang = 'CN') then
-        Result := DefaultLauguageStr[i].Caption1
+        result := DefaultLauguageStr[i].Caption1
       else
-        Result := DefaultLauguageStr[i].Caption2;
+        result := DefaultLauguageStr[i].Caption2;
       break;
     end;
   end;
@@ -527,12 +540,12 @@ function GetComponentLauguageName(Name: String): String;
 var
   i: Integer;
 begin
-  Result := '';
+  result := '';
   for i := Low(DefaultLauguageStr) to High(DefaultLauguageStr) do
   begin
     if DefaultLauguageStr[i].Name = Name then
     begin
-      Result := 'MESSAGE_' + INTTOSTR(i);
+      result := 'MESSAGE_' + IntToStr(i);
       break;
     end;
   end;

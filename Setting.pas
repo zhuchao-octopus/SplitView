@@ -72,6 +72,7 @@ type
     procedure ListView7DblClick(Sender: TObject);
     procedure ListView8DblClick(Sender: TObject);
     procedure ListView9DblClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     // FStr:String;
     { Private declarations }
@@ -782,6 +783,12 @@ begin
       SL.Free;
     end;
   end;
+end;
+
+procedure TfrmSetting.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+   if tcp <> nil then
+    tcp.stop;
 end;
 
 procedure TfrmSetting.FormCreate(Sender: TObject);

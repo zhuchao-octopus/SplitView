@@ -13,6 +13,7 @@ object frmSetting: TfrmSetting
   Font.Style = []
   OldCreateOrder = False
   Position = poMainFormCenter
+  OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -34,7 +35,6 @@ object frmSetting: TfrmSetting
     object TabSheet2: TTabSheet
       Caption = #22352#24109#20027#26426#36830#25509#26435#38480
       ImageIndex = 1
-      ExplicitWidth = 1028
       object ListView1: TListView
         AlignWithMargins = True
         Left = 3
@@ -58,7 +58,6 @@ object frmSetting: TfrmSetting
         TabOrder = 0
         ViewStyle = vsReport
         OnDblClick = ListView1DblClick
-        ExplicitLeft = -85
       end
       object ListView2: TListView
         AlignWithMargins = True
@@ -83,7 +82,6 @@ object frmSetting: TfrmSetting
         TabOrder = 1
         ViewStyle = vsReport
         OnDblClick = ListView2DblClick
-        ExplicitLeft = 3
       end
       object ListView3: TListView
         AlignWithMargins = True
@@ -109,7 +107,6 @@ object frmSetting: TfrmSetting
         TabOrder = 2
         ViewStyle = vsReport
         OnDblClick = ListView3DblClick
-        ExplicitLeft = 583
       end
       object Button4: TButton
         Left = 918
@@ -133,7 +130,10 @@ object frmSetting: TfrmSetting
     object TabSheet3: TTabSheet
       Caption = #22352#24109#25512#36865#26435#38480
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 1028
+      ExplicitHeight = 0
       object Button6: TButton
         Left = 918
         Top = 88
@@ -234,7 +234,10 @@ object frmSetting: TfrmSetting
     object TabSheet4: TTabSheet
       Caption = #22352#24109#25509#31649#26435#38480
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 1028
+      ExplicitHeight = 0
       object Button8: TButton
         Left = 916
         Top = 88
@@ -334,12 +337,18 @@ object frmSetting: TfrmSetting
     object TabSheet5: TTabSheet
       Caption = #22352#24109#36328#23631#35774#32622
       ImageIndex = 5
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 1028
+      ExplicitHeight = 0
     end
     object TabSheet8: TTabSheet
       Caption = #20854#23427
       ImageIndex = 7
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 1028
+      ExplicitHeight = 0
       object GroupBox1: TGroupBox
         Left = 43
         Top = 35

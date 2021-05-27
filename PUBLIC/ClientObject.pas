@@ -74,6 +74,7 @@ type
     procedure addWorks(StringLsit: TStrings; Id: Integer);
     Constructor Create(Free: Boolean);
     destructor Destroy; override;
+    procedure stop();
     property SleepTime: Integer read FSleepTime write SetSleepTime;
     property Client: TIdTCPClient read FTCPClient;
     property uiLock: TCriticalSection read FuiLock write SetuiLock;
@@ -212,19 +213,29 @@ begin
   try
     FFree := true;
     if FTCPClient <> nil then
-      if FTCPClient.Connected then
-        FTCPClient.Disconnect;
-
-    if FTCPClient <> nil then
+    begin
+      FTCPClient.Disconnect;
       FTCPClient.Free;
+    end;
 
     if FUDP <> nil then
       FUDP.Free;
-    cs.Free;
-  finally
 
+  finally
+    cs.Free;
   end;
   inherited;
+end;
+
+procedure TClientObject.stop;
+begin
+  FFree := true;
+  if FTCPClient <> nil then
+  begin
+    FTCPClient.Disconnect;
+  end;
+  if FUDP <> nil then
+    FUDP.Active := False;
 end;
 
 procedure TClientObject.OpenTCP; // TCP 同步柱塞式
@@ -234,16 +245,16 @@ var
   str, temp: String;
 begin
   try
-  if FTCPClient.Connected then // 一个连接一个线程，连接断开推出线程
-    Exit;
-  if (not FTCPClient.Connected) then
-  begin
-    FTCPClient.Connect;
-    FTCPClient.IOHandler.WriteLn('root' + #13#10);
-  end;
+    if FTCPClient.Connected then // 一个连接一个线程，连接断开推出线程
+      Exit;
+    if (not FTCPClient.Connected) then
+    begin
+      FTCPClient.Connect;
+      FTCPClient.IOHandler.WriteLn('root' + #13#10);
+    end;
   except
     Log('OpenTCP 失败，无法打开 TCP.');
-    exit;
+    Exit;
   end;
   ww := nil;
   temp := '';
@@ -252,8 +263,8 @@ begin
     try
       if (not FTCPClient.Connected) then
       begin
-        FFree:=false;
-        Log('连接已经断开：'+FTCPClient.Socket.Host + ':' + inttostr(FTCPClient.Socket.Port));
+        FFree := False;
+        Log('连接已经断开：' + FTCPClient.Socket.Host + ':' + inttostr(FTCPClient.Socket.Port));
         break;
       end;
       for i := 0 to FWorkList.count - 1 do
@@ -273,7 +284,9 @@ begin
 
       str := FTCPClient.IOHandler.ReadLn();
     except
-
+     Log('TCP 通信异常关闭：' + FTCPClient.Socket.Host + ':' + inttostr(FTCPClient.Socket.Port));
+     FFree:=true;//读写出错关闭线程
+     break;
     end;
 
     if (str <> '') then
@@ -299,7 +312,7 @@ begin
       ww := nil;
     end;
 
-  end;
+  end;//while
 end;
 
 procedure TClientObject.DoWork(w: TWork);

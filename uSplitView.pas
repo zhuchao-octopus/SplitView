@@ -3,6 +3,8 @@
 
 
 
+
+
 // This software is Copyright (c) 2015 Embarcadero Technologies, Inc.
 // You may only use this software if you are an authorized licensee
 // of an Embarcadero developer tools product.
@@ -210,9 +212,13 @@ begin
   if Result <> nil then
   begin
     if not Result.Client.connected then
-      DataEngineManager.DoIt(ClientObject.OpenTCP)
+    begin
+      DataEngineManager.DoIt(ClientObject.OpenTCP);
+    end
     else
-      St(1, 'TCP -->' + Result.Client.Host + ':' + IntToStr(Result.Client.Port));
+    begin
+      St(1, 'TCP -->' + Result.Client.Host + ':' + IntToStr(Result.Client.Port))
+    end;
     Exit;
   end;
 
@@ -297,7 +303,7 @@ end;
 procedure TSplitViewForm.IdTCPClient1Status(ASender: TObject; const AStatus: TIdStatus; const AStatusText: string);
 begin
   Log('TCP Status:' + AStatusText);
-  st(1,'TCP Status:' + AStatusText);
+  St(1, 'TCP Status:' + AStatusText);
 end;
 
 procedure TSplitViewForm.imgMenuClick(Sender: TObject);
@@ -419,9 +425,11 @@ end;
 procedure TSplitViewForm.Button1Click(Sender: TObject);
 var
   tcp: TClientObject;
+  udp: TClientObject;
   // txid:Integer;
-  t: Integer;
+  t,i: Integer;
   str: String;
+  buff:array[0..2] of byte;
 begin
   if srx = nil then
     Exit;
@@ -437,24 +445,39 @@ begin
     Exit;
   end;
 
-  //if tcp.Client.connected then
+  if tcp.Client.connected then
   begin
     tcp.memo := Memo1;
     tcp.SetCallBack(nil);
 
     str := 'e e_reconnect::' + IntToStr(t) + ';astparam s reset_ch_on_boot n;astparam save';
     tcp.SetWork(str, 900);
+  end
+  else
+  begin
+    // Showmessage('TCP 连接不成功。');
+    //Ip := '225.1.0.0';
+    //Port := 3333;
+    buff[0]:=$FF;
+    buff[1]:= strtoint(srx.id);
+    buff[2]:= t;
+    for i := 0 to LocalIPList.count - 1 do
+    begin
+      udp := GetUDPConnection(LocalIPList[i], 3334);
+      if udp <> nil then
+      begin
+        udp.UDPSendHexStr('225.1.0.0', 3333, BuffToHexStr(buff));
+      end;
+    end;
   end;
-  //else
-  //  Showmessage('TCP 连接不成功。');
 end;
 
 procedure TSplitViewForm.Button2Click(Sender: TObject);
 var
   tcp: TClientObject;
   udp: TClientObject;
-  //str: String;
-  //i: Integer;
+  // str: String;
+  // i: Integer;
 begin
   if ComboBox2.ItemIndex <= 1 then
   begin
@@ -477,7 +500,7 @@ begin
     begin
       Log('TCP发送IP:' + tcp.Client.Socket.Binding.Ip + ':' + IntToStr(tcp.Client.Socket.Binding.Port) + ' --> ' + tcp.Client.Host + ':' + IntToStr(tcp.Client.Port));
       Log(Memo2.text);
-      log('####################################');
+      Log('####################################');
       try
         tcp.addworks(Memo2.Lines, random(20000));
       Except
@@ -623,7 +646,7 @@ begin
     Exit;
   nanme := ListItem.subitems.Strings[0];
   ID := ListItem.subitems.Strings[1];
-  Edit2.text := ID;
+  Edit2.text := nanme;
   ComboBox3.text := ListItem.subitems.Strings[2];
   srx := DeviceList.get(nanme);
 end;
@@ -670,7 +693,7 @@ begin
     Exit;
   nanme := ListItem.subitems.Strings[0];
   ID := ListItem.subitems.Strings[1];
-  Edit1.text := ID;
+  Edit1.text := nanme;
   ComboBox3.text := ListItem.subitems.Strings[2];
   stx := DeviceList.get(nanme);
 end;

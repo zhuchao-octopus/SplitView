@@ -49,6 +49,7 @@ function GetCFGDir(DirName: String): String;
 Function GetUpperLevel(KLineDateMode: TKLineDateMode): TKLineDateMode;
 Function GetLowerLevel(KLineDateMode: TKLineDateMode): TKLineDateMode;
 procedure GetBuildInfo(FileName: string; var vs: string);
+
 function BytestoHexString(ABytes: array of Byte; len: integer): AnsiString;
 function IdBytesToAnsiString(ParamBytes: TIdBytes): AnsiString;
 
