@@ -49,7 +49,7 @@ type
   private
     FTCPClient: TIdTCPClient;
     FUDP: TIdUDPServer;
-    FFree: Boolean;
+    FRunning: Boolean;
     // FLastTick: Cardinal;
     FuiLock: TCriticalSection;
     FSleepTime: Integer;
@@ -84,6 +84,7 @@ type
     procedure TCPSendStr(str: String);
     procedure SetCallBack(DataCallBack: TTCPWorkEent);
     function GetWork(): TWork;
+    function checkStOK():Boolean;
   end;
 
 implementation
@@ -97,6 +98,10 @@ begin
   Self.Id := Id;
 end;
 
+function TClientObject.checkStOK():Boolean;
+begin
+    Result:= FRunning;
+end;
 procedure TClientObject.SetWork(Data: string; Id: Integer = 0);
 begin
   // if FWorkList.Count > 0 then // 事务阻塞模式
@@ -201,7 +206,7 @@ end;
 
 Constructor TClientObject.Create(Free: Boolean);
 begin
-  FFree := Free;
+  FRunning := Free;
   Memo := nil;
   FWorkList := TList.Create;
   cs := TCriticalSection.Create;
@@ -211,7 +216,7 @@ end;
 destructor TClientObject.Destroy;
 begin
   try
-    FFree := true;
+    FRunning := false;
     if FTCPClient <> nil then
     begin
       FTCPClient.Disconnect;
@@ -229,7 +234,7 @@ end;
 
 procedure TClientObject.stop;
 begin
-  FFree := true;
+  FRunning := false;
   if FTCPClient <> nil then
   begin
     FTCPClient.Disconnect;
@@ -258,12 +263,12 @@ begin
   end;
   ww := nil;
   temp := '';
-  while not FFree do
+  while FRunning do
   begin
     try
       if (not FTCPClient.Connected) then
       begin
-        FFree := False;
+        FRunning := False;
         Log('连接已经断开：' + FTCPClient.Socket.Host + ':' + inttostr(FTCPClient.Socket.Port));
         break;
       end;
@@ -284,8 +289,9 @@ begin
 
       str := FTCPClient.IOHandler.ReadLn();
     except
-     Log('TCP 通信异常关闭：' + FTCPClient.Socket.Host + ':' + inttostr(FTCPClient.Socket.Port));
-     FFree:=true;//读写出错关闭线程
+     Log('TCP 通道关闭：' + FTCPClient.Socket.Host + ':' + inttostr(FTCPClient.Socket.Port));
+     FRunning:=false;//读写出错关闭线程
+     FTCPClient.Disconnect;
      break;
     end;
 
@@ -416,9 +422,11 @@ begin
     Exit;
   if uiLock <> nil then
     uiLock.Enter;
+  Memo.Clear;
   Memo.Lines.AddStrings(sl);
   if uiLock <> nil then
     uiLock.Leave;
+  Memo.Perform($0115, SB_BOTTOM, 0);
 end;
 
 procedure TClientObject.Log(msg: String);
@@ -430,7 +438,7 @@ begin
     uiLock.Enter;
 
   Memo.Lines.Add(msg);
-
+  Memo.Perform($0115, SB_BOTTOM, 0);
   if uiLock <> nil then
     uiLock.Leave;
 end;

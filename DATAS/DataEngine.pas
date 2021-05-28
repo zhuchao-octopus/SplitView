@@ -4,8 +4,8 @@ interface
 
 uses SysUtils, Classes, Windows,
   ExtCtrls, MATH, Messages, SyncObjs, System.Threading,
-   GlobalConst, GlobalTypes, GlobalFunctions,
-   MyMessageQueue, ClientObject;
+  GlobalConst, GlobalTypes, GlobalFunctions,
+  MyMessageQueue, ClientObject;
 
 type
   TProc = procedure() of object;
@@ -33,7 +33,9 @@ type
 
     function Add(name: String; obj: TObject): TObject;
     function Get(name: String): TObject;
+    function Del(name: String): Boolean;
     function Has(name: String): Boolean;
+    function Count(): Integer;
   end;
 
 var
@@ -69,6 +71,11 @@ begin
   FTaskOBJList.Clear;
   FTaskOBJList.Free;
   DataSourceCriticalSection.Free;
+end;
+
+function TDataEngineManager.Count;
+begin
+  Result := FTaskOBJList.Count;
 end;
 
 procedure TDataEngineManager.Stop;
@@ -188,6 +195,20 @@ begin
   end;
 end;
 
+function TDataEngineManager.Del(name: String): Boolean;
+var
+  i: Integer;
+begin
+  Result := false;
+  i := FTaskOBJList.IndexOf(name);
+  if i >= 0 then
+  begin
+    //FTaskOBJList.Objects[i].Free;
+    FTaskOBJList.Delete(i);
+  end;
+  Result := true;
+end;
+
 function TDataEngineManager.Has(name: String): Boolean;
 var
   i: Integer;
@@ -205,7 +226,8 @@ initialization
 DataEngineManager := TDataEngineManager.Create();
 
 finalization
+
 DataEngineManager.Stop;
-//DataEngineManager.Free;
+// DataEngineManager.Free;
 
 end.

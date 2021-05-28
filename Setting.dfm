@@ -29,12 +29,13 @@ object frmSetting: TfrmSetting
     Margins.Top = 10
     Margins.Right = 10
     Margins.Bottom = 10
-    ActivePage = TabSheet2
+    ActivePage = TabSheet4
     Align = alClient
     TabOrder = 0
     object TabSheet2: TTabSheet
       Caption = #22352#24109#20027#26426#36830#25509#26435#38480
       ImageIndex = 1
+      OnShow = TabSheet2Show
       object ListView1: TListView
         AlignWithMargins = True
         Left = 3
@@ -50,7 +51,7 @@ object frmSetting: TfrmSetting
             Width = 80
           end
           item
-            Caption = #20027#26426'TX'#21517#31216
+            Caption = #20027#26426' TX OSD '#21517#31216
             Width = 200
           end>
         GridLines = True
@@ -74,7 +75,7 @@ object frmSetting: TfrmSetting
             Width = 80
           end
           item
-            Caption = #20027#26426'TX'#21517#31216
+            Caption = #20027#26426' TX OSD '#21517#31216
             Width = 200
           end>
         GridLines = True
@@ -94,11 +95,11 @@ object frmSetting: TfrmSetting
         Checkboxes = True
         Columns = <
           item
-            Caption = 'ID'
+            Caption = #20027#26426'ID'
             Width = 80
           end
           item
-            Caption = #20027#26426'TX'#21517#31216
+            Caption = #20027#26426' TX OSD '#21517#31216
             Width = 200
           end>
         GridLines = True
@@ -113,7 +114,7 @@ object frmSetting: TfrmSetting
         Top = 42
         Width = 120
         Height = 40
-        Caption = #21047#26032#22352#24109
+        Caption = #21047#26032#20027#26426
         TabOrder = 3
         OnClick = Button4Click
       end
@@ -122,18 +123,33 @@ object frmSetting: TfrmSetting
         Top = 88
         Width = 120
         Height = 40
-        Caption = #20445#23384#22352#24109
+        Caption = #20445#23384#20027#26426
         TabOrder = 4
         OnClick = Button5Click
+      end
+      object Button10: TButton
+        Left = 918
+        Top = 344
+        Width = 120
+        Height = 40
+        Caption = #21453#36873
+        TabOrder = 5
+        OnClick = Button10Click
+      end
+      object Button11: TButton
+        Left = 918
+        Top = 390
+        Width = 120
+        Height = 40
+        Caption = #20840#36873
+        TabOrder = 6
+        OnClick = Button11Click
       end
     end
     object TabSheet3: TTabSheet
       Caption = #22352#24109#25512#36865#26435#38480
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 1028
-      ExplicitHeight = 0
+      OnShow = TabSheet3Show
       object Button6: TButton
         Left = 918
         Top = 88
@@ -176,7 +192,6 @@ object frmSetting: TfrmSetting
         TabOrder = 2
         ViewStyle = vsReport
         OnDblClick = ListView4DblClick
-        ExplicitLeft = -4
       end
       object ListView5: TListView
         AlignWithMargins = True
@@ -202,7 +217,6 @@ object frmSetting: TfrmSetting
         TabOrder = 3
         ViewStyle = vsReport
         OnDblClick = ListView5DblClick
-        ExplicitLeft = 3
       end
       object ListView6: TListView
         AlignWithMargins = True
@@ -228,18 +242,32 @@ object frmSetting: TfrmSetting
         TabOrder = 4
         ViewStyle = vsReport
         OnDblClick = ListView6DblClick
-        ExplicitLeft = 259
+      end
+      object Button12: TButton
+        Left = 918
+        Top = 344
+        Width = 120
+        Height = 40
+        Caption = #21453#36873
+        TabOrder = 5
+        OnClick = Button12Click
+      end
+      object Button13: TButton
+        Left = 918
+        Top = 390
+        Width = 120
+        Height = 40
+        Caption = #20840#36873
+        TabOrder = 6
+        OnClick = Button13Click
       end
     end
     object TabSheet4: TTabSheet
       Caption = #22352#24109#25509#31649#26435#38480
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 1028
-      ExplicitHeight = 0
+      OnShow = TabSheet4Show
       object Button8: TButton
-        Left = 916
+        Left = 918
         Top = 88
         Width = 120
         Height = 40
@@ -248,7 +276,7 @@ object frmSetting: TfrmSetting
         OnClick = Button8Click
       end
       object Button9: TButton
-        Left = 916
+        Left = 918
         Top = 42
         Width = 120
         Height = 40
@@ -305,7 +333,6 @@ object frmSetting: TfrmSetting
         TabOrder = 3
         ViewStyle = vsReport
         OnDblClick = ListView8DblClick
-        ExplicitLeft = 295
       end
       object ListView9: TListView
         AlignWithMargins = True
@@ -331,24 +358,33 @@ object frmSetting: TfrmSetting
         TabOrder = 4
         ViewStyle = vsReport
         OnDblClick = ListView9DblClick
-        ExplicitLeft = 559
+      end
+      object Button14: TButton
+        Left = 918
+        Top = 344
+        Width = 120
+        Height = 40
+        Caption = #21453#36873
+        TabOrder = 5
+        OnClick = Button14Click
+      end
+      object Button15: TButton
+        Left = 918
+        Top = 390
+        Width = 120
+        Height = 40
+        Caption = #20840#36873
+        TabOrder = 6
+        OnClick = Button15Click
       end
     end
     object TabSheet5: TTabSheet
       Caption = #22352#24109#36328#23631#35774#32622
       ImageIndex = 5
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 1028
-      ExplicitHeight = 0
     end
     object TabSheet8: TTabSheet
       Caption = #20854#23427
       ImageIndex = 7
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 1028
-      ExplicitHeight = 0
       object GroupBox1: TGroupBox
         Left = 43
         Top = 35

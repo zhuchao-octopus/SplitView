@@ -2,7 +2,7 @@
 {                                FastIniFile
 {                                -----------
 {
-{                     Copyright © 2002-2007 Pieter Zijlstra
+{                     Copyright ?2002-2007 Pieter Zijlstra
 {
 { A TIniFile replacement for INI-files larger then 64KB with support for
 { quoted values and (inline) comments. It's also faster then for instant

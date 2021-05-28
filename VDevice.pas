@@ -30,6 +30,9 @@ type
     MainRTSP: String;
     SubRTSP: String;
     b: Boolean;
+    TxPull: String;
+    RxPush: String;
+    RxGet: String;
   private
     FBuff: array of Byte;
   protected
@@ -42,11 +45,13 @@ type
 
     procedure SetBuffer(Buff: array of Byte);
     function Parser_Check_KP(): Boolean;
+    procedure save();
+    procedure load();
   end;
 
 implementation
 
-uses StrUtils, Unit200;
+uses StrUtils, Unit200, GlobalFunctions;
 { TVDevice }
 
 constructor TVDevice.Create(IP: String; Port: String);
@@ -54,11 +59,17 @@ begin
   Self.IP := IP;
   Self.Port := Port;
   b := false;
+  TxPull := '';
+  RxPush := '';
+  RxGet := '';
 end;
 
 constructor TVDevice.Create(Buff: array of Byte);
 begin
   b := false;
+  TxPull := '';
+  RxPush := '';
+  RxGet := '';
   SetBuffer(Buff);
 end;
 
@@ -67,17 +78,43 @@ begin
   Self.IP := IP;
   Self.Port := Port;
   b := false;
+  TxPull := '';
+  RxPush := '';
+  RxGet := '';
   SetBuffer(Buff);
 end;
 
 constructor TVDevice.Create();
 begin
   b := false;
+  TxPull := '';
+  RxPush := '';
+  RxGet := '';
 end;
 
 destructor TVDevice.Destroy;
 begin
   SetLength(FBuff, 0);
+end;
+
+procedure TVDevice.save;
+begin
+  if ini <> nil then
+  begin
+     ini.WriteString(name,'txpull',txpull);
+     ini.WriteString(name,'rxpush',rxpush);
+     ini.WriteString(name,'rxget',rxget);
+  end;
+end;
+
+procedure TVDevice.load;
+begin
+  if ini <> nil then
+  begin
+     txpull:=ini.ReadString(name,'txpull','');
+     rxpush:=ini.ReadString(name,'rxpush','');
+     rxget:=ini.ReadString(name,'rxget','');
+  end;
 end;
 
 procedure TVDevice.SetBuffer(Buff: array of Byte);
@@ -169,10 +206,9 @@ begin
   Self.ID := s;
 
   // 修正设备名称
-  i := pos(ID,name);
-  Name := copy(Name, 1, i-1 );
-  Name:=Name+ID;
-
+  i := pos(ID, name);
+  Name := copy(Name, 1, i - 1);
+  Name := Name + ID;
 
   pb := @FBuff[259];
   Self.TxaID := ByteToWideString2(pb, 5);

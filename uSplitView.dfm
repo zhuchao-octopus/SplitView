@@ -2,8 +2,8 @@ object SplitViewForm: TSplitViewForm
   Left = 0
   Top = 0
   Caption = #20806#31185#38899#35270#39057#22352#24109#31649#29702#31995#32479
-  ClientHeight = 663
-  ClientWidth = 1112
+  ClientHeight = 747
+  ClientWidth = 1137
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -21,44 +21,45 @@ object SplitViewForm: TSplitViewForm
   TextHeight = 16
   object SV: TSplitView
     AlignWithMargins = True
-    Left = 809
+    Left = 834
     Top = 50
     Width = 300
-    Height = 589
+    Height = 673
     Margins.Top = 0
     AnimationDelay = 5
+    Color = clScrollBar
     DoubleBuffered = False
     OpenedWidth = 300
-    ParentBackground = True
-    ParentColor = True
     Placement = svpRight
     TabOrder = 0
+    ExplicitLeft = 809
+    ExplicitHeight = 589
     object Notebook2: TNotebook
       Left = 0
       Top = 0
       Width = 300
-      Height = 562
+      Height = 640
       Align = alClient
-      Ctl3D = True
-      ParentCtl3D = False
+      PageIndex = 1
       TabOrder = 0
+      ExplicitHeight = 562
       object TPage
         Left = 0
         Top = 0
         Caption = #22352#24109#36830#25509
+        ExplicitHeight = 562
         object GroupBox1: TGroupBox
           AlignWithMargins = True
-          Left = 5
-          Top = 0
-          Width = 290
-          Height = 345
-          Margins.Left = 5
-          Margins.Top = 0
-          Margins.Right = 5
+          Left = 3
+          Top = 3
+          Width = 294
+          Height = 97
           Margins.Bottom = 0
           Align = alTop
           TabOrder = 0
-          ExplicitTop = -8
+          ExplicitLeft = 5
+          ExplicitTop = 0
+          ExplicitWidth = 290
           object Label1: TLabel
             Left = 3
             Top = 27
@@ -75,73 +76,88 @@ object SplitViewForm: TSplitViewForm
           end
           object Edit1: TEdit
             Left = 79
-            Top = 24
+            Top = 20
             Width = 197
             Height = 24
             Color = clBtnFace
+            ReadOnly = True
             TabOrder = 0
             OnKeyPress = Edit1KeyPress
           end
           object Edit2: TEdit
             Left = 79
-            Top = 54
+            Top = 59
             Width = 197
             Height = 24
             Color = clBtnFace
+            ReadOnly = True
             TabOrder = 1
             OnKeyPress = Edit2KeyPress
           end
+        end
+        object GroupBox4: TGroupBox
+          AlignWithMargins = True
+          Left = 3
+          Top = 103
+          Width = 294
+          Height = 534
+          Align = alClient
+          TabOrder = 1
+          ExplicitLeft = 64
+          ExplicitTop = 368
+          ExplicitWidth = 185
+          ExplicitHeight = 105
           object Button1: TButton
             AlignWithMargins = True
             Left = 5
-            Top = 162
-            Width = 280
+            Top = 21
+            Width = 284
             Height = 40
-            Align = alBottom
+            Align = alTop
             Caption = #36830#25509
-            TabOrder = 2
+            TabOrder = 0
             OnClick = Button1Click
-            ExplicitLeft = 7
+            ExplicitTop = 106
+            ExplicitWidth = 280
           end
           object Button4: TButton
             AlignWithMargins = True
             Left = 5
-            Top = 254
-            Width = 280
+            Top = 397
+            Width = 284
             Height = 40
             Align = alBottom
             Caption = #25628#32034#21457#23556#31471
-            TabOrder = 3
+            TabOrder = 1
             OnClick = Button4Click
-            ExplicitLeft = 6
-            ExplicitTop = 160
-            ExplicitWidth = 278
+            ExplicitTop = 198
+            ExplicitWidth = 280
           end
           object Button5: TButton
             AlignWithMargins = True
             Left = 5
-            Top = 208
-            Width = 280
+            Top = 443
+            Width = 284
             Height = 40
             Align = alBottom
             Caption = #25628#32034#25509#25910#31471
-            TabOrder = 4
+            TabOrder = 2
             OnClick = Button5Click
-            ExplicitLeft = 7
+            ExplicitTop = 198
+            ExplicitWidth = 280
           end
           object Button8: TButton
             AlignWithMargins = True
             Left = 5
-            Top = 300
-            Width = 280
+            Top = 489
+            Width = 284
             Height = 40
             Align = alBottom
             Caption = #25628#32034#25152#26377#35774#22791
-            TabOrder = 5
+            TabOrder = 3
             OnClick = Button8Click
-            ExplicitLeft = 9
-            ExplicitTop = 206
-            ExplicitWidth = 278
+            ExplicitTop = 244
+            ExplicitWidth = 280
           end
         end
       end
@@ -149,28 +165,16 @@ object SplitViewForm: TSplitViewForm
         Left = 0
         Top = 0
         Caption = #32593#32476#35843#35797
-        object Button3: TButton
-          AlignWithMargins = True
-          Left = 10
-          Top = 427
-          Width = 280
-          Height = 40
-          Margins.Left = 10
-          Margins.Right = 10
-          Align = alBottom
-          Caption = #33719#21462#26412#26426#20449#24687
-          TabOrder = 0
-          OnClick = Button3Click
-        end
+        ExplicitHeight = 562
         object GroupBox3: TGroupBox
           AlignWithMargins = True
           Left = 3
-          Top = 0
+          Top = 3
           Width = 294
           Height = 134
-          Margins.Top = 0
           Align = alTop
-          TabOrder = 1
+          TabOrder = 0
+          ExplicitTop = 0
           object Label4: TLabel
             Left = 6
             Top = 64
@@ -225,11 +229,12 @@ object SplitViewForm: TSplitViewForm
         object GroupBox2: TGroupBox
           AlignWithMargins = True
           Left = 3
-          Top = 140
+          Top = 143
           Width = 294
           Height = 153
           Align = alTop
-          TabOrder = 2
+          TabOrder = 1
+          ExplicitTop = 140
           object Label3: TLabel
             Left = 4
             Top = 16
@@ -239,7 +244,7 @@ object SplitViewForm: TSplitViewForm
           end
           object Label6: TLabel
             Left = 7
-            Top = 49
+            Top = 48
             Width = 80
             Height = 16
             Caption = #36828#31243#31471#21475#65306
@@ -289,81 +294,109 @@ object SplitViewForm: TSplitViewForm
           end
           object Button9: TButton
             AlignWithMargins = True
-            Left = 8
+            Left = 5
             Top = 108
-            Width = 278
+            Width = 284
             Height = 40
-            Margins.Left = 6
-            Margins.Right = 6
             Align = alBottom
             Caption = #36830#25509
             TabOrder = 3
             OnClick = Button9Click
+            ExplicitLeft = 8
+            ExplicitWidth = 278
           end
         end
-        object Button6: TButton
+        object GroupBox5: TGroupBox
           AlignWithMargins = True
-          Left = 10
-          Top = 473
-          Width = 280
-          Height = 40
-          Margins.Left = 10
-          Margins.Right = 10
-          Align = alBottom
-          Caption = #28165#26970#35774#22791#21015#34920
-          TabOrder = 3
-          OnClick = Button6Click
-        end
-        object Button7: TButton
-          AlignWithMargins = True
-          Left = 10
-          Top = 519
-          Width = 280
-          Height = 40
-          Margins.Left = 10
-          Margins.Right = 10
-          Align = alBottom
-          Caption = #28165#26970#21382#21490#35760#24405
-          TabOrder = 4
-          OnClick = Button7Click
-        end
-        object Button2: TButton
-          AlignWithMargins = True
-          Left = 10
-          Top = 375
-          Width = 280
-          Height = 46
-          Margins.Left = 10
-          Margins.Right = 10
-          Align = alBottom
-          Caption = #21457#36865#25968#25454
-          TabOrder = 5
-          OnClick = Button2Click
-        end
-        object Memo2: TMemo
-          AlignWithMargins = True
-          Left = 10
-          Top = 299
-          Width = 280
-          Height = 70
-          Margins.Left = 10
-          Margins.Right = 10
+          Left = 3
+          Top = 302
+          Width = 294
+          Height = 335
           Align = alClient
-          Lines.Strings = (
-            'root'
-            'e e_devfind_off')
-          ScrollBars = ssBoth
-          TabOrder = 6
+          TabOrder = 2
+          ExplicitHeight = 251
+          object Button2: TButton
+            AlignWithMargins = True
+            Left = 5
+            Top = 146
+            Width = 284
+            Height = 46
+            Align = alBottom
+            Caption = #21457#36865#25968#25454
+            TabOrder = 0
+            OnClick = Button2Click
+            ExplicitLeft = 10
+            ExplicitTop = 369
+            ExplicitWidth = 280
+          end
+          object Button3: TButton
+            AlignWithMargins = True
+            Left = 5
+            Top = 198
+            Width = 284
+            Height = 40
+            Align = alBottom
+            Caption = #33719#21462#26412#26426#20449#24687
+            TabOrder = 1
+            OnClick = Button3Click
+            ExplicitLeft = 10
+            ExplicitTop = 421
+            ExplicitWidth = 280
+          end
+          object Button6: TButton
+            AlignWithMargins = True
+            Left = 5
+            Top = 244
+            Width = 284
+            Height = 40
+            Align = alBottom
+            Caption = #28165#26970#35774#22791#21015#34920
+            TabOrder = 2
+            OnClick = Button6Click
+            ExplicitLeft = 10
+            ExplicitTop = 467
+            ExplicitWidth = 280
+          end
+          object Button7: TButton
+            AlignWithMargins = True
+            Left = 5
+            Top = 290
+            Width = 284
+            Height = 40
+            Align = alBottom
+            Caption = #28165#26970#21382#21490#35760#24405
+            TabOrder = 3
+            OnClick = Button7Click
+            ExplicitLeft = 10
+            ExplicitTop = 513
+            ExplicitWidth = 280
+          end
+          object Memo2: TMemo
+            AlignWithMargins = True
+            Left = 5
+            Top = 21
+            Width = 284
+            Height = 119
+            Align = alClient
+            Lines.Strings = (
+              'e e_devfind_off')
+            ScrollBars = ssBoth
+            TabOrder = 4
+            ExplicitLeft = 3
+            ExplicitTop = 3
+            ExplicitWidth = 288
+            ExplicitHeight = 126
+          end
         end
       end
     end
     object TabSet1: TTabSet
-      Left = 0
-      Top = 562
-      Width = 300
+      AlignWithMargins = True
+      Left = 3
+      Top = 643
+      Width = 294
       Height = 27
       Align = alBottom
-      DitherBackground = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -19
@@ -378,92 +411,102 @@ object SplitViewForm: TSplitViewForm
         #32593#32476#35843#35797)
       TabIndex = 0
       OnChange = TabSet1Change
+      ExplicitLeft = 0
+      ExplicitTop = 562
+      ExplicitWidth = 300
     end
   end
   object Notebook1: TNotebook
     Left = 0
     Top = 50
-    Width = 806
-    Height = 592
+    Width = 831
+    Height = 676
     Align = alClient
     TabOrder = 1
+    ExplicitWidth = 806
+    ExplicitHeight = 592
     object TPage
       Left = 0
       Top = 0
       Caption = #33410#28857#35774#22791#31649#29702
+      ExplicitWidth = 806
+      ExplicitHeight = 592
       object Panel1: TPanel
         Left = 0
         Top = 0
-        Width = 806
-        Height = 592
+        Width = 831
+        Height = 676
         Align = alClient
         BevelOuter = bvNone
-        Color = clWindow
-        ParentBackground = False
+        ParentColor = True
         TabOrder = 0
+        ExplicitWidth = 806
+        ExplicitHeight = 592
         object Splitter1: TSplitter
           Left = 0
-          Top = 370
-          Width = 806
-          Height = 8
+          Top = 457
+          Width = 831
+          Height = 5
           Cursor = crVSplit
           Align = alBottom
-          AutoSnap = False
-          ExplicitTop = 563
-          ExplicitWidth = 862
+          ParentColor = False
+          ExplicitTop = 370
+          ExplicitWidth = 806
         end
         object Panel3: TPanel
           Left = 0
-          Top = 378
-          Width = 806
+          Top = 462
+          Width = 831
           Height = 214
           Align = alBottom
+          BevelOuter = bvNone
           ParentColor = True
           TabOrder = 0
+          ExplicitTop = 378
+          ExplicitWidth = 806
           object Memo1: TMemo
             AlignWithMargins = True
-            Left = 4
-            Top = 4
-            Width = 798
-            Height = 206
+            Left = 3
+            Top = 3
+            Width = 825
+            Height = 208
             Align = alClient
             BorderStyle = bsNone
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -16
-            Font.Name = #26032#23435#20307
-            Font.Style = []
-            ParentFont = False
             ReadOnly = True
             ScrollBars = ssBoth
             TabOrder = 0
+            ExplicitWidth = 800
           end
         end
         object Panel2: TPanel
           Left = 0
           Top = 0
-          Width = 806
-          Height = 370
+          Width = 831
+          Height = 457
           Align = alClient
+          BevelOuter = bvNone
           ParentColor = True
           TabOrder = 1
+          ExplicitWidth = 806
+          ExplicitHeight = 370
           object Splitter2: TSplitter
-            Left = 594
-            Top = 1
+            Left = 593
+            Top = 0
             Width = 8
-            Height = 368
+            Height = 457
             AutoSnap = False
             Color = clBtnFace
             ParentColor = False
             ExplicitLeft = 413
+            ExplicitTop = 1
             ExplicitHeight = 558
           end
           object ListView1: TListView
             AlignWithMargins = True
-            Left = 4
-            Top = 4
+            Left = 3
+            Top = 3
             Width = 589
-            Height = 362
+            Height = 451
             Margins.Right = 1
             Align = alLeft
             BorderStyle = bsNone
@@ -539,15 +582,16 @@ object SplitViewForm: TSplitViewForm
             ViewStyle = vsReport
             OnClick = ListView1Click
             OnDblClick = ListView1DblClick
-            ExplicitLeft = 1
-            ExplicitTop = 2
+            ExplicitLeft = 4
+            ExplicitTop = 4
+            ExplicitHeight = 362
           end
           object ListView2: TListView
             AlignWithMargins = True
-            Left = 603
-            Top = 4
-            Width = 199
-            Height = 362
+            Left = 602
+            Top = 3
+            Width = 226
+            Height = 451
             Margins.Left = 1
             Align = alClient
             BorderStyle = bsNone
@@ -611,8 +655,8 @@ object SplitViewForm: TSplitViewForm
             ViewStyle = vsReport
             OnClick = ListView2Click
             OnDblClick = ListView2DblClick
-            ExplicitLeft = 604
-            ExplicitTop = 2
+            ExplicitWidth = 201
+            ExplicitHeight = 364
           end
         end
       end
@@ -621,28 +665,28 @@ object SplitViewForm: TSplitViewForm
       Left = 0
       Top = 0
       Caption = '1'
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 806
+      ExplicitHeight = 592
     end
     object TPage
       Left = 0
       Top = 0
       Caption = '2'
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 806
+      ExplicitHeight = 592
     end
     object TPage
       Left = 0
       Top = 0
       Caption = '3'
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 806
+      ExplicitHeight = 592
     end
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 642
-    Width = 1112
+    Top = 726
+    Width = 1137
     Height = 21
     Panels = <
       item
@@ -650,18 +694,24 @@ object SplitViewForm: TSplitViewForm
         Width = 100
       end
       item
-        Width = 200
+        Width = 400
+      end
+      item
+        Width = 50
       end>
+    ExplicitTop = 642
+    ExplicitWidth = 1112
   end
   object pnlToolbar: TPanel
     Left = 0
     Top = 0
-    Width = 1112
+    Width = 1137
     Height = 50
     Align = alTop
     BevelOuter = bvNone
     ParentBackground = False
     TabOrder = 3
+    ExplicitWidth = 1112
     object imgMenu: TImage
       Left = 10
       Top = 10
@@ -2309,9 +2359,9 @@ object SplitViewForm: TSplitViewForm
     object lblTitle: TLabel
       Left = 68
       Top = 12
-      Width = 198
+      Width = 162
       Height = 21
-      Caption = #20806#31185#38899#35270#39057#22352#24109#31649#29702#31995#32479
+      Caption = #20806#31185#38899#35270#39057#22352#24109#31649#29702
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlack
       Font.Height = -16
@@ -2321,9 +2371,9 @@ object SplitViewForm: TSplitViewForm
     end
     object cbxVclStyles: TComboBox
       AlignWithMargins = True
-      Left = 820
+      Left = 833
       Top = 15
-      Width = 282
+      Width = 294
       Height = 24
       Margins.Top = 15
       Margins.Right = 10
@@ -2331,6 +2381,7 @@ object SplitViewForm: TSplitViewForm
       Style = csDropDownList
       TabOrder = 0
       OnChange = cbxVclStylesChange
+      ExplicitLeft = 808
     end
   end
   object IdTCPClient1: TIdTCPClient
@@ -2338,7 +2389,6 @@ object SplitViewForm: TSplitViewForm
     OnDisconnected = IdTCPClient1Disconnected
     OnConnected = IdTCPClient1Connected
     ConnectTimeout = 3000
-    IPVersion = Id_IPv4
     Port = 0
     ReadTimeout = -1
     Left = 216

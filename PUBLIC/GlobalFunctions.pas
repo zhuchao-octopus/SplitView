@@ -4,7 +4,7 @@ interface
 
 uses SysUtils, Classes, Windows, GlobalTypes, SyncObjs, ShlObj, GlobalConst,
 
-  System.Variants, IdGlobal, unit200;
+System.Variants, IdGlobal, unit200,inifiles;
 
 // 取的汉字拼音的首字母
 function GetHzPy(const AHzStr: string): string;
@@ -57,6 +57,11 @@ function HexStrToBuff(hs: string): TIdBytes;
 function StrToBuff(s: String; buff: array of Byte): integer;
 function UnicodeToChinese(inputstr: string): string;
 function ChineseToUniCode(sStr: string): string;
+
+
+var
+ ini: TInifile;
+
 
 implementation
 

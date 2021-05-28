@@ -5,6 +5,8 @@
 
 
 
+
+
 // This software is Copyright (c) 2015 Embarcadero Technologies, Inc.
 // You may only use this software if you are an authorized licensee
 // of an Embarcadero developer tools product.
@@ -41,7 +43,7 @@ uses
   Vcl.ActnList, IdTCPConnection, IdTCPClient, IdIPMCastBase, IdIPMCastClient,
   IdBaseComponent, IdComponent, IdUDPBase, IdUDPServer, Vcl.Samples.Spin,
   Vcl.Mask, IdGlobal, IdSocketHandle, VDeviceGroup, VDevice, Vcl.Tabs,
-  IdAntiFreezeBase, IdAntiFreeze, DataEngine, ClientObject;
+  IdAntiFreezeBase, IdAntiFreeze, DataEngine, ClientObject, inifiles;
 
 type
   TSplitViewForm = class(TForm)
@@ -96,6 +98,8 @@ type
     imgMenu: TImage;
     lblTitle: TLabel;
     cbxVclStyles: TComboBox;
+    GroupBox4: TGroupBox;
+    GroupBox5: TGroupBox;
 
     procedure FormCreate(Sender: TObject);
     procedure cbxVclStylesChange(Sender: TObject);
@@ -156,6 +160,7 @@ var
 
   srx, stx: TVDevice;
 
+
 implementation
 
 uses
@@ -211,25 +216,21 @@ begin
   Result := TClientObject(DataEngineManager.get(Ip + ':' + IntToStr(Port)));
   if Result <> nil then
   begin
-    if not Result.Client.connected then
-    begin
-      DataEngineManager.DoIt(ClientObject.OpenTCP);
-    end
+    if Result.checkStOK() then
+       exit
     else
-    begin
-      St(1, 'TCP -->' + Result.Client.Host + ':' + IntToStr(Result.Client.Port))
-    end;
-    Exit;
+      DataEngineManager.Del(Ip + ':' + IntToStr(Port));
   end;
 
   try
-    ClientObject := TClientObject.Create(False);
     IdTCPClient1.Host := Ip;
     IdTCPClient1.Port := Port;
+    ClientObject := TClientObject.Create(true); // 运行连接线程
     ClientObject.AssignTCPClient(IdTCPClient1);
     ClientObject.Client.tag := Integer(Pointer(TClientObject(ClientObject)));
     DataEngineManager.Add(Ip + ':' + IntToStr(Port), ClientObject);
     DataEngineManager.DoIt(ClientObject.OpenTCP);
+    St(2, 'Obj:' + IntToStr(DataEngineManager.count()));
   Except
     on e: Exception do
     begin
@@ -242,14 +243,16 @@ begin
 end;
 
 procedure TSplitViewForm.FormClose(Sender: TObject; var Action: TCloseAction);
+
 begin
   // if IdTCPClient1.connected then
   // IdTCPClient1.Disconnect;
+  //for I := 0 to DeviceList.dev do
 end;
 
 procedure TSplitViewForm.FormCreate(Sender: TObject);
 var
-  StyleName: string;
+  StyleName, filename: string;
   S: string;
 begin
   for StyleName in TStyleManager.StyleNames do
@@ -260,6 +263,9 @@ begin
 
   Caption := APPLICATION_TITLE_NAME + ' v' + S + ' - ' +
 {$IFDEF CPUX64}'64'{$ELSE}'32'{$ENDIF} + ' bit';
+
+  filename := ExtractFilePath(Application.ExeName) + '\' + 'zk.ini';
+  ini := TInifile.Create(filename);
 
   SynchroPage(0);
   TabSet1.Tabs := Notebook2.Pages;
@@ -303,7 +309,7 @@ end;
 procedure TSplitViewForm.IdTCPClient1Status(ASender: TObject; const AStatus: TIdStatus; const AStatusText: string);
 begin
   Log('TCP Status:' + AStatusText);
-  St(1, 'TCP Status:' + AStatusText);
+  St(1,'TCP Status:' + AStatusText);
 end;
 
 procedure TSplitViewForm.imgMenuClick(Sender: TObject);
@@ -424,43 +430,44 @@ end;
 
 procedure TSplitViewForm.Button1Click(Sender: TObject);
 var
-  tcp: TClientObject;
+  // tcp: TClientObject;
   udp: TClientObject;
   // txid:Integer;
-  t,i: Integer;
+  t, i: Integer;
   str: String;
-  buff:array[0..2] of byte;
+  buff: array [0 .. 2] of byte;
 begin
   if srx = nil then
     Exit;
   if stx = nil then
     Exit;
 
-  t := StrToInt(Edit1.text);
+  t := StrToInt(stx.ID);
 
-  tcp := GetTCPConnection(trim(srx.Ip), 24);
-  if tcp = nil then
-  begin
+  { tcp := GetTCPConnection(trim(srx.Ip), 24);
+    if tcp = nil then
+    begin
     Showmessage('没有建立有效的TCP连接。');
     Exit;
-  end;
+    end;
 
-  if tcp.Client.connected then
-  begin
+    if tcp.Client.connected then
+    begin
     tcp.memo := Memo1;
     tcp.SetCallBack(nil);
 
     str := 'e e_reconnect::' + IntToStr(t) + ';astparam s reset_ch_on_boot n;astparam save';
     tcp.SetWork(str, 900);
-  end
-  else
+    end
+    else }
   begin
     // Showmessage('TCP 连接不成功。');
-    //Ip := '225.1.0.0';
-    //Port := 3333;
-    buff[0]:=$FF;
-    buff[1]:= strtoint(srx.id);
-    buff[2]:= t;
+    // Ip := '225.1.0.0';
+    // Port := 3333;
+    buff[0] := $FF;
+    buff[1] := StrToInt(srx.ID);
+    buff[2] := t;
+    Log('UDP:' + IntToStr(buff[0]) + ' RX:' + IntToStr(buff[1]) + ' TX:' + IntToStr(buff[2]));
     for i := 0 to LocalIPList.count - 1 do
     begin
       udp := GetUDPConnection(LocalIPList[i], 3334);
@@ -486,6 +493,7 @@ begin
     // UDPSendData(trim(ComboBox1.text), StrToInt(trim(Edit7.text)),
     // ComboBox3.text, StrToInt(trim(Edit5.text)), Memo2.text);
   end;
+
   if ComboBox2.ItemIndex > 1 then
   begin
     tcp := GetTCPConnection(trim(ComboBox3.text), StrToInt(trim(Edit5.text)));
@@ -732,7 +740,10 @@ end;
 procedure TSplitViewForm.Log(const Msg: string);
 begin
   if Memo1 <> nil then
+  begin
     Memo1.Lines.Add(Msg);
+    Memo1.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+  end;
 end;
 
 procedure TSplitViewForm.St(slot: Integer; Msg: String);

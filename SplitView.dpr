@@ -22,10 +22,10 @@ uses
   ClientObject in 'PUBLIC\ClientObject.pas',
   Trash in 'PUBLIC\Trash.pas',
   Setting in 'Setting.pas' {frmSetting},
-  ObjManager in 'ObjManager.pas';
+  Vcl.Themes,
+  Vcl.Styles;
 
 {$R *.res}
-
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
