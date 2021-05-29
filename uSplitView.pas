@@ -7,6 +7,7 @@
 
 
 
+
 // This software is Copyright (c) 2015 Embarcadero Technologies, Inc.
 // You may only use this software if you are an authorized licensee
 // of an Embarcadero developer tools product.
@@ -139,6 +140,12 @@ type
     procedure Button1Click(Sender: TObject);
     procedure ListView2DblClick(Sender: TObject);
     procedure imgMenuClick(Sender: TObject);
+    procedure ListView1Compare(Sender: TObject; Item1, Item2: TListItem;
+      Data: Integer; var Compare: Integer);
+    procedure ListView2Compare(Sender: TObject; Item1, Item2: TListItem;
+      Data: Integer; var Compare: Integer);
+    procedure ListView1ColumnClick(Sender: TObject; Column: TListColumn);
+    procedure ListView2ColumnClick(Sender: TObject; Column: TListColumn);
   private
     procedure Log(const Msg: string);
     procedure SynchroPage(ItemIndex: Integer);
@@ -150,7 +157,7 @@ type
     function GetTCPConnection(Ip: String; Port: Integer): TClientObject;
     function GetUDPConnection(Ip: String; Port: Integer): TClientObject;
     procedure St(slot: Integer; Msg: String);
-
+    function GetDevice(Name: String): TVDevice;
   public
     // InitFlag:Boolean;
   end;
@@ -159,7 +166,6 @@ var
   SplitViewForm: TSplitViewForm;
 
   srx, stx: TVDevice;
-
 
 implementation
 
@@ -217,7 +223,7 @@ begin
   if Result <> nil then
   begin
     if Result.checkStOK() then
-       exit
+      Exit
     else
       DataEngineManager.Del(Ip + ':' + IntToStr(Port));
   end;
@@ -247,7 +253,7 @@ procedure TSplitViewForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   // if IdTCPClient1.connected then
   // IdTCPClient1.Disconnect;
-  //for I := 0 to DeviceList.dev do
+  // for I := 0 to DeviceList.dev do
 end;
 
 procedure TSplitViewForm.FormCreate(Sender: TObject);
@@ -309,7 +315,7 @@ end;
 procedure TSplitViewForm.IdTCPClient1Status(ASender: TObject; const AStatus: TIdStatus; const AStatusText: string);
 begin
   Log('TCP Status:' + AStatusText);
-  St(1,'TCP Status:' + AStatusText);
+  St(1, 'TCP Status:' + AStatusText);
 end;
 
 procedure TSplitViewForm.imgMenuClick(Sender: TObject);
@@ -329,7 +335,7 @@ end;
 procedure TSplitViewForm.UpdateListView();
 var
   ListItem: TListItem;
-  i, J, k: Integer;
+  i, k: Integer;
   dv: TVDevice;
 Label Lend;
 begin
@@ -347,10 +353,10 @@ begin
 
       with ListView2 do
       begin
-        J := ListView2.Items.count + 1;
+        //J := ListView2.Items.count + 1;
         ListItem := Items.Add;
-        ListItem.Caption := IntToStr(J);
-        ListItem.subitems.Add(dv.Name);
+        ListItem.Caption := dv.Name;//IntToStr(J);
+        //ListItem.subitems.Add(dv.Name);
         ListItem.subitems.Add(dv.ID);
         ListItem.subitems.Add(dv.Ip);
         ListItem.subitems.Add(dv.Port);
@@ -375,10 +381,10 @@ begin
         Continue;
       with ListView1 do
       begin
-        J := ListView1.Items.count + 1;
+        //J := ListView1.Items.count + 1;
         ListItem := Items.Add;
-        ListItem.Caption := IntToStr(J);
-        ListItem.subitems.Add(dv.Name);
+        ListItem.Caption := dv.Name;//IntToStr(J);
+        //ListItem.subitems.Add(dv.Name);
         ListItem.subitems.Add(dv.ID);
         ListItem.subitems.Add(dv.Ip);
         ListItem.subitems.Add(dv.Port);
@@ -643,36 +649,51 @@ begin
   Button8.Enabled := true;
 end;
 
+function TSplitViewForm.GetDevice(Name: String): TVDevice;
+begin
+  Result := DeviceList.get(Name);
+end;
+
 procedure TSplitViewForm.ListView1Click(Sender: TObject);
 var
   ListItem: TListItem;
-  nanme: String;
-  ID: String;
 begin
   ListItem := ListView1.Selected;
   if ListItem = nil then
     Exit;
-  nanme := ListItem.subitems.Strings[0];
-  ID := ListItem.subitems.Strings[1];
-  Edit2.text := nanme;
-  ComboBox3.text := ListItem.subitems.Strings[2];
-  srx := DeviceList.get(nanme);
+  srx := GetDevice(ListItem.Caption);
+  if srx <> nil then
+  begin
+    Edit2.text := srx.Name;;
+    ComboBox3.text := srx.ID;
+  end;
+end;
+
+procedure TSplitViewForm.ListView1ColumnClick(Sender: TObject;
+  Column: TListColumn);
+begin
+(Sender as TListView).CustomSort(nil, Column.Index);
+end;
+
+procedure TSplitViewForm.ListView1Compare(Sender: TObject; Item1,
+  Item2: TListItem; Data: Integer; var Compare: Integer);
+begin
+if Data = 0 then //按标题列排序
+    Compare := CompareStr(Item1.Caption, Item2.Caption)
+  else //按其他列排序
+    Compare := CompareStr(Item1.SubItems.Strings[Data-1], Item2.SubItems.Strings[Data-1]);
 end;
 
 procedure TSplitViewForm.ListView1DblClick(Sender: TObject);
 var
   ListItem: TListItem;
-  nanme: String;
-  ID: String;
   dv: TVDevice;
 begin
   ListItem := ListView1.Selected;
   if ListItem = nil then
     Exit;
-  nanme := ListItem.subitems.Strings[0];
-  ID := ListItem.subitems.Strings[1];
-  Edit2.text := ID;
-  dv := DeviceList.get(nanme);
+  dv := GetDevice(ListItem.Caption);
+
   if (dv <> nil) then
   begin
     frmSetting.dv := dv;
@@ -693,33 +714,43 @@ end;
 procedure TSplitViewForm.ListView2Click(Sender: TObject);
 var
   ListItem: TListItem;
-  nanme: String;
-  ID: String;
 begin
   ListItem := ListView2.Selected;
   if ListItem = nil then
     Exit;
-  nanme := ListItem.subitems.Strings[0];
-  ID := ListItem.subitems.Strings[1];
-  Edit1.text := nanme;
-  ComboBox3.text := ListItem.subitems.Strings[2];
-  stx := DeviceList.get(nanme);
+  stx := GetDevice(ListItem.Caption);
+  if stx <> nil then
+  begin
+    Edit1.text := stx.Name;
+    ComboBox3.text := stx.ID;
+  end;
+end;
+
+procedure TSplitViewForm.ListView2ColumnClick(Sender: TObject;
+  Column: TListColumn);
+begin
+(Sender as TListView).CustomSort(nil, Column.Index);
+end;
+
+procedure TSplitViewForm.ListView2Compare(Sender: TObject; Item1,
+  Item2: TListItem; Data: Integer; var Compare: Integer);
+begin
+if Data = 0 then //按标题列排序
+    Compare := CompareStr(Item1.Caption, Item2.Caption)
+  else //按其他列排序
+    Compare := CompareStr(Item1.SubItems.Strings[Data-1], Item2.SubItems.Strings[Data-1]);
 end;
 
 procedure TSplitViewForm.ListView2DblClick(Sender: TObject);
 var
   ListItem: TListItem;
-  nanme: String;
-  ID: String;
   dv: TVDevice;
 begin
   ListItem := ListView2.Selected;
   if ListItem = nil then
     Exit;
-  nanme := ListItem.subitems.Strings[0];
-  ID := ListItem.subitems.Strings[1];
-  Edit2.text := ID;
-  dv := DeviceList.get(nanme);
+  dv := GetDevice(ListItem.Caption);
+
   if (dv <> nil) then
   begin
     frmSetting.dv := dv;
