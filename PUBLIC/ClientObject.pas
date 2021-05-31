@@ -51,7 +51,7 @@ type
     FUDP: TIdUDPServer;
     FRunning: Boolean;
     // FLastTick: Cardinal;
-    FuiLock: TCriticalSection;
+    //FuiLock: TCriticalSection;
     FSleepTime: Integer;
     FDataCallBack: TTCPWorkEent;
     cs: TCriticalSection;
@@ -59,8 +59,6 @@ type
     FWorkList: TList;
     procedure SetuiLock(const Value: TCriticalSection);
     procedure SetSleepTime(const Value: Integer);
-    procedure Log(msg: String); overload;
-    procedure Log(sl: TStringlist); overload;
 
     procedure IdUDPRead(AThread: TIdUDPListenerThread; const AData: TIdBytes; ABinding: TIdSocketHandle);
     procedure InitUDP(lip: String; lPort: Integer);
@@ -77,7 +75,7 @@ type
     procedure stop();
     property SleepTime: Integer read FSleepTime write SetSleepTime;
     property Client: TIdTCPClient read FTCPClient;
-    property uiLock: TCriticalSection read FuiLock write SetuiLock;
+    //property uiLock: TCriticalSection read FuiLock write SetuiLock;
 
     procedure UDPSendHexStr(Ip: String; Port: Integer; hs: String);
     procedure TCPSendHexStr(hs: String);
@@ -85,6 +83,10 @@ type
     procedure SetCallBack(DataCallBack: TTCPWorkEent);
     function GetWork(): TWork;
     function checkStOK():Boolean;
+
+
+    procedure Log(msg: String); overload;
+    procedure Log(sl: TStringlist); overload;
   end;
 
 implementation
@@ -312,8 +314,8 @@ begin
       if Assigned(FDataCallBack) and (temp <> '') then
       begin
         FDataCallBack(temp, -1);
-        temp := '';
       end;
+      temp := '';
       ww.Free;
       ww := nil;
     end;
@@ -420,12 +422,10 @@ procedure TClientObject.Log(sl: TStringlist);
 begin
   if (Memo = nil) then
     Exit;
-  if uiLock <> nil then
-    uiLock.Enter;
+
   Memo.Clear;
   Memo.Lines.AddStrings(sl);
-  if uiLock <> nil then
-    uiLock.Leave;
+
   Memo.Perform($0115, SB_BOTTOM, 0);
 end;
 
@@ -434,13 +434,10 @@ begin
   if (Memo = nil) then
     Exit;
 
-  if uiLock <> nil then
-    uiLock.Enter;
 
   Memo.Lines.Add(msg);
   Memo.Perform($0115, SB_BOTTOM, 0);
-  if uiLock <> nil then
-    uiLock.Leave;
+
 end;
 
 procedure TClientObject.SetSleepTime(const Value: Integer);
@@ -450,7 +447,7 @@ end;
 
 procedure TClientObject.SetuiLock(const Value: TCriticalSection);
 begin
-  FuiLock := Value;
+  //FuiLock := Value;
 end;
 
 end.

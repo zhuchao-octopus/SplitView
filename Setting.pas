@@ -516,15 +516,17 @@ end;
 procedure TfrmSetting.Button16Click(Sender: TObject);
 var
   buff: array [0 .. 2] of Byte;
+  str: String;
 begin
-  buff[0] := $Fc;
+  buff[0] := $FC;
   buff[1] := StrToInt(dv.id);
   buff[2] := SpinEdit1.Value shl 4 + SpinEdit2.Value;
   // Log('UDP:' + IntToStr(buff[0]) + ' RX:' + IntToStr(buff[1]) + ' TX:' + IntToStr(buff[2]));
-
+  str := BuffToHexStr(buff);
   if udp <> nil then
   begin
-    udp.UDPSendHexStr('225.1.0.0', 3333, BuffToHexStr(buff));
+    udp.Log('UDP:' + str);
+    udp.UDPSendHexStr('225.1.0.0', 3333, str);
   end;
 
 end;
@@ -532,17 +534,19 @@ end;
 procedure TfrmSetting.Button17Click(Sender: TObject);
 var
   buff: array [0 .. 2] of Byte;
+  str: String;
 begin
   buff[0] := $FD;
   buff[1] := StrToInt(dv.id);
   buff[2] := SpinEdit3.Value shl 4 + SpinEdit4.Value;
   // Log('UDP:' + IntToStr(buff[0]) + ' RX:' + IntToStr(buff[1]) + ' TX:' + IntToStr(buff[2]));
 
+  str := BuffToHexStr(buff);
   if udp <> nil then
   begin
-    udp.UDPSendHexStr('225.1.0.0', 3333, BuffToHexStr(buff));
+    udp.Log('UDP:' + str);
+    udp.UDPSendHexStr('225.1.0.0', 3333, str);
   end;
-
 end;
 
 procedure TfrmSetting.Button19Click(Sender: TObject);
@@ -557,9 +561,9 @@ begin
   str := ''; // dv.MAC+','+IntToStr(dv.x)+','+IntToStr(y);
   x := 0;
   y := 0;
-  for i := 1 to StringGrid1.RowCount do
+  for i := 1 to StringGrid1.RowCount - 1 do
   begin
-    for j := 1 to StringGrid1.ColCount do
+    for j := 1 to StringGrid1.ColCount - 1 do
     begin
       if Trim(StringGrid1.Cells[j, i]) = dv.id then
       begin
@@ -576,9 +580,9 @@ begin
     Exit;
   end;
 
-  for i := 1 to StringGrid1.RowCount do
+  for i := 1 to StringGrid1.RowCount - 1 do
   begin
-    for j := 1 to StringGrid1.ColCount do
+    for j := 1 to StringGrid1.ColCount - 1 do
     begin
       ldv := DeviceList.get(Trim(StringGrid1.Cells[j, i]));
       if ldv <> nil then
@@ -586,13 +590,17 @@ begin
         if str <> '' then
           str := str + ':';
         str := str + ldv.MAC + ',' + IntToStr(i - x) + ',' + IntToStr(j - y);
+        break;
       end;
     end;
   end;
 
   if (str <> '') and (udp <> nil) then
   begin
-    udp.UDPSendHexStr('225.1.0.0', 3333, str);
+    // udp.UDPSendHexStr('225.1.0.0', 3333, str);
+    str := 'astparam s kmoip_roaming_layout ' + str;
+    tcp.SetWork(str, 900);
+    tcp.SetWork('astparam save;reboot', 900);
   end;
 end;
 
@@ -1117,14 +1125,15 @@ begin
     RxName.LoadFromFile(fileName);
 
   StringGrid1.ColWidths[0] := 25;
-  for i := 1 to StringGrid1.RowCount do
+  for i := 1 to StringGrid1.RowCount - 1 do
   begin
     StringGrid1.Cells[0, i] := IntToStr(i);
   end;
-  for i := 1 to StringGrid1.ColCount do
+  for i := 1 to StringGrid1.ColCount - 1 do
   begin
     StringGrid1.Cells[i, 0] := IntToStr(i);
   end;
+
   // SpinEdit5.MaxValue := StringGrid1.ColCount;
   // SpinEdit6.MaxValue := StringGrid1.RowCount;
 end;
@@ -1136,6 +1145,8 @@ begin
 end;
 
 procedure TfrmSetting.FormShow(Sender: TObject);
+var
+  i, j: Integer;
 begin
   if dv <> nil then
   begin
@@ -1175,8 +1186,16 @@ begin
       ListView8.Clear;
       ListView9.Clear;
     end;
+  end;
 
+  for i := 1 to StringGrid1.RowCount - 1 do
+  begin
+    for j := 1 to StringGrid1.ColCount - 1 do
+      StringGrid1.Cells[j, i] := '';
   end;
 end;
+
+
+
 
 end.

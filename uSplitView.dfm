@@ -38,11 +38,14 @@ object SplitViewForm: TSplitViewForm
       Width = 300
       Height = 591
       Align = alClient
+      PageIndex = 1
       TabOrder = 0
       object TPage
         Left = 0
         Top = 0
         Caption = #22352#24109#36830#25509
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object GroupBox1: TGroupBox
           AlignWithMargins = True
           Left = 3
@@ -671,7 +674,6 @@ object SplitViewForm: TSplitViewForm
       Style = csDropDownList
       TabOrder = 0
       OnChange = cbxVclStylesChange
-      ExplicitLeft = 833
     end
   end
   object IdTCPClient1: TIdTCPClient

@@ -216,10 +216,7 @@ begin
 end;
 
 function TSplitViewForm.GetTCPConnection(Ip: String; Port: Integer): TClientObject;
-var
-  ClientObject: TClientObject;
 begin
-  ClientObject := nil;
   Result := TClientObject(DataEngineManager.get(Ip + ':' + IntToStr(Port)));
   if Result <> nil then
   begin
@@ -232,11 +229,11 @@ begin
   try
     IdTCPClient1.Host := Ip;
     IdTCPClient1.Port := Port;
-    ClientObject := TClientObject.Create(true); // 运行连接线程
-    ClientObject.AssignTCPClient(IdTCPClient1);
-    ClientObject.Client.tag := Integer(Pointer(TClientObject(ClientObject)));
-    DataEngineManager.Add(Ip + ':' + IntToStr(Port), ClientObject);
-    DataEngineManager.DoIt(ClientObject.OpenTCP);
+    Result := TClientObject.Create(true); // 运行连接线程
+    Result.AssignTCPClient(IdTCPClient1);
+    Result.Client.tag := Integer(Pointer(TClientObject(Result)));
+    DataEngineManager.Add(Ip + ':' + IntToStr(Port), Result);
+    DataEngineManager.DoIt(Result.OpenTCP);
     St(2, 'Obj:' + IntToStr(DataEngineManager.count()));
   Except
     on e: Exception do
@@ -246,7 +243,7 @@ begin
     end;
 
   end;
-  Result := ClientObject;
+
 end;
 
 procedure TSplitViewForm.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -301,7 +298,7 @@ var
 begin
   tcp := Pointer(TIdTCPClient(Sender).tag);
   str := tcp.Client.Host + ':' + IntToStr(tcp.Client.Port);
-  // ComboBox3.items.Add(str);
+  ComboBox3.items.Add(str);
   St(1, 'TCP 连接成功 --> ' + str);
 end;
 
@@ -416,8 +413,6 @@ begin
 end;
 
 procedure TSplitViewForm.Button9Click(Sender: TObject);
-var
-  tcp: TClientObject;
 begin
   if ComboBox2.ItemIndex <= 1 then
   begin
@@ -425,7 +420,7 @@ begin
   end;
   if ComboBox2.ItemIndex > 1 then
   begin
-    tcp := GetTCPConnection(trim(ComboBox3.text), StrToInt(trim(Edit5.text)));
+   GetTCPConnection(trim(ComboBox3.text), StrToInt(trim(Edit5.text)));
   end;
 end;
 
@@ -659,14 +654,14 @@ begin
   srx := GetDevice(ListItem.Caption);
   if srx <> nil then
   begin
-    Edit2.text := srx.Name;;
-    ComboBox3.text := srx.ID;
+    Edit2.text := srx.Name;
   end;
 end;
 
 procedure TSplitViewForm.ListView1ColumnClick(Sender: TObject; Column: TListColumn);
 begin
   (Sender as TListView).CustomSort(nil, Column.Index);
+  Sortf:=not Sortf;
 end;
 
 procedure TSplitViewForm.ListView1Compare(Sender: TObject; Item1, Item2: TListItem; Data: Integer; var Compare: Integer);
@@ -685,7 +680,7 @@ begin
     else // 按其他列排序
       Compare := CompareStr(Item2.subitems.Strings[Data - 1], Item1.subitems.Strings[Data - 1]);
   end;
-  Sortf:=not Sortf;
+
 end;
 
 procedure TSplitViewForm.ListView1DblClick(Sender: TObject);
@@ -702,7 +697,7 @@ begin
   begin
     frmSetting.dv := dv;
     frmSetting.tcp := Self.GetTCPConnection(dv.Ip, 24);
-    frmSetting.udp := Self.GetUDPConnection(trim(ComboBox3.text), 24);
+    frmSetting.udp := Self.GetUDPConnection(trim(ComboBox1.text), 3334);
     if frmSetting.tcp <> nil then
     begin
       frmSetting.tcp.memo := Memo1;
@@ -728,13 +723,13 @@ begin
   if stx <> nil then
   begin
     Edit1.text := stx.Name;
-    ComboBox3.text := stx.ID;
   end;
 end;
 
 procedure TSplitViewForm.ListView2ColumnClick(Sender: TObject; Column: TListColumn);
 begin
   (Sender as TListView).CustomSort(nil, Column.Index);
+  Sortf:=not Sortf;
 end;
 
 procedure TSplitViewForm.ListView2Compare(Sender: TObject; Item1, Item2: TListItem; Data: Integer; var Compare: Integer);
@@ -753,7 +748,7 @@ begin
     else // 按其他列排序
       Compare := CompareStr(Item2.subitems.Strings[Data - 1], Item1.subitems.Strings[Data - 1]);
   end;
-  Sortf:=not Sortf;
+
 end;
 
 procedure TSplitViewForm.ListView2DblClick(Sender: TObject);
