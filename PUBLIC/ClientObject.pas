@@ -51,13 +51,13 @@ type
     FUDP: TIdUDPServer;
     FRunning: Boolean;
     // FLastTick: Cardinal;
-    //FuiLock: TCriticalSection;
+    // FuiLock: TCriticalSection;
     FSleepTime: Integer;
     FDataCallBack: TTCPWorkEent;
     cs: TCriticalSection;
 
     FWorkList: TList;
-    procedure SetuiLock(const Value: TCriticalSection);
+    // procedure SetuiLock(const Value: TCriticalSection);
     procedure SetSleepTime(const Value: Integer);
 
     procedure IdUDPRead(AThread: TIdUDPListenerThread; const AData: TIdBytes; ABinding: TIdSocketHandle);
@@ -75,15 +75,14 @@ type
     procedure stop();
     property SleepTime: Integer read FSleepTime write SetSleepTime;
     property Client: TIdTCPClient read FTCPClient;
-    //property uiLock: TCriticalSection read FuiLock write SetuiLock;
+    // property uiLock: TCriticalSection read FuiLock write SetuiLock;
 
     procedure UDPSendHexStr(Ip: String; Port: Integer; hs: String);
     procedure TCPSendHexStr(hs: String);
     procedure TCPSendStr(str: String);
     procedure SetCallBack(DataCallBack: TTCPWorkEent);
     function GetWork(): TWork;
-    function checkStOK():Boolean;
-
+    function checkStOK(): Boolean;
 
     procedure Log(msg: String); overload;
     procedure Log(sl: TStringlist); overload;
@@ -100,10 +99,11 @@ begin
   Self.Id := Id;
 end;
 
-function TClientObject.checkStOK():Boolean;
+function TClientObject.checkStOK(): Boolean;
 begin
-    Result:= FRunning;
+  Result := FRunning;
 end;
+
 procedure TClientObject.SetWork(Data: string; Id: Integer = 0);
 begin
   // if FWorkList.Count > 0 then // 事务阻塞模式
@@ -131,10 +131,10 @@ begin
   try
     if FWorkList.count > 0 then
     begin
-      cs.Enter;
+      //cs.Enter;
       Result := FWorkList.First;
-      // FWorkList.Remove(Result); //事务做完了才移走
-      cs.Leave;
+      //FWorkList.Remove(Result); //事务做完了才移走
+      //cs.Leave;
     end;
   finally
   end;
@@ -218,7 +218,7 @@ end;
 destructor TClientObject.Destroy;
 begin
   try
-    FRunning := false;
+    FRunning := False;
     if FTCPClient <> nil then
     begin
       FTCPClient.Disconnect;
@@ -236,7 +236,7 @@ end;
 
 procedure TClientObject.stop;
 begin
-  FRunning := false;
+  FRunning := False;
   if FTCPClient <> nil then
   begin
     FTCPClient.Disconnect;
@@ -277,24 +277,28 @@ begin
       for i := 0 to FWorkList.count - 1 do
       begin
         w := GetWork();
-        if (w <> nil) and ((ww = nil) or (ww.Id = w.Id)) then
+        if w = nil then continue;
+
+        if (ww = nil) or (ww.Id = w.Id) then
         begin
           DoWork(w);
-          FWorkList.Remove(w); // 移除已经完成的任务
           ww := w;
+          cs.Enter;
+          FWorkList.Remove(w); // 移除已经完成的任务
+          cs.Leave;
         end
         else
         begin
           break;
         end;
-      end;
+      end;//for
 
       str := FTCPClient.IOHandler.ReadLn();
     except
-     Log('TCP 通道关闭：' + FTCPClient.Socket.Host + ':' + inttostr(FTCPClient.Socket.Port));
-     FRunning:=false;//读写出错关闭线程
-     FTCPClient.Disconnect;
-     break;
+      Log('TCP 通道关闭：' + FTCPClient.Socket.Host + ':' + inttostr(FTCPClient.Socket.Port));
+      FRunning := False; // 读写出错关闭线程
+      FTCPClient.Disconnect;
+      break;
     end;
 
     if (str <> '') then
@@ -320,7 +324,7 @@ begin
       ww := nil;
     end;
 
-  end;//while
+  end; // while
 end;
 
 procedure TClientObject.DoWork(w: TWork);
@@ -341,17 +345,17 @@ end;
 // 一个套接字就是一个设备
 procedure TClientObject.IdUDPRead(AThread: TIdUDPListenerThread; const AData: TIdBytes; ABinding: TIdSocketHandle);
 var
-  //sl: TStringlist;
+  // sl: TStringlist;
   dv: TVDevice;
   // s:String;
 begin
-  //sl := TStringlist.Create;
-  Log(' UDP数据来自：' + ABinding.PeerIP + ':' + inttostr(ABinding.PeerPort) + ':' + inttostr(AThread.ThreadID)+'|字节：'+IntToStr(Length(AData)));
+  // sl := TStringlist.Create;
+  Log(' UDP数据来自：' + ABinding.PeerIP + ':' + inttostr(ABinding.PeerPort) + ':' + inttostr(AThread.ThreadID) + '|字节：' + inttostr(Length(AData)));
   // s:=BytesToString(AData,IndyTextEncoding_UTF8);
-  //FormatBuff(AData, sl, 16);
-  //Log(sl);
-  //sl.Clear;
-  //sl.Free;
+  // FormatBuff(AData, sl, 16);
+  // Log(sl);
+  // sl.Clear;
+  // sl.Free;
 
   /// ///////////////////////////////////////////////////////////////////////
   // 解析鲲鹏节点设备
@@ -434,7 +438,6 @@ begin
   if (Memo = nil) then
     Exit;
 
-
   Memo.Lines.Add(msg);
   Memo.Perform($0115, SB_BOTTOM, 0);
 
@@ -443,11 +446,6 @@ end;
 procedure TClientObject.SetSleepTime(const Value: Integer);
 begin
   FSleepTime := Value;
-end;
-
-procedure TClientObject.SetuiLock(const Value: TCriticalSection);
-begin
-  //FuiLock := Value;
 end;
 
 end.

@@ -30,7 +30,7 @@ begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
 
-  Application.CreateForm(TSplitViewForm, SplitViewForm);
   Application.CreateForm(TfrmSetting, frmSetting);
+  Application.CreateForm(TSplitViewForm, SplitViewForm);
   Application.Run;
 end.

@@ -9,6 +9,9 @@
 
 
 
+
+
+
 // This software is Copyright (c) 2015 Embarcadero Technologies, Inc.
 // You may only use this software if you are an authorized licensee
 // of an Embarcadero developer tools product.
@@ -45,7 +48,7 @@ uses
   Vcl.ActnList, IdTCPConnection, IdTCPClient, IdIPMCastBase, IdIPMCastClient,
   IdBaseComponent, IdComponent, IdUDPBase, IdUDPServer, Vcl.Samples.Spin,
   Vcl.Mask, IdGlobal, IdSocketHandle, VDeviceGroup, VDevice, Vcl.Tabs,
-  IdAntiFreezeBase, IdAntiFreeze, DataEngine, ClientObject, inifiles;
+  IdAntiFreezeBase, IdAntiFreeze, DataEngine, ClientObject, inifiles, Vcl.XPMan;
 
 type
   TSplitViewForm = class(TForm)
@@ -102,7 +105,6 @@ type
     GroupBox4: TGroupBox;
     GroupBox5: TGroupBox;
     ImageList1: TImageList;
-    ImageList2: TImageList;
 
     procedure FormCreate(Sender: TObject);
     procedure cbxVclStylesChange(Sender: TObject);
@@ -157,6 +159,7 @@ type
     function GetUDPConnection(Ip: String; Port: Integer): TClientObject;
     procedure St(slot: Integer; Msg: String);
     function GetDevice(Name: String): TVDevice;
+    procedure CheckItems(Lv: TListView; Item: TListItem; MultiSel: Boolean);
   public
     // InitFlag:Boolean;
   end;
@@ -175,6 +178,21 @@ uses
   Setting;
 
 {$R *.dfm}
+
+procedure TSplitViewForm.CheckItems(Lv: TListView; Item: TListItem; MultiSel: Boolean);
+var
+  i: Integer;
+begin
+
+  if MultiSel = true then
+    Exit;
+
+  for i := 0 to Lv.items.count - 1 do
+  begin
+    if Lv.items.Item[i] <> Item then
+      Lv.items.Item[i].Checked := false;
+  end;
+end;
 
 procedure TSplitViewForm.InitUDP_S_KP();
 var
@@ -216,10 +234,13 @@ begin
 end;
 
 function TSplitViewForm.GetTCPConnection(Ip: String; Port: Integer): TClientObject;
+var
+  obj: TObject;
 begin
-  Result := TClientObject(DataEngineManager.get(Ip + ':' + IntToStr(Port)));
-  if Result <> nil then
+  obj := DataEngineManager.get(Ip + ':' + IntToStr(Port));
+  if obj <> nil then
   begin
+    Result := TClientObject(obj);
     if Result.checkStOK() then
       Exit
     else
@@ -229,9 +250,10 @@ begin
   try
     IdTCPClient1.Host := Ip;
     IdTCPClient1.Port := Port;
+
     Result := TClientObject.Create(true); // 运行连接线程
     Result.AssignTCPClient(IdTCPClient1);
-    Result.Client.tag := Integer(Pointer(TClientObject(Result)));
+    Result.Client.tag := Integer(Pointer(Result)); // 通过类成员关联类本身
     DataEngineManager.Add(Ip + ':' + IntToStr(Port), Result);
     DataEngineManager.DoIt(Result.OpenTCP);
     St(2, 'Obj:' + IntToStr(DataEngineManager.count()));
@@ -260,13 +282,13 @@ var
   S: string;
 begin
   for StyleName in TStyleManager.StyleNames do
-    cbxVclStyles.Items.Add(StyleName);
-  cbxVclStyles.ItemIndex := cbxVclStyles.Items.IndexOf(TStyleManager.ActiveStyle.Name);
+    cbxVclStyles.items.Add(StyleName);
+  cbxVclStyles.ItemIndex := cbxVclStyles.items.IndexOf(TStyleManager.ActiveStyle.Name);
 
   GetBuildInfo(Application.ExeName, S);
 
-  Caption := APPLICATION_TITLE_NAME + ' '+
-{$IFDEF CPUX64}'64'{$ELSE}'32'{$ENDIF} + ' bit' + ' v' + S ;
+  Caption := APPLICATION_TITLE_NAME + ' ' +
+{$IFDEF CPUX64}'64'{$ELSE}'32'{$ENDIF} + ' bit' + ' v' + S;
 
   filename := ExtractFilePath(Application.ExeName) + '\' + 'zk.ini';
   ini := TInifile.Create(filename);
@@ -277,7 +299,7 @@ begin
 
   Edit6.text := _GetComputerName();
   LocalIPList := GetIPList();
-  ComboBox1.Items.AddStrings(LocalIPList);
+  ComboBox1.items.AddStrings(LocalIPList);
   if LocalIPList.count >= 0 then
     ComboBox1.ItemIndex := 0;
 
@@ -344,7 +366,7 @@ begin
       with ListView2 do
       begin
         // J := ListView2.Items.count + 1;
-        ListItem := Items.Add;
+        ListItem := items.Add;
         ListItem.Caption := dv.Name; // IntToStr(J);
         ListItem.ImageIndex := Random(1);
         // ListItem.subitems.Add(dv.Name);
@@ -373,9 +395,9 @@ begin
       with ListView1 do
       begin
         // J := ListView1.Items.count + 1;
-        ListItem := Items.Add;
+        ListItem := items.Add;
         ListItem.Caption := dv.Name; // IntToStr(J);
-        ListItem.ImageIndex := 0;//Random(2);
+        ListItem.ImageIndex := 0; // Random(2);
         // ListItem.subitems.Add(dv.Name);
         ListItem.subitems.Add(dv.ID);
         ListItem.subitems.Add(dv.Ip);
@@ -420,7 +442,7 @@ begin
   end;
   if ComboBox2.ItemIndex > 1 then
   begin
-   GetTCPConnection(trim(ComboBox3.text), StrToInt(trim(Edit5.text)));
+    GetTCPConnection(trim(ComboBox3.text), StrToInt(trim(Edit5.text)));
   end;
 end;
 
@@ -533,7 +555,7 @@ end;
 
 procedure TSplitViewForm.Button4Click(Sender: TObject);
 begin
-  ListView2.Items.Clear;
+  ListView2.items.Clear;
   DeviceList.DevicesTx.Clear;
   UpdateListView();
   UpdateNetDeviceKP('0x01 0x00 0x00 0x0d');
@@ -542,7 +564,7 @@ end;
 procedure TSplitViewForm.Button5Click(Sender: TObject);
 begin
 
-  ListView1.Items.Clear;
+  ListView1.items.Clear;
   DeviceList.DevicesRx.Clear;
   UpdateListView();
   UpdateNetDeviceKP('0x02 0x00 0x00 0x0d');
@@ -550,10 +572,11 @@ end;
 
 procedure TSplitViewForm.Button6Click(Sender: TObject);
 begin
-  ListView1.Items.Clear;
-  ListView2.Items.Clear;
+  ListView1.items.Clear;
+  ListView2.items.Clear;
   DeviceList.Clear;
   UpdateListView();
+  // ListView1DblClick(nil);
 end;
 
 procedure TSplitViewForm.Button7Click(Sender: TObject);
@@ -563,8 +586,8 @@ end;
 
 procedure TSplitViewForm.Button8Click(Sender: TObject);
 begin
-  ListView1.Items.Clear;
-  ListView2.Items.Clear;
+  ListView1.items.Clear;
+  ListView2.items.Clear;
   DeviceList.Clear;
   UpdateListView();
   UpdateNetDeviceKP('0x00 x00 0x00');
@@ -628,12 +651,12 @@ end;
 
 procedure TSplitViewForm.Timer3Timer(Sender: TObject);
 begin
-  Button4.Enabled := False;
-  Button5.Enabled := False;
-  Button8.Enabled := False;
+  Button4.Enabled := false;
+  Button5.Enabled := false;
+  Button8.Enabled := false;
   InitUDP_S_KP();
   UpdateNetDeviceKP('0x00 x00 0x00');
-  Timer3.Enabled := False;
+  Timer3.Enabled := false;
   Button4.Enabled := true;
   Button5.Enabled := true;
   Button8.Enabled := true;
@@ -652,16 +675,20 @@ begin
   if ListItem = nil then
     Exit;
   srx := GetDevice(ListItem.Caption);
+
   if srx <> nil then
   begin
     Edit2.text := srx.Name;
   end;
+
+  ListItem.Checked := true;
+  CheckItems(ListView1, ListItem, false);
 end;
 
 procedure TSplitViewForm.ListView1ColumnClick(Sender: TObject; Column: TListColumn);
 begin
   (Sender as TListView).CustomSort(nil, Column.Index);
-  Sortf:=not Sortf;
+  Sortf := not Sortf;
 end;
 
 procedure TSplitViewForm.ListView1Compare(Sender: TObject; Item1, Item2: TListItem; Data: Integer; var Compare: Integer);
@@ -701,7 +728,7 @@ begin
     if frmSetting.tcp <> nil then
     begin
       frmSetting.tcp.memo := Memo1;
-      frmSetting.udp.Memo := Memo1;
+      frmSetting.udp.memo := Memo1;
       frmSetting.TabSheet2.tabvisible := true;
       frmSetting.TabSheet3.tabvisible := true;
       frmSetting.TabSheet4.tabvisible := true;
@@ -724,17 +751,20 @@ begin
   begin
     Edit1.text := stx.Name;
   end;
+
+  ListItem.Checked := true;
+  CheckItems(ListView1, ListItem, false);
 end;
 
 procedure TSplitViewForm.ListView2ColumnClick(Sender: TObject; Column: TListColumn);
 begin
   (Sender as TListView).CustomSort(nil, Column.Index);
-  Sortf:=not Sortf;
+  Sortf := not Sortf;
 end;
 
 procedure TSplitViewForm.ListView2Compare(Sender: TObject; Item1, Item2: TListItem; Data: Integer; var Compare: Integer);
 begin
-   if Sortf then
+  if Sortf then
   begin
     if Data = 0 then // 按标题列排序
       Compare := CompareStr(Item1.Caption, Item2.Caption)
@@ -768,10 +798,10 @@ begin
     if frmSetting.tcp <> nil then
     begin
       frmSetting.tcp.memo := Memo1;
-      frmSetting.TabSheet2.tabvisible := False;
-      frmSetting.TabSheet3.tabvisible := False;
-      frmSetting.TabSheet4.tabvisible := False;
-      frmSetting.TabSheet5.tabvisible := False;
+      frmSetting.TabSheet2.tabvisible := false;
+      frmSetting.TabSheet3.tabvisible := false;
+      frmSetting.TabSheet4.tabvisible := false;
+      frmSetting.TabSheet5.tabvisible := false;
       frmSetting.TabSheet8.tabvisible := true;
       frmSetting.showmodal;
     end;
@@ -794,7 +824,7 @@ begin
   if Timer1 = nil then
     Exit;
 
-  Timer1.Enabled := False;
+  Timer1.Enabled := false;
   StatusBar1.Panels[slot].text := Msg;
   Timer1.Enabled := true;
 end;

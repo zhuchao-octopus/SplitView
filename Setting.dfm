@@ -500,7 +500,6 @@ object frmSetting: TfrmSetting
           DefaultColWidth = 50
           DefaultRowHeight = 25
           RowCount = 6
-          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goEditing, goTabs, goAlwaysShowEditor, goFixedRowDefAlign]
           ParentColor = True
           TabOrder = 0
         end
