@@ -25,14 +25,19 @@ type
     St: String;
     TxaID: String;
     TxvID: String;
+    //x:Integer;
+    //y:Integer;
     User: String;
     Password: String;
     MainRTSP: String;
     SubRTSP: String;
-    b: Boolean;
+
     TxPull: String;
     RxPush: String;
     RxGet: String;
+
+
+    b: Boolean;
   private
     FBuff: array of Byte;
   protected
@@ -218,8 +223,8 @@ begin
 
   pb := @FBuff[279];
   s := ByteToWideString2(pb, 13);
-  Self.MAC := '';
-  Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
+  Self.MAC := s;//'';
+  {Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
   Delete(s, 1, 2);
   Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
   Delete(s, 1, 2);
@@ -229,7 +234,7 @@ begin
   Delete(s, 1, 2);
   Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
   Delete(s, 1, 2);
-  Self.MAC := Self.MAC + LeftStr(s, 2);
+  Self.MAC := Self.MAC + LeftStr(s, 2);}
 
   SetLength(FBuff, 0);
   Result := True;

@@ -25,7 +25,8 @@ type
     constructor Create(name: string; Tag: Integer);
     destructor Destroy;
     procedure Add(Dname: String; Dv: TVDevice);
-    function get(Dname: String): TVDevice;
+    function get(Dname: String): TVDevice;overload;
+    function get(id: Integer): TVDevice;overload;
     procedure Clear();
     procedure ParserUpdate_KP();
   end;
@@ -108,6 +109,35 @@ begin
   end;
 end;
 
+
+function TVDeviceGroup.get(id: Integer): TVDevice;
+var
+  i, index: Integer;
+begin
+  Result := nil;
+  for i := 0 to DevicesRx.Count - 1 do
+  begin
+     Result := TVDevice(DevicesRx.Objects[i]);
+    if Result.ID = IntToStr(id) then
+    begin
+      break;
+    end;
+  end;
+
+  if Result <> nil then
+    Exit;
+
+  for i := 0 to DevicesTx.Count - 1 do
+  begin
+    Result := TVDevice(DevicesTx.Objects[i]);
+    if Result.ID = IntToStr(id) then
+    begin
+
+      break;
+    end;
+  end;
+
+end;
 procedure TVDeviceGroup.Clear();
 begin
   DevicesRx.Clear;

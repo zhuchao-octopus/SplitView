@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.StdCtrls, VDevice,
-  ClientObject, ip;
+  ClientObject, ip, Vcl.Samples.Spin, Vcl.Grids, VDeviceGroup;
 
 type
   TfrmSetting = class(TForm)
@@ -52,6 +52,23 @@ type
     Button13: TButton;
     Button14: TButton;
     Button15: TButton;
+    Label6: TLabel;
+    GroupBox3: TGroupBox;
+    Label7: TLabel;
+    SpinEdit1: TSpinEdit;
+    SpinEdit2: TSpinEdit;
+    Button16: TButton;
+    GroupBox4: TGroupBox;
+    Label8: TLabel;
+    Label9: TLabel;
+    SpinEdit3: TSpinEdit;
+    SpinEdit4: TSpinEdit;
+    Button17: TButton;
+    GroupBox5: TGroupBox;
+    StringGrid1: TStringGrid;
+    Button19: TButton;
+    Label12: TLabel;
+    Edit6: TEdit;
     procedure FormShow(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
@@ -88,23 +105,25 @@ type
     procedure Button13Click(Sender: TObject);
     procedure Button15Click(Sender: TObject);
     procedure Button14Click(Sender: TObject);
+    procedure Button16Click(Sender: TObject);
+    procedure Button19Click(Sender: TObject);
+    procedure Button17Click(Sender: TObject);
   private
     // FStr:String;
     { Private declarations }
     procedure TCPReadData(const data: String; id: Integer);
     procedure UpdateRxZx(ListView: TListView; b: Byte; ZXId: Integer);
     procedure UpdateTxZx(ListView: TListView; b: Byte; ZXId: Integer);
-    function GetZX(ListView: TListView; var buf: array of Byte; offset: Integer):Integer;
+    function GetZX(ListView: TListView; var buf: array of Byte; offset: Integer): Integer;
     procedure SaveToFile(ListView: TListView; fileName: String);
     procedure LoadTXNameFromFile(ListView: TListView; fileName: String);
   public
     { Public declarations }
     dv: TVDevice;
-    tcp: TClientObject;
+    tcp, udp: TClientObject;
     ipIP: TIP;
     TxName: TStringList;
     RxName: TStringList;
-
 
   end;
 
@@ -113,7 +132,7 @@ var
 
 implementation
 
-uses ObjManager, GlobalFunctions;
+uses ObjManager, GlobalFunctions, Unit200;
 {$R *.dfm}
 
 procedure TfrmSetting.SaveToFile(ListView: TListView; fileName: string);
@@ -318,6 +337,7 @@ begin
     Showmessage('名字过长，最好不要超过6个汉字的长度！！！');
     Exit;
   end;
+
   ListItem.subitems.strings[0] := Name;
 
   str := 'astparam s rxn1 ' + Name;
@@ -343,6 +363,7 @@ begin
     Showmessage('名字过长，最好不要超过6个汉字的长度！！！');
     Exit;
   end;
+
   ListItem.subitems.strings[0] := Name;
 
   str := 'astparam s rxn1 ' + Name;
@@ -492,6 +513,89 @@ begin
   end;
 end;
 
+procedure TfrmSetting.Button16Click(Sender: TObject);
+var
+  buff: array [0 .. 2] of Byte;
+begin
+  buff[0] := $Fc;
+  buff[1] := StrToInt(dv.id);
+  buff[2] := SpinEdit1.Value shl 4 + SpinEdit2.Value;
+  // Log('UDP:' + IntToStr(buff[0]) + ' RX:' + IntToStr(buff[1]) + ' TX:' + IntToStr(buff[2]));
+
+  if udp <> nil then
+  begin
+    udp.UDPSendHexStr('225.1.0.0', 3333, BuffToHexStr(buff));
+  end;
+
+end;
+
+procedure TfrmSetting.Button17Click(Sender: TObject);
+var
+  buff: array [0 .. 2] of Byte;
+begin
+  buff[0] := $FD;
+  buff[1] := StrToInt(dv.id);
+  buff[2] := SpinEdit3.Value shl 4 + SpinEdit4.Value;
+  // Log('UDP:' + IntToStr(buff[0]) + ' RX:' + IntToStr(buff[1]) + ' TX:' + IntToStr(buff[2]));
+
+  if udp <> nil then
+  begin
+    udp.UDPSendHexStr('225.1.0.0', 3333, BuffToHexStr(buff));
+  end;
+
+end;
+
+procedure TfrmSetting.Button19Click(Sender: TObject);
+var
+  i, j, x, y: Integer;
+  str: String;
+  ldv: TVDevice;
+
+begin
+  // dv.x:=0;
+  // dv.y:=0;
+  str := ''; // dv.MAC+','+IntToStr(dv.x)+','+IntToStr(y);
+  x := 0;
+  y := 0;
+  for i := 1 to StringGrid1.RowCount do
+  begin
+    for j := 1 to StringGrid1.ColCount do
+    begin
+      if Trim(StringGrid1.Cells[j, i]) = dv.id then
+      begin
+        x := i;
+        y := j;
+        break;
+      end;
+    end;
+  end;
+
+  if (x = 0) or (y = 0) then
+  begin
+    Showmessage('没有找到当前坐席的位置！！！');
+    Exit;
+  end;
+
+  for i := 1 to StringGrid1.RowCount do
+  begin
+    for j := 1 to StringGrid1.ColCount do
+    begin
+      ldv := DeviceList.get(Trim(StringGrid1.Cells[j, i]));
+      if ldv <> nil then
+      begin
+        if str <> '' then
+          str := str + ':';
+        str := str + ldv.MAC + ',' + IntToStr(i - x) + ',' + IntToStr(j - y);
+      end;
+    end;
+  end;
+
+  if (str <> '') and (udp <> nil) then
+  begin
+    udp.UDPSendHexStr('225.1.0.0', 3333, str);
+  end;
+end;
+
 procedure TfrmSetting.Button1Click(Sender: TObject);
 var
   str: String;
@@ -586,13 +690,13 @@ var
   str: string;
 
   lList: TStrings;
-  i,n: Integer;
+  i, n: Integer;
 begin
   // SaveToFile(ListView1, ExtractFilePath(Application.Exename) + '\' + 'txName.dat');
   SetLength(buff, 12);
-  n:=GetZX(Self.ListView1, buff, 11);
-  n:=n+GetZX(Self.ListView2, buff, 7);
-  n:=n+GetZX(Self.ListView3, buff, 3);
+  n := GetZX(Self.ListView1, buff, 11);
+  n := n + GetZX(Self.ListView2, buff, 7);
+  n := n + GetZX(Self.ListView3, buff, 3);
 
   str := BytestoHexString(buff, 12);
   // tcp.SetCallBack(TCPReadData);
@@ -600,7 +704,7 @@ begin
   if tcp <> nil then
   begin
     tcp.SetWork('astparam s pullperm ' + str, 101);
-    tcp.SetWork('astparam s pullnum '+inttostr(n), 101);
+    tcp.SetWork('astparam s pullnum ' + IntToStr(n), 101);
     tcp.SetWork('astparam save', 101);
   end;
 
@@ -627,13 +731,13 @@ var
   str: string;
 
   lList: TStrings;
-  i,n: Integer;
+  i, n: Integer;
 begin
   // SaveToFile(ListView1, ExtractFilePath(Application.Exename) + '\' + 'RxName.dat');
   SetLength(buff, 12);
-  n:=GetZX(Self.ListView4, buff, 11);
-  n:=n+GetZX(Self.ListView5, buff, 7);
-  n:=n+GetZX(Self.ListView6, buff, 3);
+  n := GetZX(Self.ListView4, buff, 11);
+  n := n + GetZX(Self.ListView5, buff, 7);
+  n := n + GetZX(Self.ListView6, buff, 3);
 
   str := BytestoHexString(buff, 12);
   // tcp.SetCallBack(TCPReadData);
@@ -641,7 +745,7 @@ begin
   if tcp <> nil then
   begin
     tcp.SetWork('astparam s pushperm ' + str, 103);
-    tcp.SetWork('astparam s pushnum '+inttostr(n), 103);
+    tcp.SetWork('astparam s pushnum ' + IntToStr(n), 103);
     tcp.SetWork('astparam save', 103);
   end;
 
@@ -668,13 +772,13 @@ var
   str: String;
 
   lList: TStrings;
-  i,n: Integer;
+  i, n: Integer;
 begin
   // SaveToFile(ListView1, ExtractFilePath(Application.Exename) + '\' + 'RxName.dat');
   SetLength(buff, 12);
-  n:=GetZX(Self.ListView7, buff, 11);
-  n:=n+GetZX(Self.ListView8, buff, 7);
-  n:=n+GetZX(Self.ListView9, buff, 3);
+  n := GetZX(Self.ListView7, buff, 11);
+  n := n + GetZX(Self.ListView8, buff, 7);
+  n := n + GetZX(Self.ListView9, buff, 3);
 
   str := BytestoHexString(buff, 12);
   // tcp.SetCallBack(TCPReadData);
@@ -682,7 +786,7 @@ begin
   if tcp <> nil then
   begin
     tcp.SetWork('astparam s getperm ' + str, 105);
-    tcp.SetWork('astparam s getnum '+inttostr(n), 105);
+    tcp.SetWork('astparam s getnum ' + IntToStr(n), 105);
     tcp.SetWork('astparam save', 105);
   end;
 
@@ -747,7 +851,7 @@ begin
   End;
 end;
 
-function TfrmSetting.GetZX(ListView: TListView; var buf: array of Byte; offset: Integer):Integer;
+function TfrmSetting.GetZX(ListView: TListView; var buf: array of Byte; offset: Integer): Integer;
 var
   i: Integer;
   Item: TListItem;
@@ -755,7 +859,7 @@ var
   mask: Byte;
   // c:byte;
 begin
-  Result:=0;
+  Result := 0;
   mask := $01;
   b := 0; // c:=0;
   for i := 0 to ListView.Items.Count - 1 do
@@ -789,7 +893,7 @@ begin
   begin
 
     Item := ListView.Items.add;
-    Item.caption := inttostr(i + ZXId);
+    Item.caption := IntToStr(i + ZXId);
 
     name := '主机' + Item.caption;
 
@@ -820,7 +924,7 @@ begin
   begin
 
     Item := ListView.Items.add;
-    Item.caption := inttostr(i + ZXId);
+    Item.caption := IntToStr(i + ZXId);
 
     name := '坐席' + Item.caption;
 
@@ -856,13 +960,15 @@ begin
   // if dv.Rxget <> '' then
   // TCPReadData('astparam g pullperm ' + dv.Rxget, -1);
 end;
+
 function ReverseWord(w: word): word;
 asm
-   {$IFDEF cpuX64}
-   mov rax,rcx
-   {$ENDIF}
-   xchg   al,ah
+  {$IFDEF cpuX64}
+  mov rax,rcx
+  {$ENDIF}
+  xchg   al,ah
 end;
+
 procedure TfrmSetting.TCPReadData(const data: string; id: Integer);
 var
   str, s: String;
@@ -885,7 +991,8 @@ begin
     begin
       s := copy(str, pos('astparam g pullperm', str), Length(str));
       ExtractStrings([' '], [' '], PChar(s), SL);
-      if sl.Count < 4  then Exit;
+      if SL.Count < 4 then
+        Exit;
 
       str := LowerCase(SL[3]);
       bc := Length(str) div 2;
@@ -894,8 +1001,8 @@ begin
       if i <> bc then
         Exit;
 
-      //MakeWord($CC,$DD),
-      //ReverseWord(buf[0]); ReverseWord(buf[1]);ReverseWord(buf[2]);ReverseWord(buf[3]);
+      // MakeWord($CC,$DD),
+      // ReverseWord(buf[0]); ReverseWord(buf[1]);ReverseWord(buf[2]);ReverseWord(buf[3]);
       ListView1.Clear;
       UpdateTxZx(Self.ListView1, buf[0], 1);
       UpdateTxZx(Self.ListView1, buf[1], 9);
@@ -919,7 +1026,8 @@ begin
     begin
       delete(str, 1, pos('astparam g pushperm', str) - 1);
       ExtractStrings([' '], [' '], PChar(str), SL);
-       if sl.Count < 4  then Exit;
+      if SL.Count < 4 then
+        Exit;
 
       str := LowerCase(SL[3]);
       bc := Length(str) div 2;
@@ -954,7 +1062,8 @@ begin
     begin
       delete(str, 1, pos('astparam g getperm', str) - 1);
       ExtractStrings([' '], [' '], PChar(str), SL);
-       if sl.Count < 4  then Exit;
+      if SL.Count < 4 then
+        Exit;
 
       str := LowerCase(SL[3]);
       bc := Length(str) div 2;
@@ -996,6 +1105,7 @@ end;
 procedure TfrmSetting.FormCreate(Sender: TObject);
 var
   fileName: String;
+  i: Integer;
 begin
   fileName := ExtractFilePath(Application.Exename) + '\' + 'txName.dat';
   TxName := TStringList.Create;
@@ -1005,6 +1115,18 @@ begin
   fileName := ExtractFilePath(Application.Exename) + '\' + 'rxName.dat';
   if FileExists(fileName) then
     RxName.LoadFromFile(fileName);
+
+  StringGrid1.ColWidths[0] := 25;
+  for i := 1 to StringGrid1.RowCount do
+  begin
+    StringGrid1.Cells[0, i] := IntToStr(i);
+  end;
+  for i := 1 to StringGrid1.ColCount do
+  begin
+    StringGrid1.Cells[i, 0] := IntToStr(i);
+  end;
+  // SpinEdit5.MaxValue := StringGrid1.ColCount;
+  // SpinEdit6.MaxValue := StringGrid1.RowCount;
 end;
 
 procedure TfrmSetting.FormDestroy(Sender: TObject);
@@ -1023,6 +1145,7 @@ begin
     Edit1.Text := dv.Name;
     Edit2.Text := dv.id;
     Edit3.Text := dv.ip;
+    Edit6.Text := dv.MAC;
     // edit4.Text:=
     Edit5.Text := ipIP.ip1 + '.' + ipIP.ip2 + '.' + ipIP.ip3 + '.1';
     dv.load;

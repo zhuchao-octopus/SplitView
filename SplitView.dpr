@@ -15,7 +15,6 @@ uses
   GlobalFunctions in 'PUBLIC\GlobalFunctions.pas',
   GlobalTypes in 'PUBLIC\GlobalTypes.pas',
   MyMessageQueue in 'PUBLIC\MyMessageQueue.pas',
-  DataEngine in 'DATAS\DataEngine.pas',
   IP in 'PUBLIC\IP.pas',
   ueIPEdit in 'PUBLIC\ueIPEdit.pas',
   Unit200 in 'PUBLIC\Unit200.pas',
@@ -23,7 +22,8 @@ uses
   Trash in 'PUBLIC\Trash.pas',
   Setting in 'Setting.pas' {frmSetting},
   Vcl.Themes,
-  Vcl.Styles;
+  Vcl.Styles,
+  DataEngine in 'Engine\DataEngine.pas';
 
 {$R *.res}
 begin

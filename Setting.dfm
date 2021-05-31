@@ -29,7 +29,7 @@ object frmSetting: TfrmSetting
     Margins.Top = 10
     Margins.Right = 10
     Margins.Bottom = 10
-    ActivePage = TabSheet4
+    ActivePage = TabSheet5
     Align = alClient
     TabOrder = 0
     object TabSheet2: TTabSheet
@@ -379,8 +379,141 @@ object frmSetting: TfrmSetting
       end
     end
     object TabSheet5: TTabSheet
-      Caption = #22352#24109#36328#23631#35774#32622
+      Caption = #22352#24109#30011#38754#25340#25509#19982#22352#24109#36328#23631#35774#32622
       ImageIndex = 5
+      object GroupBox3: TGroupBox
+        Left = 43
+        Top = 35
+        Width = 478
+        Height = 182
+        Caption = #35270#39057#22681#25340#25509#22823#23567#23610#23544#35774#32622
+        TabOrder = 0
+        object Label6: TLabel
+          Left = 32
+          Top = 54
+          Width = 72
+          Height = 16
+          Caption = #35270#39057#22681#34892':'
+        end
+        object Label7: TLabel
+          Left = 32
+          Top = 91
+          Width = 80
+          Height = 16
+          Caption = #35270#39057#22681#21015#65306
+        end
+        object SpinEdit1: TSpinEdit
+          Left = 120
+          Top = 51
+          Width = 121
+          Height = 26
+          MaxValue = 15
+          MinValue = 0
+          TabOrder = 0
+          Value = 0
+        end
+        object SpinEdit2: TSpinEdit
+          Left = 120
+          Top = 88
+          Width = 121
+          Height = 26
+          MaxValue = 15
+          MinValue = 0
+          TabOrder = 1
+          Value = 0
+        end
+        object Button16: TButton
+          Left = 320
+          Top = 51
+          Width = 75
+          Height = 63
+          Caption = #35774#32622
+          TabOrder = 2
+          OnClick = Button16Click
+        end
+      end
+      object GroupBox4: TGroupBox
+        Left = 43
+        Top = 243
+        Width = 478
+        Height = 182
+        Caption = #35270#39057#22681#22352#24109#22352#26631#35774#32622
+        TabOrder = 1
+        object Label8: TLabel
+          Left = 32
+          Top = 54
+          Width = 72
+          Height = 16
+          Caption = #35270#39057#22681#34892':'
+        end
+        object Label9: TLabel
+          Left = 32
+          Top = 91
+          Width = 80
+          Height = 16
+          Caption = #35270#39057#22681#21015#65306
+        end
+        object SpinEdit3: TSpinEdit
+          Left = 120
+          Top = 51
+          Width = 121
+          Height = 26
+          MaxValue = 15
+          MinValue = 0
+          TabOrder = 0
+          Value = 0
+        end
+        object SpinEdit4: TSpinEdit
+          Left = 120
+          Top = 88
+          Width = 121
+          Height = 26
+          MaxValue = 15
+          MinValue = 0
+          TabOrder = 1
+          Value = 0
+        end
+        object Button17: TButton
+          Left = 320
+          Top = 51
+          Width = 75
+          Height = 63
+          Caption = #35774#32622
+          TabOrder = 2
+          OnClick = Button17Click
+        end
+      end
+      object GroupBox5: TGroupBox
+        Left = 558
+        Top = 35
+        Width = 467
+        Height = 390
+        Caption = #22352#24109#36328#23631#35774#32622
+        TabOrder = 2
+        object StringGrid1: TStringGrid
+          Left = 32
+          Top = 40
+          Width = 393
+          Height = 275
+          BorderStyle = bsNone
+          ColCount = 6
+          DefaultColWidth = 50
+          DefaultRowHeight = 25
+          RowCount = 6
+          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goEditing, goTabs, goAlwaysShowEditor, goFixedRowDefAlign]
+          ParentColor = True
+          TabOrder = 0
+        end
+        object Button19: TButton
+          Left = 81
+          Top = 321
+          Width = 344
+          Height = 40
+          Caption = #35774#32622#36328#23631
+          TabOrder = 1
+          OnClick = Button19Click
+        end
+      end
     end
     object TabSheet8: TTabSheet
       Caption = #20854#23427
@@ -426,6 +559,13 @@ object frmSetting: TfrmSetting
           Width = 80
           Height = 16
           Caption = #32593#20851#22320#22336#65306
+        end
+        object Label12: TLabel
+          Left = 16
+          Top = 248
+          Width = 80
+          Height = 16
+          Caption = #32593#21345#22320#22336#65306
         end
         object Button1: TButton
           Left = 380
@@ -485,6 +625,15 @@ object frmSetting: TfrmSetting
           TabOrder = 5
           Text = 'Edit5'
           OnKeyPress = Edit5KeyPress
+        end
+        object Edit6: TEdit
+          Left = 94
+          Top = 245
+          Width = 250
+          Height = 24
+          ReadOnly = True
+          TabOrder = 6
+          Text = 'Edit6'
         end
       end
       object GroupBox2: TGroupBox

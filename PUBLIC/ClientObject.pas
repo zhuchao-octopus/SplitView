@@ -339,17 +339,17 @@ end;
 // 一个套接字就是一个设备
 procedure TClientObject.IdUDPRead(AThread: TIdUDPListenerThread; const AData: TIdBytes; ABinding: TIdSocketHandle);
 var
-  sl: TStringlist;
+  //sl: TStringlist;
   dv: TVDevice;
   // s:String;
 begin
-  sl := TStringlist.Create;
-  Log(GetSystemDateTimeStr() + ' UDP数据来自：' + ABinding.PeerIP + ':' + inttostr(ABinding.PeerPort) + ':' + inttostr(AThread.ThreadID));
+  //sl := TStringlist.Create;
+  Log(' UDP数据来自：' + ABinding.PeerIP + ':' + inttostr(ABinding.PeerPort) + ':' + inttostr(AThread.ThreadID)+'|字节：'+IntToStr(Length(AData)));
   // s:=BytesToString(AData,IndyTextEncoding_UTF8);
-  FormatBuff(AData, sl, 16);
-  Log(sl);
-  sl.Clear;
-  sl.Free;
+  //FormatBuff(AData, sl, 16);
+  //Log(sl);
+  //sl.Clear;
+  //sl.Free;
 
   /// ///////////////////////////////////////////////////////////////////////
   // 解析鲲鹏节点设备

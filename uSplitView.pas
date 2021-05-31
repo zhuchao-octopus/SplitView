@@ -8,6 +8,7 @@
 
 
 
+
 // This software is Copyright (c) 2015 Embarcadero Technologies, Inc.
 // You may only use this software if you are an authorized licensee
 // of an Embarcadero developer tools product.
@@ -96,11 +97,12 @@ type
     Splitter2: TSplitter;
     Timer3: TTimer;
     pnlToolbar: TPanel;
-    imgMenu: TImage;
     lblTitle: TLabel;
     cbxVclStyles: TComboBox;
     GroupBox4: TGroupBox;
     GroupBox5: TGroupBox;
+    ImageList1: TImageList;
+    ImageList2: TImageList;
 
     procedure FormCreate(Sender: TObject);
     procedure cbxVclStylesChange(Sender: TObject);
@@ -139,11 +141,8 @@ type
     procedure ListView1DblClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure ListView2DblClick(Sender: TObject);
-    procedure imgMenuClick(Sender: TObject);
-    procedure ListView1Compare(Sender: TObject; Item1, Item2: TListItem;
-      Data: Integer; var Compare: Integer);
-    procedure ListView2Compare(Sender: TObject; Item1, Item2: TListItem;
-      Data: Integer; var Compare: Integer);
+    procedure ListView1Compare(Sender: TObject; Item1, Item2: TListItem; Data: Integer; var Compare: Integer);
+    procedure ListView2Compare(Sender: TObject; Item1, Item2: TListItem; Data: Integer; var Compare: Integer);
     procedure ListView1ColumnClick(Sender: TObject; Column: TListColumn);
     procedure ListView2ColumnClick(Sender: TObject; Column: TListColumn);
   private
@@ -166,6 +165,8 @@ var
   SplitViewForm: TSplitViewForm;
 
   srx, stx: TVDevice;
+
+  Sortf: Boolean;
 
 implementation
 
@@ -267,8 +268,8 @@ begin
 
   GetBuildInfo(Application.ExeName, S);
 
-  Caption := APPLICATION_TITLE_NAME + ' v' + S + ' - ' +
-{$IFDEF CPUX64}'64'{$ELSE}'32'{$ENDIF} + ' bit';
+  Caption := APPLICATION_TITLE_NAME + ' '+
+{$IFDEF CPUX64}'64'{$ELSE}'32'{$ENDIF} + ' bit' + ' v' + S ;
 
   filename := ExtractFilePath(Application.ExeName) + '\' + 'zk.ini';
   ini := TInifile.Create(filename);
@@ -290,7 +291,7 @@ end;
 
 procedure TSplitViewForm.FormResize(Sender: TObject);
 begin
-  ListView1.width := SplitViewForm.width div 2;
+  ListView1.width := Panel2.width div 2;
 end;
 
 procedure TSplitViewForm.IdTCPClient1Connected(Sender: TObject);
@@ -316,14 +317,6 @@ procedure TSplitViewForm.IdTCPClient1Status(ASender: TObject; const AStatus: TId
 begin
   Log('TCP Status:' + AStatusText);
   St(1, 'TCP Status:' + AStatusText);
-end;
-
-procedure TSplitViewForm.imgMenuClick(Sender: TObject);
-begin
-  // if sv.opened then
-  // sv.Close
-  // else
-  // sv.open;
 end;
 
 procedure TSplitViewForm.UpdateLocalDevices(dv: TVDevice);
@@ -353,10 +346,11 @@ begin
 
       with ListView2 do
       begin
-        //J := ListView2.Items.count + 1;
+        // J := ListView2.Items.count + 1;
         ListItem := Items.Add;
-        ListItem.Caption := dv.Name;//IntToStr(J);
-        //ListItem.subitems.Add(dv.Name);
+        ListItem.Caption := dv.Name; // IntToStr(J);
+        ListItem.ImageIndex := Random(1);
+        // ListItem.subitems.Add(dv.Name);
         ListItem.subitems.Add(dv.ID);
         ListItem.subitems.Add(dv.Ip);
         ListItem.subitems.Add(dv.Port);
@@ -381,10 +375,11 @@ begin
         Continue;
       with ListView1 do
       begin
-        //J := ListView1.Items.count + 1;
+        // J := ListView1.Items.count + 1;
         ListItem := Items.Add;
-        ListItem.Caption := dv.Name;//IntToStr(J);
-        //ListItem.subitems.Add(dv.Name);
+        ListItem.Caption := dv.Name; // IntToStr(J);
+        ListItem.ImageIndex := 0;//Random(2);
+        // ListItem.subitems.Add(dv.Name);
         ListItem.subitems.Add(dv.ID);
         ListItem.subitems.Add(dv.Ip);
         ListItem.subitems.Add(dv.Port);
@@ -516,7 +511,7 @@ begin
       Log(Memo2.text);
       Log('####################################');
       try
-        tcp.addworks(Memo2.Lines, random(20000));
+        tcp.addworks(Memo2.Lines, Random(20000));
       Except
         on e: Exception do
         begin
@@ -669,19 +664,28 @@ begin
   end;
 end;
 
-procedure TSplitViewForm.ListView1ColumnClick(Sender: TObject;
-  Column: TListColumn);
+procedure TSplitViewForm.ListView1ColumnClick(Sender: TObject; Column: TListColumn);
 begin
-(Sender as TListView).CustomSort(nil, Column.Index);
+  (Sender as TListView).CustomSort(nil, Column.Index);
 end;
 
-procedure TSplitViewForm.ListView1Compare(Sender: TObject; Item1,
-  Item2: TListItem; Data: Integer; var Compare: Integer);
+procedure TSplitViewForm.ListView1Compare(Sender: TObject; Item1, Item2: TListItem; Data: Integer; var Compare: Integer);
 begin
-if Data = 0 then //按标题列排序
-    Compare := CompareStr(Item1.Caption, Item2.Caption)
-  else //按其他列排序
-    Compare := CompareStr(Item1.SubItems.Strings[Data-1], Item2.SubItems.Strings[Data-1]);
+  if Sortf then
+  begin
+    if Data = 0 then // 按标题列排序
+      Compare := CompareStr(Item1.Caption, Item2.Caption)
+    else // 按其他列排序
+      Compare := CompareStr(Item1.subitems.Strings[Data - 1], Item2.subitems.Strings[Data - 1]);
+  end
+  else
+  begin
+    if Data = 0 then // 按标题列排序
+      Compare := CompareStr(Item2.Caption, Item1.Caption)
+    else // 按其他列排序
+      Compare := CompareStr(Item2.subitems.Strings[Data - 1], Item1.subitems.Strings[Data - 1]);
+  end;
+  Sortf:=not Sortf;
 end;
 
 procedure TSplitViewForm.ListView1DblClick(Sender: TObject);
@@ -698,9 +702,11 @@ begin
   begin
     frmSetting.dv := dv;
     frmSetting.tcp := Self.GetTCPConnection(dv.Ip, 24);
+    frmSetting.udp := Self.GetUDPConnection(trim(ComboBox3.text), 24);
     if frmSetting.tcp <> nil then
     begin
       frmSetting.tcp.memo := Memo1;
+      frmSetting.udp.Memo := Memo1;
       frmSetting.TabSheet2.tabvisible := true;
       frmSetting.TabSheet3.tabvisible := true;
       frmSetting.TabSheet4.tabvisible := true;
@@ -726,19 +732,28 @@ begin
   end;
 end;
 
-procedure TSplitViewForm.ListView2ColumnClick(Sender: TObject;
-  Column: TListColumn);
+procedure TSplitViewForm.ListView2ColumnClick(Sender: TObject; Column: TListColumn);
 begin
-(Sender as TListView).CustomSort(nil, Column.Index);
+  (Sender as TListView).CustomSort(nil, Column.Index);
 end;
 
-procedure TSplitViewForm.ListView2Compare(Sender: TObject; Item1,
-  Item2: TListItem; Data: Integer; var Compare: Integer);
+procedure TSplitViewForm.ListView2Compare(Sender: TObject; Item1, Item2: TListItem; Data: Integer; var Compare: Integer);
 begin
-if Data = 0 then //按标题列排序
-    Compare := CompareStr(Item1.Caption, Item2.Caption)
-  else //按其他列排序
-    Compare := CompareStr(Item1.SubItems.Strings[Data-1], Item2.SubItems.Strings[Data-1]);
+   if Sortf then
+  begin
+    if Data = 0 then // 按标题列排序
+      Compare := CompareStr(Item1.Caption, Item2.Caption)
+    else // 按其他列排序
+      Compare := CompareStr(Item1.subitems.Strings[Data - 1], Item2.subitems.Strings[Data - 1]);
+  end
+  else
+  begin
+    if Data = 0 then // 按标题列排序
+      Compare := CompareStr(Item2.Caption, Item1.Caption)
+    else // 按其他列排序
+      Compare := CompareStr(Item2.subitems.Strings[Data - 1], Item1.subitems.Strings[Data - 1]);
+  end;
+  Sortf:=not Sortf;
 end;
 
 procedure TSplitViewForm.ListView2DblClick(Sender: TObject);
