@@ -52,23 +52,12 @@ type
     Button13: TButton;
     Button14: TButton;
     Button15: TButton;
-    Label6: TLabel;
-    GroupBox3: TGroupBox;
-    Label7: TLabel;
-    SpinEdit1: TSpinEdit;
-    SpinEdit2: TSpinEdit;
-    Button16: TButton;
-    GroupBox4: TGroupBox;
-    Label8: TLabel;
-    Label9: TLabel;
-    SpinEdit3: TSpinEdit;
-    SpinEdit4: TSpinEdit;
-    Button17: TButton;
     GroupBox5: TGroupBox;
     StringGrid1: TStringGrid;
     Button19: TButton;
     Label12: TLabel;
     Edit6: TEdit;
+    Button18: TButton;
     procedure FormShow(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
@@ -105,9 +94,9 @@ type
     procedure Button13Click(Sender: TObject);
     procedure Button15Click(Sender: TObject);
     procedure Button14Click(Sender: TObject);
-    procedure Button16Click(Sender: TObject);
     procedure Button19Click(Sender: TObject);
-    procedure Button17Click(Sender: TObject);
+    procedure Button18Click(Sender: TObject);
+    procedure StringGrid1KeyPress(Sender: TObject; var Key: Char);
   private
     // FStr:String;
     { Private declarations }
@@ -148,6 +137,14 @@ begin
   finally
     lList.Free;
   end;
+end;
+
+procedure TfrmSetting.StringGrid1KeyPress(Sender: TObject; var Key: Char);
+begin
+  If not(Key in ['0' .. '9', #8]) then
+  Begin
+    Key := #0; // #0 表示没有输入
+  End;
 end;
 
 procedure TfrmSetting.ListView1DblClick(Sender: TObject);
@@ -513,46 +510,20 @@ begin
   end;
 end;
 
-procedure TfrmSetting.Button16Click(Sender: TObject);
-var
-  buff: array [0 .. 2] of Byte;
-  str: String;
+procedure TfrmSetting.Button18Click(Sender: TObject);
 begin
-  buff[0] := $FC;
-  buff[1] := StrToInt(dv.id);
-  buff[2] := SpinEdit1.Value shl 4 + SpinEdit2.Value;
-  // Log('UDP:' + IntToStr(buff[0]) + ' RX:' + IntToStr(buff[1]) + ' TX:' + IntToStr(buff[2]));
-  str := BuffToHexStr(buff);
-  if udp <> nil then
+  if (udp <> nil) then
   begin
-    udp.Log('UDP:' + str);
-    udp.UDPSendHexStr('225.1.0.0', 3333, str);
-  end;
-
-end;
-
-procedure TfrmSetting.Button17Click(Sender: TObject);
-var
-  buff: array [0 .. 2] of Byte;
-  str: String;
-begin
-  buff[0] := $FD;
-  buff[1] := StrToInt(dv.id);
-  buff[2] := SpinEdit3.Value shl 4 + SpinEdit4.Value;
-  // Log('UDP:' + IntToStr(buff[0]) + ' RX:' + IntToStr(buff[1]) + ' TX:' + IntToStr(buff[2]));
-
-  str := BuffToHexStr(buff);
-  if udp <> nil then
-  begin
-    udp.Log('UDP:' + str);
-    udp.UDPSendHexStr('225.1.0.0', 3333, str);
+    // udp.UDPSendHexStr('225.1.0.0', 3333, str);
+    tcp.SetWork('astparam s kmoip_roaming_layout " "', 900);
+    tcp.SetWork('astparam save;reboot', 900);
   end;
 end;
 
 procedure TfrmSetting.Button19Click(Sender: TObject);
 var
-  i, j, x, y: Integer;
-  str: String;
+  i, j, x, y, id: Integer;
+  str, s: String;
   ldv: TVDevice;
 
 begin
@@ -567,8 +538,8 @@ begin
     begin
       if Trim(StringGrid1.Cells[j, i]) = dv.id then
       begin
-        x := i;
-        y := j;
+        x := j;
+        y := i;
         break;
       end;
     end;
@@ -584,13 +555,24 @@ begin
   begin
     for j := 1 to StringGrid1.ColCount - 1 do
     begin
-      ldv := DeviceList.get(Trim(StringGrid1.Cells[j, i]));
+      s := Trim(StringGrid1.Cells[j, i]);
+      if s = '' then
+        Continue;
+
+      try
+        id := StrToInt(s);
+      Except
+        Continue;
+      end;
+
+      ldv := DeviceList.get(id);
+
       if ldv <> nil then
       begin
         if str <> '' then
           str := str + ':';
-        str := str + ldv.MAC + ',' + IntToStr(i - x) + ',' + IntToStr(j - y);
-        break;
+        str := str + ldv.MAC + ',' + IntToStr(j - x) + ',' + IntToStr(y - i);
+        //break;
       end;
     end;
   end;
@@ -1108,6 +1090,8 @@ procedure TfrmSetting.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   // if tcp <> nil then
   // tcp.stop;
+  if dv <> nil then
+   dv.save;
 end;
 
 procedure TfrmSetting.FormCreate(Sender: TObject);
@@ -1194,8 +1178,5 @@ begin
       StringGrid1.Cells[j, i] := '';
   end;
 end;
-
-
-
 
 end.

@@ -61,8 +61,9 @@ begin
   if Dv.Typee = 'Tx' then
   begin
     index := DevicesTx.IndexOf(Dname);
-    if index >= 0 then
+    if index >= 0 then  //已存在
     begin
+      Exit;
       DevicesTx.BeginUpdate;
       DevicesTx.Delete(index);
       DevicesTx.EndUpdate;
@@ -72,8 +73,9 @@ begin
   else if Dv.Typee = 'Rx' then
   begin
     index := DevicesRx.IndexOf(Dname);
-    if index >= 0 then // 烧掉原有的
+    if index >= 0 then //已存在 烧掉原有的
     begin
+      Exit;
       DevicesRx.BeginUpdate;
       DevicesRx.Delete(index);
       DevicesRx.EndUpdate;

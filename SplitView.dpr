@@ -23,14 +23,16 @@ uses
   Setting in 'Setting.pas' {frmSetting},
   Vcl.Themes,
   Vcl.Styles,
-  DataEngine in 'Engine\DataEngine.pas';
+  DataEngine in 'Engine\DataEngine.pas',
+  GSetting in 'GSetting.pas' {GSettingfrm};
 
 {$R *.res}
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
 
-  Application.CreateForm(TfrmSetting, frmSetting);
   Application.CreateForm(TSplitViewForm, SplitViewForm);
+  Application.CreateForm(TfrmSetting, frmSetting);
+  Application.CreateForm(TGSettingfrm, GSettingfrm);
   Application.Run;
 end.

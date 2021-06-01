@@ -12,6 +12,10 @@
 
 
 
+
+
+
+
 // This software is Copyright (c) 2015 Embarcadero Technologies, Inc.
 // You may only use this software if you are an authorized licensee
 // of an Embarcadero developer tools product.
@@ -48,7 +52,8 @@ uses
   Vcl.ActnList, IdTCPConnection, IdTCPClient, IdIPMCastBase, IdIPMCastClient,
   IdBaseComponent, IdComponent, IdUDPBase, IdUDPServer, Vcl.Samples.Spin,
   Vcl.Mask, IdGlobal, IdSocketHandle, VDeviceGroup, VDevice, Vcl.Tabs,
-  IdAntiFreezeBase, IdAntiFreeze, DataEngine, ClientObject, inifiles, Vcl.XPMan;
+  IdAntiFreezeBase, IdAntiFreeze, DataEngine, ClientObject, inifiles, Vcl.XPMan,
+  Vcl.Menus;
 
 type
   TSplitViewForm = class(TForm)
@@ -87,7 +92,6 @@ type
     Button6: TButton;
     Button7: TButton;
     Button8: TButton;
-    IdAntiFreeze1: TIdAntiFreeze;
     Button2: TButton;
     Memo2: TMemo;
     ComboBox3: TComboBox;
@@ -105,6 +109,15 @@ type
     GroupBox4: TGroupBox;
     GroupBox5: TGroupBox;
     ImageList1: TImageList;
+    SpeedButton1: TSpeedButton;
+    ImageList2: TImageList;
+    PopupMenu1: TPopupMenu;
+    N1: TMenuItem;
+    N2: TMenuItem;
+    N3: TMenuItem;
+    N4: TMenuItem;
+    ImageList3: TImageList;
+    ImageList4: TImageList;
 
     procedure FormCreate(Sender: TObject);
     procedure cbxVclStylesChange(Sender: TObject);
@@ -147,6 +160,11 @@ type
     procedure ListView2Compare(Sender: TObject; Item1, Item2: TListItem; Data: Integer; var Compare: Integer);
     procedure ListView1ColumnClick(Sender: TObject; Column: TListColumn);
     procedure ListView2ColumnClick(Sender: TObject; Column: TListColumn);
+    procedure SpeedButton1Click(Sender: TObject);
+    procedure N4Click(Sender: TObject);
+    procedure N3Click(Sender: TObject);
+    procedure N2Click(Sender: TObject);
+    procedure N1Click(Sender: TObject);
   private
     procedure Log(const Msg: string);
     procedure SynchroPage(ItemIndex: Integer);
@@ -160,6 +178,10 @@ type
     procedure St(slot: Integer; Msg: String);
     function GetDevice(Name: String): TVDevice;
     procedure CheckItems(Lv: TListView; Item: TListItem; MultiSel: Boolean);
+
+    procedure WMNCPaint(var Msg: TWMNCPaint); message WM_NCPAINT;
+    procedure WMNCACTIVATE(var Msg: TWMNCActivate); message WM_NCACTIVATE;
+    procedure DrawCaptionText();
   public
     // InitFlag:Boolean;
   end;
@@ -175,9 +197,40 @@ implementation
 
 uses
   Vcl.Themes, GlobalConst, GlobalFunctions, Unit200, Ip, MyMessageQueue, trash,
-  Setting;
+  Setting, GSetting;
 
 {$R *.dfm}
+
+procedure TSplitViewForm.DrawCaptionText;
+//const
+//  captionText = 'delphi.about.com';
+//var
+//  canvas: TCanvas;
+begin
+  {
+  canvas := TCanvas.Create;
+  try
+    canvas.Handle := GetWindowDC(Self.Handle);
+
+
+  finally
+    ReleaseDC(Self.Handle, canvas.Handle);
+    canvas.Free;
+  end;
+  }
+end;
+
+procedure TSplitViewForm.WMNCACTIVATE(var Msg: TWMNCActivate);
+begin
+  inherited;
+  DrawCaptionText;
+end;
+
+procedure TSplitViewForm.WMNCPaint(var Msg: TWMNCPaint);
+begin
+  inherited;
+  DrawCaptionText;
+end;
 
 procedure TSplitViewForm.CheckItems(Lv: TListView; Item: TListItem; MultiSel: Boolean);
 var
@@ -256,7 +309,7 @@ begin
     Result.Client.tag := Integer(Pointer(Result)); // 通过类成员关联类本身
     DataEngineManager.Add(Ip + ':' + IntToStr(Port), Result);
     DataEngineManager.DoIt(Result.OpenTCP);
-    St(2, 'Obj:' + IntToStr(DataEngineManager.count()));
+    St(2, '连接总数：' + IntToStr(DataEngineManager.count()));
   Except
     on e: Exception do
     begin
@@ -310,7 +363,7 @@ end;
 
 procedure TSplitViewForm.FormResize(Sender: TObject);
 begin
-  ListView1.width := Panel2.width div 2;
+  ListView1.Width := Panel2.Width div 2;
 end;
 
 procedure TSplitViewForm.IdTCPClient1Connected(Sender: TObject);
@@ -320,7 +373,7 @@ var
 begin
   tcp := Pointer(TIdTCPClient(Sender).tag);
   str := tcp.Client.Host + ':' + IntToStr(tcp.Client.Port);
-  ComboBox3.items.Add(str);
+  // ComboBox3.items.Add(str); 假死宕机
   St(1, 'TCP 连接成功 --> ' + str);
 end;
 
@@ -397,7 +450,7 @@ begin
         // J := ListView1.Items.count + 1;
         ListItem := items.Add;
         ListItem.Caption := dv.Name; // IntToStr(J);
-        ListItem.ImageIndex := 0; // Random(2);
+        ListItem.ImageIndex := Random(ImageList1.count - 1);
         // ListItem.subitems.Add(dv.Name);
         ListItem.subitems.Add(dv.ID);
         ListItem.subitems.Add(dv.Ip);
@@ -435,6 +488,8 @@ begin
 end;
 
 procedure TSplitViewForm.Button9Click(Sender: TObject);
+var
+  ClientObject: TClientObject;
 begin
   if ComboBox2.ItemIndex <= 1 then
   begin
@@ -442,7 +497,9 @@ begin
   end;
   if ComboBox2.ItemIndex > 1 then
   begin
-    GetTCPConnection(trim(ComboBox3.text), StrToInt(trim(Edit5.text)));
+    ClientObject := GetTCPConnection(trim(ComboBox3.text), StrToInt(trim(Edit5.text)));
+    if ClientObject <> nil then
+      ClientObject.Client.IOHandler.WriteLn('root' + #13#10);
   end;
 end;
 
@@ -649,6 +706,46 @@ begin
   end;
 end;
 
+procedure TSplitViewForm.N1Click(Sender: TObject);
+begin
+  ListView1.viewStyle := vsIcon;
+  ListView2.viewStyle := vsIcon;
+  N4.Checked := false;
+  N3.Checked := false;
+  N2.Checked := false;
+  N1.Checked := true;
+end;
+
+procedure TSplitViewForm.N2Click(Sender: TObject);
+begin
+  ListView1.viewStyle := vsSmallIcon;
+  ListView2.viewStyle := vsSmallIcon;
+  N2.Checked := true;
+  N4.Checked := false;
+  N3.Checked := false;
+  N1.Checked := false;
+end;
+
+procedure TSplitViewForm.N3Click(Sender: TObject);
+begin
+  ListView1.viewStyle := vsList;
+  ListView2.viewStyle := vsList;
+  N3.Checked := true;
+  N4.Checked := false;
+  N2.Checked := false;
+  N1.Checked := false;
+end;
+
+procedure TSplitViewForm.N4Click(Sender: TObject);
+begin
+  ListView1.viewStyle := vsReport;
+  ListView2.viewStyle := vsReport;
+  N4.Checked := true;
+  N3.Checked := false;
+  N2.Checked := false;
+  N1.Checked := false;
+end;
+
 procedure TSplitViewForm.Timer3Timer(Sender: TObject);
 begin
   Button4.Enabled := false;
@@ -679,6 +776,7 @@ begin
   if srx <> nil then
   begin
     Edit2.text := srx.Name;
+    ComboBox3.text := srx.Ip;
   end;
 
   ListItem.Checked := true;
@@ -750,10 +848,11 @@ begin
   if stx <> nil then
   begin
     Edit1.text := stx.Name;
+    ComboBox3.text := stx.Ip;
   end;
 
   ListItem.Checked := true;
-  CheckItems(ListView1, ListItem, false);
+  CheckItems(ListView2, ListItem, false);
 end;
 
 procedure TSplitViewForm.ListView2ColumnClick(Sender: TObject; Column: TListColumn);
@@ -815,6 +914,19 @@ begin
     Memo1.Lines.Add(Msg);
     Memo1.Perform(WM_VSCROLL, SB_BOTTOM, 0);
   end;
+end;
+
+procedure TSplitViewForm.SpeedButton1Click(Sender: TObject);
+begin
+  // frmSetting.tcp := Self.GetTCPConnection(dv.Ip, 24);
+  GSettingfrm.udp := Self.GetUDPConnection(trim(ComboBox1.text), 3334);
+  if GSettingfrm.udp <> nil then
+  begin
+    // frmSetting.tcp.memo := Memo1;
+    GSettingfrm.udp.memo := Memo1;
+    GSettingfrm.showmodal;
+  end;
+
 end;
 
 procedure TSplitViewForm.St(slot: Integer; Msg: String);

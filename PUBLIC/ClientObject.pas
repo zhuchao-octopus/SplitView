@@ -63,6 +63,7 @@ type
     procedure IdUDPRead(AThread: TIdUDPListenerThread; const AData: TIdBytes; ABinding: TIdSocketHandle);
     procedure InitUDP(lip: String; lPort: Integer);
     procedure DoWork(w: TWork);
+
   public
     procedure AssignTCPClient(AClient: TIdTCPClient);
     procedure AssignUDP(AClient: TIdUDPServer; lip: String; lPort: Integer);
@@ -83,9 +84,9 @@ type
     procedure SetCallBack(DataCallBack: TTCPWorkEent);
     function GetWork(): TWork;
     function checkStOK(): Boolean;
-
     procedure Log(msg: String); overload;
     procedure Log(sl: TStringlist); overload;
+
   end;
 
 implementation
@@ -131,10 +132,10 @@ begin
   try
     if FWorkList.count > 0 then
     begin
-      //cs.Enter;
+      // cs.Enter;
       Result := FWorkList.First;
-      //FWorkList.Remove(Result); //事务做完了才移走
-      //cs.Leave;
+      // FWorkList.Remove(Result); //事务做完了才移走
+      // cs.Leave;
     end;
   finally
   end;
@@ -245,19 +246,30 @@ begin
     FUDP.Active := False;
 end;
 
-procedure TClientObject.OpenTCP; // TCP 同步柱塞式
+//一个套接字一个线程，连接断开退出线程
+//TCP同步阻塞式读写，异步处理
+//线程放入线程池自动回收释放
+//由引擎驱动耗时任务，防界面卡死。
+procedure TClientObject.OpenTCP;
 var
   w, ww: TWork;
   i: Integer;
   str, temp: String;
 begin
+
   try
-    if FTCPClient.Connected then // 一个连接一个线程，连接断开推出线程
+     if FTCPClient.Connected then
       Exit;
+
     if (not FTCPClient.Connected) then
     begin
       FTCPClient.Connect;
+      sleep(1000);
       FTCPClient.IOHandler.WriteLn('root' + #13#10);
+    end
+    else
+    begin
+
     end;
   except
     Log('OpenTCP 失败，无法打开 TCP.');
@@ -265,6 +277,7 @@ begin
   end;
   ww := nil;
   temp := '';
+
   while FRunning do
   begin
     try
@@ -277,7 +290,8 @@ begin
       for i := 0 to FWorkList.count - 1 do
       begin
         w := GetWork();
-        if w = nil then continue;
+        if w = nil then
+          continue;
 
         if (ww = nil) or (ww.Id = w.Id) then
         begin
@@ -291,13 +305,13 @@ begin
         begin
           break;
         end;
-      end;//for
+      end; // for
 
       str := FTCPClient.IOHandler.ReadLn();
     except
       Log('TCP 通道关闭：' + FTCPClient.Socket.Host + ':' + inttostr(FTCPClient.Socket.Port));
-      FRunning := False; // 读写出错关闭线程
       FTCPClient.Disconnect;
+      FRunning := False; // 读写出错关闭线程
       break;
     end;
 
@@ -325,6 +339,7 @@ begin
     end;
 
   end; // while
+   FRunning := False;
 end;
 
 procedure TClientObject.DoWork(w: TWork);
@@ -437,7 +452,8 @@ procedure TClientObject.Log(msg: String);
 begin
   if (Memo = nil) then
     Exit;
-
+  if Memo.Parent = nil then
+    Exit;
   Memo.Lines.Add(msg);
   Memo.Perform($0115, SB_BOTTOM, 0);
 
