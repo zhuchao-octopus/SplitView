@@ -16,6 +16,7 @@
 
 
 
+
 // This software is Copyright (c) 2015 Embarcadero Technologies, Inc.
 // You may only use this software if you are an authorized licensee
 // of an Embarcadero developer tools product.
@@ -202,21 +203,21 @@ uses
 {$R *.dfm}
 
 procedure TSplitViewForm.DrawCaptionText;
-//const
-//  captionText = 'delphi.about.com';
-//var
-//  canvas: TCanvas;
+// const
+// captionText = 'delphi.about.com';
+// var
+// canvas: TCanvas;
 begin
   {
-  canvas := TCanvas.Create;
-  try
+    canvas := TCanvas.Create;
+    try
     canvas.Handle := GetWindowDC(Self.Handle);
 
 
-  finally
+    finally
     ReleaseDC(Self.Handle, canvas.Handle);
     canvas.Free;
-  end;
+    end;
   }
 end;
 
@@ -322,11 +323,11 @@ begin
 end;
 
 procedure TSplitViewForm.FormClose(Sender: TObject; var Action: TCloseAction);
-
 begin
   // if IdTCPClient1.connected then
   // IdTCPClient1.Disconnect;
   // for I := 0 to DeviceList.dev do
+
 end;
 
 procedure TSplitViewForm.FormCreate(Sender: TObject);
@@ -402,70 +403,68 @@ var
   ListItem: TListItem;
   i, k: Integer;
   dv: TVDevice;
-Label Lend;
 begin
-  if DeviceList.DevicesTx.count > 0 then
-  begin
-    for i := 0 to DeviceList.DevicesTx.count - 1 do
-    begin
-      dv := TVDevice(DeviceList.DevicesTx.Objects[i]);
-      if dv = nil then
-        Continue;
-      if dv.Name = '' then
-        Continue;
-      if dv.b then
-        Continue;
 
-      with ListView2 do
-      begin
-        // J := ListView2.Items.count + 1;
-        ListItem := items.Add;
-        ListItem.Caption := dv.Name; // IntToStr(J);
-        ListItem.ImageIndex := Random(1);
-        // ListItem.subitems.Add(dv.Name);
-        ListItem.subitems.Add(dv.ID);
-        ListItem.subitems.Add(dv.Ip);
-        ListItem.subitems.Add(dv.Port);
-        ListItem.subitems.Add(dv.MAC);
-        ListItem.subitems.Add(dv.typee);
-        ListItem.subitems.Add(dv.St);
-        dv.b := true;
-      end;
+  for i := 0 to DeviceList.DevicesTx.count - 1 do
+  begin
+    dv := TVDevice(DeviceList.DevicesTx.Objects[i]);
+    if dv = nil then
+      Continue;
+    if dv.Name = '' then
+      Continue;
+    if not dv.bNew then
+      Continue;
+    ListView2.columns.beginupdate;
+    with ListView2 do
+    begin
+      // J := ListView2.Items.count + 1;
+      ListItem := items.Add;
+      ListItem.Caption := dv.Name; // IntToStr(J);
+      ListItem.ImageIndex := Random(1);
+      // ListItem.subitems.Add(dv.Name);
+      ListItem.subitems.Add(dv.ID);
+      ListItem.subitems.Add(dv.Ip);
+      ListItem.subitems.Add(dv.Port);
+      ListItem.subitems.Add(dv.MAC);
+      ListItem.subitems.Add(dv.typee);
+      ListItem.subitems.Add(dv.St);
+      dv.bNew := false;
     end;
+    ListView2.columns.endupdate;
   end;
 
-  if DeviceList.DevicesRx.count > 0 then
+  for i := 0 to DeviceList.DevicesRx.count - 1 do
   begin
-    for i := 0 to DeviceList.DevicesRx.count - 1 do
+    dv := TVDevice(DeviceList.DevicesRx.Objects[i]);
+    if dv = nil then
+      Continue;
+    if dv.Name = '' then
+      Continue;
+    if not dv.bNew then
+      Continue;
+    LockWindowUpdate(ListView1.Handle);
+    ListView1.columns.beginupdate;
+    with ListView1 do
     begin
-      dv := TVDevice(DeviceList.DevicesRx.Objects[i]);
-      if dv = nil then
-        Continue;
-      if dv.Name = '' then
-        Continue;
-      if dv.b then
-        Continue;
-      with ListView1 do
-      begin
-        // J := ListView1.Items.count + 1;
-        ListItem := items.Add;
-        ListItem.Caption := dv.Name; // IntToStr(J);
-        ListItem.ImageIndex := Random(ImageList1.count - 1);
-        // ListItem.subitems.Add(dv.Name);
-        ListItem.subitems.Add(dv.ID);
-        ListItem.subitems.Add(dv.Ip);
-        ListItem.subitems.Add(dv.Port);
-        ListItem.subitems.Add(dv.MAC);
-        ListItem.subitems.Add(dv.typee);
-        ListItem.subitems.Add(dv.St);
-        ListItem.subitems.Add(dv.TxaID);
-        ListItem.subitems.Add(dv.TxvID);
-        dv.b := true;
-      end;
+      // J := ListView1.Items.count + 1;
+      ListItem := items.Add;
+      ListItem.Caption := dv.Name; // IntToStr(J);
+      ListItem.ImageIndex := Random(ImageList1.count - 1);
+      // ListItem.subitems.Add(dv.Name);
+      ListItem.subitems.Add(dv.ID);
+      ListItem.subitems.Add(dv.Ip);
+      ListItem.subitems.Add(dv.Port);
+      ListItem.subitems.Add(dv.MAC);
+      ListItem.subitems.Add(dv.typee);
+      ListItem.subitems.Add(dv.St);
+      ListItem.subitems.Add(dv.TxaID);
+      ListItem.subitems.Add(dv.TxvID);
+      dv.bNew := false;
     end;
+     ListView1.columns.endupdate;
+     LockWindowUpdate(0);
   end;
 
-Lend:
   StatusBar1.Panels[0].text := 'Rx : ' + IntToStr(DeviceList.DevicesRx.count) + '    Tx : ' + IntToStr(DeviceList.DevicesTx.count)
 end;
 

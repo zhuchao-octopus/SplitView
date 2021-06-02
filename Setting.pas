@@ -6,7 +6,8 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.StdCtrls, VDevice,
-  ClientObject, ip, Vcl.Samples.Spin, Vcl.Grids, VDeviceGroup;
+  ClientObject, ip, Vcl.Samples.Spin, Vcl.Grids, VDeviceGroup, Vcl.ExtCtrls,
+  PasLibVlcPlayerUnit, Vcl.Imaging.pngimage;
 
 type
   TfrmSetting = class(TForm)
@@ -58,6 +59,45 @@ type
     Label12: TLabel;
     Edit6: TEdit;
     Button18: TButton;
+    TabSheet1: TTabSheet;
+    PasLibVlcPlayer1: TPasLibVlcPlayer;
+    PR: TPanel;
+    PlayBtn: TButton;
+    PauseBtn: TButton;
+    GetWidthBtn: TButton;
+    GetHeightBtn: TButton;
+    GetStateBtn: TButton;
+    ResumeBtn: TButton;
+    GetPosLenBtn: TButton;
+    Scale10Btn: TButton;
+    ScaleFitBtn: TButton;
+    SnapShotBtn: TButton;
+    NextFrameBtn: TButton;
+    GetASpectRatioBtn: TButton;
+    SetAsp11Btn: TButton;
+    SetAsp43Btn: TButton;
+    GetVolume: TButton;
+    SetVolumeUp10: TButton;
+    SetVolumeDo10: TButton;
+    GetPlayRateBtn: TButton;
+    SetPlayRate2xBtn: TButton;
+    SetPlayRateHalfBtn: TButton;
+    FullScreenYesBtn: TButton;
+    DeInterlaceBtn: TButton;
+    GetAudioChannel: TButton;
+    SetAudioChannelLeft: TButton;
+    SetAudioChannelRight: TButton;
+    SetAudioChannelStereo: TButton;
+    GetAudioOutListBtn: TButton;
+    GetAudioOutDevEnumBtn: TButton;
+    GetEqPreListBtn: TButton;
+    SetEqualizerBtn: TButton;
+    ChAudioOut: TButton;
+    GetAudioTrackList: TButton;
+    VideoAdjustBtn: TButton;
+    Edit7: TEdit;
+    Panel1: TPanel;
+    Image1: TImage;
     procedure FormShow(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
@@ -97,6 +137,41 @@ type
     procedure Button19Click(Sender: TObject);
     procedure Button18Click(Sender: TObject);
     procedure StringGrid1KeyPress(Sender: TObject; var Key: Char);
+    procedure PlayBtnClick(Sender: TObject);
+    procedure PauseBtnClick(Sender: TObject);
+    procedure ResumeBtnClick(Sender: TObject);
+    procedure GetWidthBtnClick(Sender: TObject);
+    procedure GetHeightBtnClick(Sender: TObject);
+    procedure GetStateBtnClick(Sender: TObject);
+    procedure GetPosLenBtnClick(Sender: TObject);
+    procedure Scale10BtnClick(Sender: TObject);
+    procedure ScaleFitBtnClick(Sender: TObject);
+    procedure SnapShotBtnClick(Sender: TObject);
+    procedure NextFrameBtnClick(Sender: TObject);
+    procedure DeInterlaceBtnClick(Sender: TObject);
+    procedure GetAudioOutListBtnClick(Sender: TObject);
+    procedure GetAudioOutDevEnumBtnClick(Sender: TObject);
+    procedure ChAudioOutClick(Sender: TObject);
+    procedure GetAudioTrackListClick(Sender: TObject);
+    procedure VideoAdjustBtnClick(Sender: TObject);
+    procedure GetASpectRatioBtnClick(Sender: TObject);
+    procedure SetAsp11BtnClick(Sender: TObject);
+    procedure SetAsp43BtnClick(Sender: TObject);
+    procedure GetVolumeClick(Sender: TObject);
+    procedure SetVolumeUp10Click(Sender: TObject);
+    procedure SetVolumeDo10Click(Sender: TObject);
+    procedure GetPlayRateBtnClick(Sender: TObject);
+    procedure SetPlayRate2xBtnClick(Sender: TObject);
+    procedure SetPlayRateHalfBtnClick(Sender: TObject);
+    procedure GetAudioChannelClick(Sender: TObject);
+    procedure SetAudioChannelLeftClick(Sender: TObject);
+    procedure SetAudioChannelRightClick(Sender: TObject);
+    procedure SetAudioChannelStereoClick(Sender: TObject);
+    procedure SetEqualizerBtnClick(Sender: TObject);
+    procedure GetEqPreListBtnClick(Sender: TObject);
+    procedure PasLibVlcPlayer1MediaPlayerEncounteredError(Sender: TObject);
+    procedure PasLibVlcPlayer1MediaPlayerPlaying(Sender: TObject);
+    procedure PasLibVlcPlayer1MediaPlayerStopped(Sender: TObject);
   private
     // FStr:String;
     { Private declarations }
@@ -106,6 +181,8 @@ type
     function GetZX(ListView: TListView; var buf: array of Byte; offset: Integer): Integer;
     procedure SaveToFile(ListView: TListView; fileName: String);
     procedure LoadTXNameFromFile(ListView: TListView; fileName: String);
+    procedure play(str: String);
+    procedure play2();
   public
     { Public declarations }
     dv: TVDevice;
@@ -121,7 +198,7 @@ var
 
 implementation
 
-uses ObjManager, GlobalFunctions, Unit200;
+uses DataEngine, GlobalFunctions, Unit200, PasLibVlcUnit, SetEqualizerPresetFormUnit, SelectOutputDeviceFormUnit, PasLibVlcClassUnit, VideoAdjustFormUnit;
 {$R *.dfm}
 
 procedure TfrmSetting.SaveToFile(ListView: TListView; fileName: string);
@@ -137,6 +214,107 @@ begin
   finally
     lList.Free;
   end;
+end;
+
+procedure TfrmSetting.Scale10BtnClick(Sender: TObject);
+var
+  sc: Single;
+begin
+  sc := PasLibVlcPlayer1.GetVideoScaleInPercent;
+  if (sc < 1) then
+    sc := 100;
+  sc := sc - 10;
+  if PasLibVlcPlayer1.IsPlay() then
+    PasLibVlcPlayer1.SetVideoScaleInPercent(sc);
+
+end;
+
+procedure TfrmSetting.ScaleFitBtnClick(Sender: TObject);
+begin
+  if PasLibVlcPlayer1.IsPlay() then
+    PasLibVlcPlayer1.SetVideoScaleInPercent(0);
+end;
+
+procedure TfrmSetting.SetAsp11BtnClick(Sender: TObject);
+begin
+  PasLibVlcPlayer1.SetVideoAspectRatio('1:1');
+end;
+
+procedure TfrmSetting.SetAsp43BtnClick(Sender: TObject);
+begin
+  PasLibVlcPlayer1.SetVideoAspectRatio('4:3');
+end;
+
+procedure TfrmSetting.SetAudioChannelLeftClick(Sender: TObject);
+begin
+  PasLibVlcPlayer1.SetAudioChannel(libvlc_AudioChannel_Left);
+end;
+
+procedure TfrmSetting.SetAudioChannelRightClick(Sender: TObject);
+begin
+  PasLibVlcPlayer1.SetAudioChannel(libvlc_AudioChannel_Right);
+end;
+
+procedure TfrmSetting.SetAudioChannelStereoClick(Sender: TObject);
+begin
+  PasLibVlcPlayer1.SetAudioChannel(libvlc_AudioChannel_Stereo);
+end;
+
+procedure TfrmSetting.SetEqualizerBtnClick(Sender: TObject);
+var
+  eqf: TSetEqualizerPresetForm;
+  prl: TStringList;
+begin
+  prl := PasLibVlcPlayer1.EqualizerGetPresetList();
+  eqf := TSetEqualizerPresetForm.Create(SELF);
+  eqf.FVLC := PasLibVlcPlayer1.VLC;
+  eqf.PresetListLB.Items.AddStrings(prl);
+  if eqf.ShowModal = mrOK then
+  begin
+    if (eqf.PresetListLB.ItemIndex > -1) then
+    begin
+      PasLibVlcPlayer1.EqualizerSetPreset(Word(prl.Objects[eqf.PresetListLB.ItemIndex]));
+    end;
+  end;
+  eqf.Free;
+  prl.Free;
+
+end;
+
+procedure TfrmSetting.SetPlayRate2xBtnClick(Sender: TObject);
+var
+  newPlayRate: Integer;
+begin
+  newPlayRate := PasLibVlcPlayer1.GetPlayRate() * 2;
+  if (newPlayRate > 400) then
+    exit;
+  PasLibVlcPlayer1.SetPlayRate(newPlayRate);
+end;
+
+procedure TfrmSetting.SetPlayRateHalfBtnClick(Sender: TObject);
+var
+  newPlayRate: Integer;
+begin
+  newPlayRate := PasLibVlcPlayer1.GetPlayRate() div 2;
+  if (newPlayRate < 25) then
+    exit;
+  PasLibVlcPlayer1.SetPlayRate(newPlayRate);
+
+end;
+
+procedure TfrmSetting.SetVolumeDo10Click(Sender: TObject);
+begin
+  PasLibVlcPlayer1.SetAudioVolume(PasLibVlcPlayer1.GetAudioVolume() - 10);
+end;
+
+procedure TfrmSetting.SetVolumeUp10Click(Sender: TObject);
+begin
+  PasLibVlcPlayer1.SetAudioVolume(PasLibVlcPlayer1.GetAudioVolume() + 10);
+end;
+
+procedure TfrmSetting.SnapShotBtnClick(Sender: TObject);
+begin
+  PasLibVlcPlayer1.SnapShot(ChangeFileExt(Application.ExeName, '.png'));
 end;
 
 procedure TfrmSetting.StringGrid1KeyPress(Sender: TObject; var Key: Char);
@@ -155,13 +333,13 @@ var
 begin
   ListItem := ListView1.Selected;
   if ListItem = nil then
-    Exit;
+    exit;
   Name := inputbox('设备名称修改', '请输入名称：', '主机');
 
   if Length(name) > 12 then
   begin
     Showmessage('名字过长，最好不要超过6个汉字的长度！！！');
-    Exit;
+    exit;
   end;
   ListItem.subitems.strings[0] := Name;
 
@@ -179,13 +357,13 @@ var
 begin
   ListItem := ListView2.Selected;
   if ListItem = nil then
-    Exit;
+    exit;
   Name := inputbox('设备名称修改', '请输入名称：', '主机');
 
   if Length(name) > 12 then
   begin
     Showmessage('名字过长，最好不要超过6个汉字的长度！！！');
-    Exit;
+    exit;
   end;
   ListItem.subitems.strings[0] := Name;
 
@@ -203,13 +381,13 @@ var
 begin
   ListItem := ListView3.Selected;
   if ListItem = nil then
-    Exit;
+    exit;
   Name := inputbox('设备名称修改', '请输入名称：', '主机');
 
   if Length(name) > 12 then
   begin
     Showmessage('名字过长，最好不要超过6个汉字的长度！！！');
-    Exit;
+    exit;
   end;
   ListItem.subitems.strings[0] := Name;
 
@@ -228,13 +406,13 @@ var
 begin
   ListItem := ListView4.Selected;
   if ListItem = nil then
-    Exit;
+    exit;
   Name := inputbox('设备名称修改', '请输入名称：', '主机');
 
   if Length(name) > 12 then
   begin
     Showmessage('名字过长，最好不要超过6个汉字的长度！！！');
-    Exit;
+    exit;
   end;
   ListItem.subitems.strings[0] := Name;
 
@@ -253,13 +431,13 @@ var
 begin
   ListItem := ListView5.Selected;
   if ListItem = nil then
-    Exit;
+    exit;
   Name := inputbox('设备名称修改', '请输入名称：', '主机');
 
   if Length(name) > 12 then
   begin
     Showmessage('名字过长，最好不要超过6个汉字的长度！！！');
-    Exit;
+    exit;
   end;
   ListItem.subitems.strings[0] := Name;
 
@@ -277,13 +455,13 @@ var
 begin
   ListItem := ListView6.Selected;
   if ListItem = nil then
-    Exit;
+    exit;
   Name := inputbox('设备名称修改', '请输入名称：', '主机');
 
   if Length(name) > 12 then
   begin
     Showmessage('名字过长，最好不要超过6个汉字的长度！！！');
-    Exit;
+    exit;
   end;
   ListItem.subitems.strings[0] := Name;
 
@@ -301,13 +479,13 @@ var
 begin
   ListItem := ListView7.Selected;
   if ListItem = nil then
-    Exit;
+    exit;
   Name := inputbox('设备名称修改', '请输入名称：', '主机');
 
   if Length(name) > 12 then
   begin
     Showmessage('名字过长，最好不要超过6个汉字的长度！！！');
-    Exit;
+    exit;
   end;
   ListItem.subitems.strings[0] := Name;
 
@@ -326,13 +504,13 @@ var
 begin
   ListItem := ListView8.Selected;
   if ListItem = nil then
-    Exit;
+    exit;
   Name := inputbox('设备名称修改', '请输入名称：', '主机');
 
   if Length(name) > 12 then
   begin
     Showmessage('名字过长，最好不要超过6个汉字的长度！！！');
-    Exit;
+    exit;
   end;
 
   ListItem.subitems.strings[0] := Name;
@@ -352,13 +530,13 @@ var
 begin
   ListItem := ListView9.Selected;
   if ListItem = nil then
-    Exit;
+    exit;
   Name := inputbox('设备名称修改', '请输入名称：', '主机');
 
   if Length(name) > 12 then
   begin
     Showmessage('名字过长，最好不要超过6个汉字的长度！！！');
-    Exit;
+    exit;
   end;
 
   ListItem.subitems.strings[0] := Name;
@@ -375,6 +553,93 @@ begin
   // if fileName = '' then
   // fileName:=  ExtractFilePath(Application.Exename) + '\'+'txName.dat';
 
+end;
+
+procedure TfrmSetting.NextFrameBtnClick(Sender: TObject);
+begin
+  PasLibVlcPlayer1.NextFrame();
+end;
+
+procedure TfrmSetting.PasLibVlcPlayer1MediaPlayerEncounteredError(Sender: TObject);
+begin
+  //if FileExists('logo.png') then
+  //  play('logo.png');
+  Panel1.Visible:=true;
+end;
+
+procedure TfrmSetting.PasLibVlcPlayer1MediaPlayerPlaying(Sender: TObject);
+begin
+  PlayBtn.Enabled := true;
+  Panel1.Visible := false;
+end;
+
+procedure TfrmSetting.PasLibVlcPlayer1MediaPlayerStopped(Sender: TObject);
+begin
+Panel1.Visible:=true;
+end;
+
+procedure TfrmSetting.PauseBtnClick(Sender: TObject);
+begin
+  PasLibVlcPlayer1.Pause();
+end;
+
+procedure TfrmSetting.play2();
+begin
+  PlayBtnClick(nil);
+end;
+
+procedure TfrmSetting.play(str: string);
+begin
+  // PasLibVlcPlayer1.Play(TFileStream.Create(MrlEdit.Text, fmOpenRead), [libvlc_media_record_str('c:\Users\robert\Desktop\stream.mp4', '', '', 0, 0, 0, '', 0, 0, 0, TRUE)]);
+
+  PasLibVlcPlayer1.play(str);
+  // PasLibVlcPlayer1.MarqueeShowText('marquee test %H:%M:%S');
+  edit7.Text:=str;
+end;
+
+procedure TfrmSetting.PlayBtnClick(Sender: TObject);
+var
+  // appl_path: string;
+  // logo_path: string;
+  logo_file_1: string;
+  logo_file_2: string;
+  s:String;
+begin
+  // PasLibVlcPlayer1.Play(TFileStream.Create(MrlEdit.Text, fmOpenRead), [libvlc_media_record_str('c:\Users\robert\Desktop\stream.mp4', '', '', 0, 0, 0, '', 0, 0, 0, TRUE)]);
+  if dv.MainRTSP = '' then
+    exit;
+
+  //  s:= PasLibVlcPlayer1.GetMediaMrl;
+
+  if (PasLibVlcPlayer1.IsPlay) then
+    exit;
+
+  PlayBtn.Enabled := false;
+  PasLibVlcPlayer1.play(dv.SubRTSP);
+
+  { appl_path := ExtractFilePath(Application.ExeName);
+    if ((appl_path <> '') and (appl_path[Length(appl_path)] <> PathDelim)) then
+    begin
+    appl_path := appl_path + PathDelim;
+    end;
+
+    logo_path := appl_path + '..' + PathDelim + '..' + PathDelim + '..' + PathDelim + '..' + PathDelim;
+
+    logo_file_1 := logo_path + 'logo.png';
+    logo_file_2 := logo_path + 'logo.png';
+
+    if (FileExists(logo_file_1) and FileExists(logo_file_2)) then
+    begin
+    PasLibVlcPlayer1.LogoShowFiles([logo_file_1, logo_file_2]);
+    end; }
+
+  // PasLibVlcPlayer1.MarqueeShowText('Loading %H:%M:%S');
+  Edit7.Text:= dv.SubRTSP;
+end;
+
+procedure TfrmSetting.ResumeBtnClick(Sender: TObject);
+begin
+  PasLibVlcPlayer1.Resume();
 end;
 
 procedure TfrmSetting.Button10Click(Sender: TObject);
@@ -548,7 +813,7 @@ begin
   if (x = 0) or (y = 0) then
   begin
     Showmessage('没有找到当前坐席的位置！！！');
-    Exit;
+    exit;
   end;
 
   for i := 1 to StringGrid1.RowCount - 1 do
@@ -572,7 +837,7 @@ begin
         if str <> '' then
           str := str + ':';
         str := str + ldv.MAC + ',' + IntToStr(j - x) + ',' + IntToStr(y - i);
-        //break;
+        // break;
       end;
     end;
   end;
@@ -605,7 +870,7 @@ begin
     begin
       Showmessage('    无效的网络 IP 地址！！！');
       Edit3.SetFocus;
-      Exit;
+      exit;
     end;
 
     Edit5.Text := ipIP.ip1 + '.' + ipIP.ip2 + '.' + ipIP.ip3 + '.1';
@@ -674,6 +939,57 @@ begin
   // TCPReadData('astparam g getperm FFFFFFFFFFFFFFFFFFFFFFFF', -1);
 end;
 
+procedure TfrmSetting.ChAudioOutClick(Sender: TObject);
+var
+  adLst: TStringList;
+  chAdForm: TSelectOutputDeviceForm;
+  newAudioDevice: string;
+  selIdx: Integer;
+begin
+  chAdForm := TSelectOutputDeviceForm.Create(SELF);
+  try
+    chAdForm.OutputDevicesLB.Clear;
+    adLst := PasLibVlcPlayer1.GetAudioOutputDeviceEnum(true);
+    chAdForm.OutputDevicesLB.Items.AddStrings(adLst);
+    chAdForm.OutputDevicesLB.ItemIndex := -1;
+    for selIdx := 0 to chAdForm.OutputDevicesLB.Items.Count - 1 do
+    begin
+      newAudioDevice := chAdForm.OutputDevicesLB.Items.strings[selIdx];
+      if PasLibVlcPlayer1.LastAudioOutputDeviceId = Copy(newAudioDevice, 1, Pos('|', newAudioDevice) - 1) then
+      begin
+        chAdForm.OutputDevicesLB.ItemIndex := selIdx;
+        break;
+      end;
+    end;
+    if (chAdForm.ShowModal = mrOK) then
+    begin
+      newAudioDevice := chAdForm.OutputDevicesLB.Items.strings[chAdForm.OutputDevicesLB.ItemIndex];
+      newAudioDevice := Copy(newAudioDevice, 1, Pos('|', newAudioDevice) - 1);
+      // LBAdd('Change Audio Device: ' + newAudioDevice);
+      PasLibVlcPlayer1.SetAudioOutputDevice(newAudioDevice);
+    end;
+    adLst.Free;
+  finally
+    chAdForm.Free;
+  end;
+
+end;
+
+procedure TfrmSetting.DeInterlaceBtnClick(Sender: TObject);
+begin
+  if (PasLibVlcPlayer1.DeInterlaceFilter = deOFF) then
+  begin
+    PasLibVlcPlayer1.DeinterlaceMode := dmX;
+    PasLibVlcPlayer1.DeInterlaceFilter := deON;
+    // LBAdd('DeInterlaceFilter = ON, ' + PasLibVlcPlayer1.DeinterlaceModeName);
+  end
+  else
+  begin
+    PasLibVlcPlayer1.DeInterlaceFilter := deOFF;
+    // LBAdd('DeInterlaceFilter = OFF');
+  end;
+end;
+
 procedure TfrmSetting.Button5Click(Sender: TObject);
 var
   buff: array of Byte;
@@ -684,9 +1000,9 @@ var
 begin
   // SaveToFile(ListView1, ExtractFilePath(Application.Exename) + '\' + 'txName.dat');
   SetLength(buff, 12);
-  n := GetZX(Self.ListView1, buff, 11);
-  n := n + GetZX(Self.ListView2, buff, 7);
-  n := n + GetZX(Self.ListView3, buff, 3);
+  n := GetZX(SELF.ListView1, buff, 11);
+  n := n + GetZX(SELF.ListView2, buff, 7);
+  n := n + GetZX(SELF.ListView3, buff, 3);
 
   str := BytestoHexString(buff, 12);
   // tcp.SetCallBack(TCPReadData);
@@ -708,7 +1024,7 @@ begin
     for i := 0 to ListView3.Items.Count - 1 do
       lList.add(ListView3.Items[i].subitems.strings[0]);
 
-    lList.SaveToFile(ExtractFilePath(Application.Exename) + '\' + 'txName.dat');
+    lList.SaveToFile(ExtractFilePath(Application.ExeName) + '\' + 'txName.dat');
     dv.save;
   finally
     lList.Free;
@@ -725,9 +1041,9 @@ var
 begin
   // SaveToFile(ListView1, ExtractFilePath(Application.Exename) + '\' + 'RxName.dat');
   SetLength(buff, 12);
-  n := GetZX(Self.ListView4, buff, 11);
-  n := n + GetZX(Self.ListView5, buff, 7);
-  n := n + GetZX(Self.ListView6, buff, 3);
+  n := GetZX(SELF.ListView4, buff, 11);
+  n := n + GetZX(SELF.ListView5, buff, 7);
+  n := n + GetZX(SELF.ListView6, buff, 3);
 
   str := BytestoHexString(buff, 12);
   // tcp.SetCallBack(TCPReadData);
@@ -749,7 +1065,7 @@ begin
     for i := 0 to ListView6.Items.Count - 1 do
       lList.add(ListView6.Items[i].subitems.strings[0]);
 
-    lList.SaveToFile(ExtractFilePath(Application.Exename) + '\' + 'rxName.dat');
+    lList.SaveToFile(ExtractFilePath(Application.ExeName) + '\' + 'rxName.dat');
     dv.save;
   finally
     lList.Free;
@@ -766,9 +1082,9 @@ var
 begin
   // SaveToFile(ListView1, ExtractFilePath(Application.Exename) + '\' + 'RxName.dat');
   SetLength(buff, 12);
-  n := GetZX(Self.ListView7, buff, 11);
-  n := n + GetZX(Self.ListView8, buff, 7);
-  n := n + GetZX(Self.ListView9, buff, 3);
+  n := GetZX(SELF.ListView7, buff, 11);
+  n := n + GetZX(SELF.ListView8, buff, 7);
+  n := n + GetZX(SELF.ListView9, buff, 3);
 
   str := BytestoHexString(buff, 12);
   // tcp.SetCallBack(TCPReadData);
@@ -791,7 +1107,7 @@ begin
     for i := 0 to ListView9.Items.Count - 1 do
       lList.add(ListView9.Items[i].subitems.strings[0]);
 
-    lList.SaveToFile(ExtractFilePath(Application.Exename) + '\' + 'rxName.dat');
+    lList.SaveToFile(ExtractFilePath(Application.ExeName) + '\' + 'rxName.dat');
     dv.save;
   finally
     lList.Free;
@@ -839,6 +1155,183 @@ begin
   Begin
     Key := #0; // #0 表示没有输入
   End;
+end;
+
+procedure TfrmSetting.GetASpectRatioBtnClick(Sender: TObject);
+var
+  info: string;
+  sar_num, sar_den: LongWord;
+begin
+  info := 'Aspect ratio = ' + PasLibVlcPlayer1.GetVideoAspectRatio();
+  if (PasLibVlcPlayer1.GetVideoSampleAspectRatio(sar_num, sar_den)) then
+  begin
+    info := info + ', SampleAspectRatio = ' + IntToStr(sar_num) + ':' + IntToStr(sar_den);
+  end;
+  MessageDlg(info, mtInformation, [mbOK], 0);
+end;
+
+procedure TfrmSetting.GetAudioChannelClick(Sender: TObject);
+var
+  chname: string;
+begin
+  chname := 'Unknown';
+  case PasLibVlcPlayer1.GetAudioChannel() of
+    libvlc_AudioChannel_Error:
+      chname := 'Error';
+    libvlc_AudioChannel_NotAvail:
+      chname := 'Not availiable';
+    libvlc_AudioChannel_Stereo:
+      chname := 'Stereo';
+    libvlc_AudioChannel_RStereo:
+      chname := 'RStereo';
+    libvlc_AudioChannel_Left:
+      chname := 'Left';
+    libvlc_AudioChannel_Right:
+      chname := 'Right';
+    libvlc_AudioChannel_Dolbys:
+      chname := 'Dolbys';
+  end;
+  MessageDlg(chname, mtInformation, [mbOK], 0);
+end;
+
+procedure TfrmSetting.GetAudioOutDevEnumBtnClick(Sender: TObject);
+var
+  ls1: TStringList;
+  id1: Integer;
+begin
+  // LBAdd('GetAudioOutputDeviceEnum');
+  ls1 := PasLibVlcPlayer1.GetAudioOutputDeviceEnum();
+  for id1 := 0 to ls1.Count - 1 do
+  begin
+    // LBAdd('  ' + ls1.Strings[id1]);
+  end;
+  ls1.Free;
+
+end;
+
+procedure TfrmSetting.GetAudioOutListBtnClick(Sender: TObject);
+var
+  ls1: TStringList;
+  ls2: TStringList;
+  id1: Integer;
+  id2: Integer;
+begin
+  // LBAdd('GetAudioOutputList');
+  ls1 := PasLibVlcPlayer1.GetAudioOutputList();
+  for id1 := 0 to ls1.Count - 1 do
+  begin
+    // LBAdd('  ' + ls1.Strings[id1]);
+    ls2 := PasLibVlcPlayer1.GetAudioOutputDeviceList(ls1.strings[id1]);
+    if (ls2.Count < 1) then
+    begin
+      // LBAdd('    no devices found');
+    end;
+    for id2 := 0 to ls2.Count - 1 do
+    begin
+      // LBAdd('    device: ' + ls2.Strings[id2]);
+    end;
+    ls2.Free;
+  end;
+  ls1.Free;
+
+end;
+
+procedure TfrmSetting.GetAudioTrackListClick(Sender: TObject);
+var
+  ls1: TStringList;
+  id1: Integer;
+begin
+  // LBAdd('GetAudioTrackList');
+  ls1 := PasLibVlcPlayer1.GetAudioTrackList();
+  if (ls1.Count < 1) then
+  begin
+    // LBAdd('    no audio tracks found');
+  end;
+  for id1 := 0 to ls1.Count - 1 do
+  begin
+    // LBAdd('  audio track, ID: ' + IntToStr(Int64(ls1.Objects[id1])) + ' - ' + ls1.Strings[id1]);
+  end;
+  ls1.Free;
+
+end;
+
+procedure TfrmSetting.GetEqPreListBtnClick(Sender: TObject);
+var
+  ls1: TStringList;
+  id1: Integer;
+  ebc: Word;
+begin
+  // LBAdd('GetEqualizerPresetList');
+  ls1 := PasLibVlcPlayer1.EqualizerGetPresetList();
+  for id1 := 0 to ls1.Count - 1 do
+  begin
+    // LBAdd('  ' + IntToStr(Word(ls1.Objects[id1])) + ' - ' + ls1.Strings[id1]);
+  end;
+  ls1.Free;
+
+  ebc := PasLibVlcPlayer1.EqualizerGetBandCount();
+
+  // LBAdd('GetEqualizerBandCount = ' + IntToStr(ebc));
+
+  // LBAdd('GetEqualizerBandFrequency');
+  for id1 := 0 to ebc - 1 do
+  begin
+    // LBAdd('  ' + IntToStr(id1) + ' - ' + IntToStr(Round(PasLibVlcPlayer1.EqualizerGetBandFrequency(id1))));
+  end;
+
+end;
+
+procedure TfrmSetting.GetHeightBtnClick(Sender: TObject);
+begin
+  MessageDlg('Video height = ' + IntToStr(PasLibVlcPlayer1.GetVideoHeight()), mtInformation, [mbOK], 0);
+end;
+
+procedure TfrmSetting.GetPlayRateBtnClick(Sender: TObject);
+begin
+  MessageDlg('Play rate = ' + IntToStr(PasLibVlcPlayer1.GetPlayRate()), mtInformation, [mbOK], 0);
+end;
+
+procedure TfrmSetting.GetPosLenBtnClick(Sender: TObject);
+begin
+  MessageDlg('Len = ' + IntToStr(PasLibVlcPlayer1.GetVideoLenInMs()) + ' ms, ' + 'Pos = ' + IntToStr(PasLibVlcPlayer1.GetVideoPosInMs()), mtInformation, [mbOK], 0);
+end;
+
+procedure TfrmSetting.GetStateBtnClick(Sender: TObject);
+var
+  stateName: string;
+begin
+  case PasLibVlcPlayer1.GetState() of
+    plvPlayer_NothingSpecial:
+      stateName := 'Idle';
+    plvPlayer_Opening:
+      stateName := 'Opening';
+    plvPlayer_Buffering:
+      stateName := 'Buffering';
+    plvPlayer_Playing:
+      stateName := 'Playing';
+    plvPlayer_Paused:
+      stateName := 'Paused';
+    plvPlayer_Stopped:
+      stateName := 'Stopped';
+    plvPlayer_Ended:
+      stateName := 'Ended';
+    plvPlayer_Error:
+      stateName := 'Error';
+  else
+    stateName := 'Unknown';
+  end;
+  MessageDlg('State = ' + stateName, mtInformation, [mbOK], 0);
+
+end;
+
+procedure TfrmSetting.GetVolumeClick(Sender: TObject);
+begin
+  MessageDlg('Volume level = ' + IntToStr(PasLibVlcPlayer1.GetAudioVolume()), mtInformation, [mbOK], 0);
+end;
+
+procedure TfrmSetting.GetWidthBtnClick(Sender: TObject);
+begin
+  MessageDlg('Video width = ' + IntToStr(PasLibVlcPlayer1.GetVideoWidth()), mtInformation, [mbOK], 0);
 end;
 
 function TfrmSetting.GetZX(ListView: TListView; var buf: array of Byte; offset: Integer): Integer;
@@ -902,6 +1395,18 @@ begin
   end;
 end;
 
+procedure TfrmSetting.VideoAdjustBtnClick(Sender: TObject);
+var
+  vaForm: TVideoAdjustForm;
+begin
+  vaForm := TVideoAdjustForm.Create(SELF);
+  try
+    vaForm.ShowModal;
+  finally
+    vaForm.Free;
+  end;
+end;
+
 procedure TfrmSetting.UpdateRxZx(ListView: TListView; b: Byte; ZXId: Integer);
 var
   Item: TListItem;
@@ -951,7 +1456,7 @@ begin
   // TCPReadData('astparam g pullperm ' + dv.Rxget, -1);
 end;
 
-function ReverseWord(w: word): word;
+function ReverseWord(w: Word): Word;
 asm
   {$IFDEF cpuX64}
   mov rax,rcx
@@ -967,7 +1472,7 @@ var
   bc, i: Integer;
 begin
   if Length(data) <= 2 then
-    Exit;
+    exit;
   SL := TStringList.Create;
   // if (id = 100) or (id = 0) then // astparam g pullperm
   // begin
@@ -977,108 +1482,108 @@ begin
     str := StringReplace(data, '/', '', [rfReplaceAll]);
     str := StringReplace(str, '#', '', [rfReplaceAll]);
     str := Trim(str);
-    if pos('astparam g pullperm', str) > 0 then
+    if Pos('astparam g pullperm', str) > 0 then
     begin
-      s := copy(str, pos('astparam g pullperm', str), Length(str));
+      s := Copy(str, Pos('astparam g pullperm', str), Length(str));
       ExtractStrings([' '], [' '], PChar(s), SL);
       if SL.Count < 4 then
-        Exit;
+        exit;
 
       str := LowerCase(SL[3]);
       bc := Length(str) div 2;
       SetLength(buf, bc);
       i := HexToBin(PChar(str), @buf[0], bc);
       if i <> bc then
-        Exit;
+        exit;
 
       // MakeWord($CC,$DD),
       // ReverseWord(buf[0]); ReverseWord(buf[1]);ReverseWord(buf[2]);ReverseWord(buf[3]);
       ListView1.Clear;
-      UpdateTxZx(Self.ListView1, buf[0], 1);
-      UpdateTxZx(Self.ListView1, buf[1], 9);
-      UpdateTxZx(Self.ListView1, buf[2], 17);
-      UpdateTxZx(Self.ListView1, buf[3], 25);
+      UpdateTxZx(SELF.ListView1, buf[0], 1);
+      UpdateTxZx(SELF.ListView1, buf[1], 9);
+      UpdateTxZx(SELF.ListView1, buf[2], 17);
+      UpdateTxZx(SELF.ListView1, buf[3], 25);
       ListView2.Clear;
-      UpdateTxZx(Self.ListView2, buf[4], 33);
-      UpdateTxZx(Self.ListView2, buf[5], 41);
-      UpdateTxZx(Self.ListView2, buf[6], 49);
-      UpdateTxZx(Self.ListView2, buf[7], 57);
+      UpdateTxZx(SELF.ListView2, buf[4], 33);
+      UpdateTxZx(SELF.ListView2, buf[5], 41);
+      UpdateTxZx(SELF.ListView2, buf[6], 49);
+      UpdateTxZx(SELF.ListView2, buf[7], 57);
       ListView3.Clear;
-      UpdateTxZx(Self.ListView3, buf[8], 65);
-      UpdateTxZx(Self.ListView3, buf[9], 73);
-      UpdateTxZx(Self.ListView3, buf[10], 81);
-      UpdateTxZx(Self.ListView3, buf[11], 89);
+      UpdateTxZx(SELF.ListView3, buf[8], 65);
+      UpdateTxZx(SELF.ListView3, buf[9], 73);
+      UpdateTxZx(SELF.ListView3, buf[10], 81);
+      UpdateTxZx(SELF.ListView3, buf[11], 89);
       // ShowMessage(SL.Text);
       dv.TxPull := str;
       SL.Free;
     end;
-    if pos('astparam g pushperm', str) > 0 then
+    if Pos('astparam g pushperm', str) > 0 then
     begin
-      delete(str, 1, pos('astparam g pushperm', str) - 1);
+      delete(str, 1, Pos('astparam g pushperm', str) - 1);
       ExtractStrings([' '], [' '], PChar(str), SL);
       if SL.Count < 4 then
-        Exit;
+        exit;
 
       str := LowerCase(SL[3]);
       bc := Length(str) div 2;
       SetLength(buf, bc);
       i := HexToBin(PChar(str), @buf[0], bc);
       if i <> bc then
-        Exit;
+        exit;
 
       ListView4.Clear;
-      UpdateRxZx(Self.ListView4, buf[0], 1);
-      UpdateRxZx(Self.ListView4, buf[1], 9);
-      UpdateRxZx(Self.ListView4, buf[2], 17);
-      UpdateRxZx(Self.ListView4, buf[3], 25);
+      UpdateRxZx(SELF.ListView4, buf[0], 1);
+      UpdateRxZx(SELF.ListView4, buf[1], 9);
+      UpdateRxZx(SELF.ListView4, buf[2], 17);
+      UpdateRxZx(SELF.ListView4, buf[3], 25);
 
       ListView5.Clear;
-      UpdateRxZx(Self.ListView5, buf[4], 33);
-      UpdateRxZx(Self.ListView5, buf[5], 41);
-      UpdateRxZx(Self.ListView5, buf[6], 49);
-      UpdateRxZx(Self.ListView5, buf[7], 57);
+      UpdateRxZx(SELF.ListView5, buf[4], 33);
+      UpdateRxZx(SELF.ListView5, buf[5], 41);
+      UpdateRxZx(SELF.ListView5, buf[6], 49);
+      UpdateRxZx(SELF.ListView5, buf[7], 57);
 
       ListView6.Clear;
-      UpdateRxZx(Self.ListView6, buf[8], 65);
-      UpdateRxZx(Self.ListView6, buf[9], 73);
-      UpdateRxZx(Self.ListView6, buf[10], 81);
-      UpdateRxZx(Self.ListView6, buf[11], 89);
+      UpdateRxZx(SELF.ListView6, buf[8], 65);
+      UpdateRxZx(SELF.ListView6, buf[9], 73);
+      UpdateRxZx(SELF.ListView6, buf[10], 81);
+      UpdateRxZx(SELF.ListView6, buf[11], 89);
       // ShowMessage(SL.Text);
       dv.Rxpush := str;
       SL.Free;
     end;
 
-    if pos('astparam g getperm', str) > 0 then
+    if Pos('astparam g getperm', str) > 0 then
     begin
-      delete(str, 1, pos('astparam g getperm', str) - 1);
+      delete(str, 1, Pos('astparam g getperm', str) - 1);
       ExtractStrings([' '], [' '], PChar(str), SL);
       if SL.Count < 4 then
-        Exit;
+        exit;
 
       str := LowerCase(SL[3]);
       bc := Length(str) div 2;
       SetLength(buf, bc);
       i := HexToBin(PChar(str), @buf[0], bc);
       if i <> bc then
-        Exit;
+        exit;
 
       ListView7.Clear;
-      UpdateRxZx(Self.ListView7, buf[0], 1);
-      UpdateRxZx(Self.ListView7, buf[1], 9);
-      UpdateRxZx(Self.ListView7, buf[2], 17);
-      UpdateRxZx(Self.ListView7, buf[3], 25);
+      UpdateRxZx(SELF.ListView7, buf[0], 1);
+      UpdateRxZx(SELF.ListView7, buf[1], 9);
+      UpdateRxZx(SELF.ListView7, buf[2], 17);
+      UpdateRxZx(SELF.ListView7, buf[3], 25);
 
       ListView8.Clear;
-      UpdateRxZx(Self.ListView8, buf[4], 33);
-      UpdateRxZx(Self.ListView8, buf[5], 41);
-      UpdateRxZx(Self.ListView8, buf[6], 49);
-      UpdateRxZx(Self.ListView8, buf[7], 57);
+      UpdateRxZx(SELF.ListView8, buf[4], 33);
+      UpdateRxZx(SELF.ListView8, buf[5], 41);
+      UpdateRxZx(SELF.ListView8, buf[6], 49);
+      UpdateRxZx(SELF.ListView8, buf[7], 57);
 
       ListView9.Clear;
-      UpdateRxZx(Self.ListView9, buf[8], 65);
-      UpdateRxZx(Self.ListView9, buf[9], 73);
-      UpdateRxZx(Self.ListView9, buf[10], 81);
-      UpdateRxZx(Self.ListView9, buf[11], 89);
+      UpdateRxZx(SELF.ListView9, buf[8], 65);
+      UpdateRxZx(SELF.ListView9, buf[9], 73);
+      UpdateRxZx(SELF.ListView9, buf[10], 81);
+      UpdateRxZx(SELF.ListView9, buf[11], 89);
       // ShowMessage(SL.Text);
       dv.Rxget := str;
       SL.Free;
@@ -1090,8 +1595,9 @@ procedure TfrmSetting.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   // if tcp <> nil then
   // tcp.stop;
+  PasLibVlcPlayer1.STOP();
   if dv <> nil then
-   dv.save;
+    dv.save;
 end;
 
 procedure TfrmSetting.FormCreate(Sender: TObject);
@@ -1099,12 +1605,12 @@ var
   fileName: String;
   i: Integer;
 begin
-  fileName := ExtractFilePath(Application.Exename) + '\' + 'txName.dat';
+  fileName := ExtractFilePath(Application.ExeName) + '\' + 'txName.dat';
   TxName := TStringList.Create;
   RxName := TStringList.Create;
   if FileExists(fileName) then
     TxName.LoadFromFile(fileName);
-  fileName := ExtractFilePath(Application.Exename) + '\' + 'rxName.dat';
+  fileName := ExtractFilePath(Application.ExeName) + '\' + 'rxName.dat';
   if FileExists(fileName) then
     RxName.LoadFromFile(fileName);
 
@@ -1120,6 +1626,7 @@ begin
 
   // SpinEdit5.MaxValue := StringGrid1.ColCount;
   // SpinEdit6.MaxValue := StringGrid1.RowCount;
+
 end;
 
 procedure TfrmSetting.FormDestroy(Sender: TObject);
@@ -1131,10 +1638,11 @@ end;
 procedure TfrmSetting.FormShow(Sender: TObject);
 var
   i, j: Integer;
+  ddv: TVDevice;
 begin
   if dv <> nil then
   begin
-    Self.caption := '兆科音视频坐席管理设置' + ' : ' + dv.Name + ', ' + dv.ip;
+    SELF.caption := '兆科音视频坐席管理设置' + ' : ' + dv.Name + ', ' + dv.ip;
     ipIP := TIP.Create(dv.ip);
     ipIP.parserIP(dv.ip);
     Edit1.Text := dv.Name;
@@ -1143,7 +1651,23 @@ begin
     Edit6.Text := dv.MAC;
     // edit4.Text:=
     Edit5.Text := ipIP.ip1 + '.' + ipIP.ip2 + '.' + ipIP.ip3 + '.1';
+
+    if (dv.Typee = 'Rx') and (dv.SubRTSP = '') then
+    begin
+      if dv.TxvID <> '' then
+      begin
+        ddv := DeviceList.GetTx(StrToInt(dv.TxvID));
+        if ddv <> nil then
+        begin
+          dv.SubRTSP := ddv.SubRTSP;
+          dv.MainRTSP := ddv.MainRTSP;
+        end;
+      end;
+    end;
+
+    DataEngineManager.DoIt(play2);
     dv.load;
+
     if dv.TxPull <> '' then
       TCPReadData('astparam g pullperm ' + dv.TxPull, -1)
     else

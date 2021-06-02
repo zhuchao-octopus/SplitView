@@ -25,8 +25,8 @@ type
     St: String;
     TxaID: String;
     TxvID: String;
-    //x:Integer;
-    //y:Integer;
+    // x:Integer;
+    // y:Integer;
     User: String;
     Password: String;
     MainRTSP: String;
@@ -36,8 +36,7 @@ type
     RxPush: String;
     RxGet: String;
 
-
-    b: Boolean;
+    bNew: Boolean;
   private
     FBuff: array of Byte;
   protected
@@ -56,14 +55,14 @@ type
 
 implementation
 
-uses StrUtils, Unit200, GlobalFunctions;
+uses StrUtils, Unit200, GlobalFunctions, IP;
 { TVDevice }
 
 constructor TVDevice.Create(IP: String; Port: String);
 begin
   Self.IP := IP;
   Self.Port := Port;
-  b := false;
+  bNew := true;
   TxPull := '';
   RxPush := '';
   RxGet := '';
@@ -71,7 +70,7 @@ end;
 
 constructor TVDevice.Create(Buff: array of Byte);
 begin
-  b := false;
+  bNew := true;
   TxPull := '';
   RxPush := '';
   RxGet := '';
@@ -82,7 +81,7 @@ constructor TVDevice.Create(IP: String; Port: String; Buff: array of Byte);
 begin
   Self.IP := IP;
   Self.Port := Port;
-  b := false;
+  bNew := true;
   TxPull := '';
   RxPush := '';
   RxGet := '';
@@ -91,7 +90,7 @@ end;
 
 constructor TVDevice.Create();
 begin
-  b := false;
+  bNew := true;
   TxPull := '';
   RxPush := '';
   RxGet := '';
@@ -106,9 +105,9 @@ procedure TVDevice.save;
 begin
   if ini <> nil then
   begin
-     ini.WriteString(name,'txpull',txpull);
-     ini.WriteString(name,'rxpush',rxpush);
-     ini.WriteString(name,'rxget',rxget);
+    ini.WriteString(name, 'txpull', TxPull);
+    ini.WriteString(name, 'rxpush', RxPush);
+    ini.WriteString(name, 'rxget', RxGet);
   end;
 end;
 
@@ -116,9 +115,9 @@ procedure TVDevice.load;
 begin
   if ini <> nil then
   begin
-     txpull:=ini.ReadString(name,'txpull','');
-     rxpush:=ini.ReadString(name,'rxpush','');
-     rxget:=ini.ReadString(name,'rxget','');
+    TxPull := ini.ReadString(name, 'txpull', '');
+    RxPush := ini.ReadString(name, 'rxpush', '');
+    RxGet := ini.ReadString(name, 'rxget', '');
   end;
 end;
 
@@ -145,6 +144,7 @@ var
   pb: PByte;
   Pi: PInteger;
   s: String;
+  ipIP: TIP;
 begin
   // i:= MakeLong(MakeWord($CC,$DD),
   Result := false;
@@ -223,19 +223,25 @@ begin
 
   pb := @FBuff[279];
   s := ByteToWideString2(pb, 13);
-  Self.MAC := s;//'';
-  {Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
-  Delete(s, 1, 2);
-  Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
-  Delete(s, 1, 2);
-  Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
-  Delete(s, 1, 2);
-  Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
-  Delete(s, 1, 2);
-  Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
-  Delete(s, 1, 2);
-  Self.MAC := Self.MAC + LeftStr(s, 2);}
+  Self.MAC := s; // '';
+  { Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
+    Delete(s, 1, 2);
+    Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
+    Delete(s, 1, 2);
+    Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
+    Delete(s, 1, 2);
+    Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
+    Delete(s, 1, 2);
+    Self.MAC := Self.MAC + LeftStr(s, 2) + '-';
+    Delete(s, 1, 2);
+    Self.MAC := Self.MAC + LeftStr(s, 2); }
 
+  ipIP := TIP.Create(IP);
+  if (Typee = 'Tx') then
+  begin
+    MainRTSP := 'rtsp://' + ipIP.ip1 + '.' + ipIP.ip2 + '.' + IntToStr(StrToInt(ipIP.ip3) + 1) + '.' + ipIP.ip4 + ':8554/chn0';
+    SubRTSP := 'rtsp://' + ipIP.ip1 + '.' + ipIP.ip2 + '.' + IntToStr(StrToInt(ipIP.ip3) + 1) + '.' + ipIP.ip4 + ':8554/chn1';
+  end;
   SetLength(FBuff, 0);
   Result := True;
 end;

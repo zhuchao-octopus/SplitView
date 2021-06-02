@@ -25,8 +25,9 @@ type
     constructor Create(name: string; Tag: Integer);
     destructor Destroy;
     procedure Add(Dname: String; Dv: TVDevice);
-    function get(Dname: String): TVDevice;overload;
-    function get(id: Integer): TVDevice;overload;
+    function get(Dname: String): TVDevice; overload;
+    function get(id: Integer): TVDevice; overload;
+    function GetTx(Id:Integer): TVDevice;
     procedure Clear();
     procedure ParserUpdate_KP();
   end;
@@ -61,7 +62,7 @@ begin
   if Dv.Typee = 'Tx' then
   begin
     index := DevicesTx.IndexOf(Dname);
-    if index >= 0 then  //已存在
+    if index >= 0 then // 已存在
     begin
       Exit;
       DevicesTx.BeginUpdate;
@@ -73,7 +74,7 @@ begin
   else if Dv.Typee = 'Rx' then
   begin
     index := DevicesRx.IndexOf(Dname);
-    if index >= 0 then //已存在 烧掉原有的
+    if index >= 0 then // 已存在 烧掉原有的
     begin
       Exit;
       DevicesRx.BeginUpdate;
@@ -111,17 +112,18 @@ begin
   end;
 end;
 
-
 function TVDeviceGroup.get(id: Integer): TVDevice;
 var
   i, index: Integer;
 begin
   Result := nil;
-  for i := 0 to DevicesRx.Count - 1 do
+
+  for i := 0 to DevicesTx.Count - 1 do
   begin
-     Result := TVDevice(DevicesRx.Objects[i]);
-    if Result.ID = IntToStr(id) then
+    Result := TVDevice(DevicesTx.Objects[i]);
+    if Result.id = IntToStr(id) then
     begin
+
       break;
     end;
   end;
@@ -129,17 +131,34 @@ begin
   if Result <> nil then
     Exit;
 
-  for i := 0 to DevicesTx.Count - 1 do
+  for i := 0 to DevicesRx.Count - 1 do
   begin
-    Result := TVDevice(DevicesTx.Objects[i]);
-    if Result.ID = IntToStr(id) then
+    Result := TVDevice(DevicesRx.Objects[i]);
+    if Result.id = IntToStr(id) then
     begin
-
       break;
     end;
   end;
 
 end;
+
+function TVDeviceGroup.GetTx(Id: Integer): TVDevice;
+var
+  i, index: Integer;
+begin
+  Result := nil;
+
+  for i := 0 to DevicesTx.Count - 1 do
+  begin
+    Result := TVDevice(DevicesTx.Objects[i]);
+    if Result.id = IntToStr(id) then
+    begin
+      break;
+    end;
+  end;
+
+end;
+
 procedure TVDeviceGroup.Clear();
 begin
   DevicesRx.Clear;

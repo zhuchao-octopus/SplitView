@@ -24,15 +24,25 @@ uses
   Vcl.Themes,
   Vcl.Styles,
   DataEngine in 'Engine\DataEngine.pas',
-  GSetting in 'GSetting.pas' {GSettingfrm};
+  GSetting in 'GSetting.pas' {GSettingfrm},
+  PasLibVlcClassUnit in 'LibVLC\PasLibVlcClassUnit.pas',
+  PasLibVlcPlayerUnit in 'LibVLC\PasLibVlcPlayerUnit.pas',
+  PasLibVlcUnit in 'LibVLC\PasLibVlcUnit.pas',
+  SelectOutputDeviceFormUnit in 'LibVLC\SelectOutputDeviceFormUnit.pas' {SelectOutputDeviceForm},
+  SetEqualizerPresetFormUnit in 'LibVLC\SetEqualizerPresetFormUnit.pas' {SetEqualizerPresetForm},
+  VideoAdjustFormUnit in 'LibVLC\VideoAdjustFormUnit.pas' {VideoAdjustForm};
 
 {$R *.res}
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
 
+  TStyleManager.TrySetStyle('Windows10');
   Application.CreateForm(TSplitViewForm, SplitViewForm);
   Application.CreateForm(TfrmSetting, frmSetting);
   Application.CreateForm(TGSettingfrm, GSettingfrm);
+  Application.CreateForm(TSelectOutputDeviceForm, SelectOutputDeviceForm);
+  Application.CreateForm(TSetEqualizerPresetForm, SetEqualizerPresetForm);
+  Application.CreateForm(TVideoAdjustForm, VideoAdjustForm);
   Application.Run;
 end.
