@@ -11,6 +11,7 @@ object SplitViewForm: TSplitViewForm
   Font.Height = -16
   Font.Name = #26032#23435#20307
   Font.Style = []
+  Menu = MainMenu1
   OldCreateOrder = False
   Position = poDesktopCenter
   WindowState = wsMaximized
@@ -37,7 +38,6 @@ object SplitViewForm: TSplitViewForm
       Width = 300
       Height = 591
       Align = alClient
-      PageIndex = 1
       TabOrder = 0
       object TPage
         Left = 0
@@ -113,7 +113,7 @@ object SplitViewForm: TSplitViewForm
             Width = 284
             Height = 40
             Align = alBottom
-            Caption = #25628#32034#21457#23556#31471
+            Caption = #25628#32034#21457#23556#35774#22791
             TabOrder = 1
             OnClick = Button4Click
           end
@@ -124,7 +124,7 @@ object SplitViewForm: TSplitViewForm
             Width = 284
             Height = 40
             Align = alBottom
-            Caption = #25628#32034#25509#25910#31471
+            Caption = #25628#32034#25509#25910#35774#22791
             TabOrder = 2
             OnClick = Button5Click
           end
@@ -394,7 +394,7 @@ object SplitViewForm: TSplitViewForm
         TabOrder = 0
         object Splitter1: TSplitter
           Left = 0
-          Top = 408
+          Top = 472
           Width = 831
           Height = 5
           Cursor = crVSplit
@@ -406,19 +406,20 @@ object SplitViewForm: TSplitViewForm
         end
         object Panel3: TPanel
           Left = 0
-          Top = 413
+          Top = 477
           Width = 831
-          Height = 214
+          Height = 150
           Align = alBottom
           BevelOuter = bvNone
           ParentColor = True
           TabOrder = 0
+          Visible = False
           object Memo1: TMemo
             AlignWithMargins = True
             Left = 3
             Top = 3
             Width = 825
-            Height = 208
+            Height = 144
             Align = alClient
             BorderStyle = bsNone
             ReadOnly = True
@@ -430,7 +431,7 @@ object SplitViewForm: TSplitViewForm
           Left = 0
           Top = 0
           Width = 831
-          Height = 408
+          Height = 472
           Align = alClient
           BevelOuter = bvNone
           ParentColor = True
@@ -439,7 +440,7 @@ object SplitViewForm: TSplitViewForm
             Left = 593
             Top = 0
             Width = 8
-            Height = 408
+            Height = 472
             AutoSnap = False
             Color = clBtnFace
             ParentColor = False
@@ -452,7 +453,7 @@ object SplitViewForm: TSplitViewForm
             Left = 3
             Top = 3
             Width = 589
-            Height = 402
+            Height = 466
             Margins.Right = 1
             Align = alLeft
             BorderStyle = bsNone
@@ -534,7 +535,7 @@ object SplitViewForm: TSplitViewForm
             Left = 602
             Top = 3
             Width = 226
-            Height = 402
+            Height = 466
             Margins.Left = 1
             Align = alClient
             BorderStyle = bsNone
@@ -676,6 +677,7 @@ object SplitViewForm: TSplitViewForm
       Margins.Bottom = 10
       Align = alRight
       Caption = #35774#32622
+      Visible = False
       OnClick = SpeedButton1Click
       ExplicitLeft = 784
       ExplicitTop = 0
@@ -691,6 +693,7 @@ object SplitViewForm: TSplitViewForm
       Margins.Right = 5
       Align = alRight
       Style = csDropDownList
+      DropDownCount = 30
       TabOrder = 0
       OnChange = cbxVclStylesChange
     end
@@ -4958,5 +4961,59 @@ object SplitViewForm: TSplitViewForm
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000}
+  end
+  object MainMenu1: TMainMenu
+    Left = 384
+    Top = 82
+    object N5: TMenuItem
+      Caption = #25991#20214
+      object N14: TMenuItem
+        Caption = #24314#31435#36830#25509
+        OnClick = N14Click
+      end
+      object N15: TMenuItem
+        Caption = '-'
+      end
+      object N8: TMenuItem
+        Caption = #36864#20986
+        OnClick = N8Click
+      end
+    end
+    object N6: TMenuItem
+      Caption = #35270#22270
+      object N9: TMenuItem
+        Caption = #26174#31034#29366#24577#20449#24687#31383#21475
+        OnClick = N9Click
+      end
+      object N16: TMenuItem
+        Caption = #38544#34255#21491#20391#24037#20855#38754#26495
+        OnClick = N16Click
+      end
+    end
+    object N7: TMenuItem
+      Caption = #26597#30475
+      ShortCut = 16470
+      object N10: TMenuItem
+        Caption = #26174#31034#22823#22270#26631
+        OnClick = N10Click
+      end
+      object N11: TMenuItem
+        Caption = #26174#31034#23567#22270#26631
+        OnClick = N11Click
+      end
+      object N12: TMenuItem
+        Caption = #26174#31034#21015#34920
+        OnClick = N12Click
+      end
+      object N13: TMenuItem
+        Caption = #26174#31034#35814#32454#20449#24687
+        Checked = True
+        OnClick = N13Click
+      end
+      object N17: TMenuItem
+        Caption = #26174#31034#32593#26684#32447
+        OnClick = N17Click
+      end
+    end
   end
 end

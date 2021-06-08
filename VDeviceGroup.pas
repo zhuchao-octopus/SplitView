@@ -25,9 +25,9 @@ type
     constructor Create(name: string; Tag: Integer);
     destructor Destroy;
     procedure Add(Dname: String; Dv: TVDevice);
-    function get(Dname: String): TVDevice; overload;
-    function get(id: Integer): TVDevice; overload;
-    function GetTx(Id:Integer): TVDevice;
+    function get(Dname: String): TVDevice;
+    function GetByID(id: String): TVDevice;
+    function GetTx(Id:String): TVDevice;
     procedure Clear();
     procedure ParserUpdate_KP();
   end;
@@ -112,18 +112,19 @@ begin
   end;
 end;
 
-function TVDeviceGroup.get(id: Integer): TVDevice;
+function TVDeviceGroup.GetByID(id: String): TVDevice;
 var
   i, index: Integer;
+  dv:TVDevice;
 begin
   Result := nil;
 
   for i := 0 to DevicesTx.Count - 1 do
   begin
-    Result := TVDevice(DevicesTx.Objects[i]);
-    if Result.id = IntToStr(id) then
+    dv := TVDevice(DevicesTx.Objects[i]);
+    if dv.id = id then
     begin
-
+      Result:=dv;
       break;
     end;
   end;
@@ -133,26 +134,29 @@ begin
 
   for i := 0 to DevicesRx.Count - 1 do
   begin
-    Result := TVDevice(DevicesRx.Objects[i]);
-    if Result.id = IntToStr(id) then
+    dv := TVDevice(DevicesRx.Objects[i]);
+    if dv.id = id then
     begin
+      Result:=dv;
       break;
     end;
   end;
 
 end;
 
-function TVDeviceGroup.GetTx(Id: Integer): TVDevice;
+function TVDeviceGroup.GetTx(Id: String): TVDevice;
 var
   i, index: Integer;
+  dv:TVDevice;
 begin
   Result := nil;
 
   for i := 0 to DevicesTx.Count - 1 do
   begin
-    Result := TVDevice(DevicesTx.Objects[i]);
-    if Result.id = IntToStr(id) then
+    dv := TVDevice(DevicesTx.Objects[i]);
+    if dv.id = id then
     begin
+      Result:=dv;
       break;
     end;
   end;

@@ -77,8 +77,14 @@ begin
   for i := 1 to Length(hz) do
   begin
     w := Ord(hz[i]);
-    s := IntToHex(w, 4);
-    Result := Result + '\u' + LowerCase(s);
+    if (w >= 19968) and (w <= 40869) then
+    begin
+       s := IntToHex(w, 4);
+       Result := Result + '\\u' + LowerCase(s);
+    end else
+    begin
+      Result:=Result+sStr[i];
+    end;
   end;
 end;
 

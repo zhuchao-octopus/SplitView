@@ -98,6 +98,7 @@ type
     Edit7: TEdit;
     Panel1: TPanel;
     Image1: TImage;
+    Button16: TButton;
     procedure FormShow(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
@@ -114,7 +115,6 @@ type
     procedure Edit2KeyPress(Sender: TObject; var Key: Char);
     procedure Edit1KeyPress(Sender: TObject; var Key: Char);
     procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
     procedure ListView1DblClick(Sender: TObject);
     procedure ListView2DblClick(Sender: TObject);
     procedure ListView3DblClick(Sender: TObject);
@@ -172,6 +172,8 @@ type
     procedure PasLibVlcPlayer1MediaPlayerEncounteredError(Sender: TObject);
     procedure PasLibVlcPlayer1MediaPlayerPlaying(Sender: TObject);
     procedure PasLibVlcPlayer1MediaPlayerStopped(Sender: TObject);
+    procedure Button16Click(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
     // FStr:String;
     { Private declarations }
@@ -182,7 +184,7 @@ type
     procedure SaveToFile(ListView: TListView; fileName: String);
     procedure LoadTXNameFromFile(ListView: TListView; fileName: String);
     procedure play(str: String);
-    procedure play2();
+
   public
     { Public declarations }
     dv: TVDevice;
@@ -190,7 +192,7 @@ type
     ipIP: TIP;
     TxName: TStringList;
     RxName: TStringList;
-
+    procedure play2();
   end;
 
 var
@@ -334,7 +336,7 @@ begin
   ListItem := ListView1.Selected;
   if ListItem = nil then
     exit;
-  Name := inputbox('设备名称修改', '请输入名称：', '主机');
+  Name := inputbox('设备名称修改', '请输入名称：', ListItem.subitems.strings[0]);
 
   if Length(name) > 12 then
   begin
@@ -343,7 +345,9 @@ begin
   end;
   ListItem.subitems.strings[0] := Name;
 
-  str := 'astparam s txn1 ' + Name;
+  Name := ChineseToUniCode(Name);
+
+  str := 'astparam s txn' + ListItem.Caption + ' ' + Name;
   str := str + ';astparam save';
   tcp.SetCallBack(TCPReadData);
   tcp.SetWork(str, 800);
@@ -358,7 +362,7 @@ begin
   ListItem := ListView2.Selected;
   if ListItem = nil then
     exit;
-  Name := inputbox('设备名称修改', '请输入名称：', '主机');
+  Name := inputbox('设备名称修改', '请输入名称：', ListItem.subitems.strings[0]);
 
   if Length(name) > 12 then
   begin
@@ -366,8 +370,8 @@ begin
     exit;
   end;
   ListItem.subitems.strings[0] := Name;
-
-  str := 'astparam s txn1 ' + Name;
+  Name := ChineseToUniCode(Name);
+  str := 'astparam s txn' + ListItem.Caption + ' ' + Name;
   str := str + ';astparam save';
   tcp.SetCallBack(TCPReadData);
   tcp.SetWork(str, 800);
@@ -382,7 +386,7 @@ begin
   ListItem := ListView3.Selected;
   if ListItem = nil then
     exit;
-  Name := inputbox('设备名称修改', '请输入名称：', '主机');
+  Name := inputbox('设备名称修改', '请输入名称：', ListItem.subitems.strings[0]);
 
   if Length(name) > 12 then
   begin
@@ -390,8 +394,8 @@ begin
     exit;
   end;
   ListItem.subitems.strings[0] := Name;
-
-  str := 'astparam s txn1 ' + Name;
+  Name := ChineseToUniCode(Name);
+  str := 'astparam s txn' + ListItem.Caption + ' ' + Name;
   str := str + ';astparam save';
   tcp.SetCallBack(TCPReadData);
   tcp.SetWork(str, 800);
@@ -407,7 +411,7 @@ begin
   ListItem := ListView4.Selected;
   if ListItem = nil then
     exit;
-  Name := inputbox('设备名称修改', '请输入名称：', '主机');
+  Name := inputbox('设备名称修改', '请输入名称：', ListItem.subitems.strings[0]);
 
   if Length(name) > 12 then
   begin
@@ -415,8 +419,8 @@ begin
     exit;
   end;
   ListItem.subitems.strings[0] := Name;
-
-  str := 'astparam s rxn1 ' + Name;
+  Name := ChineseToUniCode(Name);
+  str := 'astparam s rxn' + ListItem.Caption + ' ' + Name;
   str := str + ';astparam save';
   tcp.SetCallBack(TCPReadData);
   tcp.SetWork(str, 800);
@@ -432,7 +436,7 @@ begin
   ListItem := ListView5.Selected;
   if ListItem = nil then
     exit;
-  Name := inputbox('设备名称修改', '请输入名称：', '主机');
+  Name := inputbox('设备名称修改', '请输入名称：', ListItem.subitems.strings[0]);
 
   if Length(name) > 12 then
   begin
@@ -440,8 +444,8 @@ begin
     exit;
   end;
   ListItem.subitems.strings[0] := Name;
-
-  str := 'astparam s rxn1 ' + Name;
+  Name := ChineseToUniCode(Name);
+  str := 'astparam s rxn' + ListItem.Caption + ' ' + Name;
   str := str + ';astparam save';
   tcp.SetCallBack(TCPReadData);
   tcp.SetWork(str, 800);
@@ -456,7 +460,7 @@ begin
   ListItem := ListView6.Selected;
   if ListItem = nil then
     exit;
-  Name := inputbox('设备名称修改', '请输入名称：', '主机');
+  Name := inputbox('设备名称修改', '请输入名称：', ListItem.subitems.strings[0]);
 
   if Length(name) > 12 then
   begin
@@ -464,8 +468,8 @@ begin
     exit;
   end;
   ListItem.subitems.strings[0] := Name;
-
-  str := 'astparam s rxn1 ' + Name;
+  Name := ChineseToUniCode(Name);
+  str := 'astparam s rxn' + ListItem.Caption + ' ' + Name;
   str := str + ';astparam save';
   tcp.SetCallBack(TCPReadData);
   tcp.SetWork(str, 800);
@@ -480,7 +484,7 @@ begin
   ListItem := ListView7.Selected;
   if ListItem = nil then
     exit;
-  Name := inputbox('设备名称修改', '请输入名称：', '主机');
+  Name := inputbox('设备名称修改', '请输入名称：', ListItem.subitems.strings[0]);
 
   if Length(name) > 12 then
   begin
@@ -488,8 +492,8 @@ begin
     exit;
   end;
   ListItem.subitems.strings[0] := Name;
-
-  str := 'astparam s rxn1 ' + Name;
+  Name := ChineseToUniCode(Name);
+  str := 'astparam s rxn' + ListItem.Caption + ' ' + Name;
   str := str + ';astparam save';
   tcp.SetCallBack(TCPReadData);
   tcp.SetWork(str, 800);
@@ -505,7 +509,7 @@ begin
   ListItem := ListView8.Selected;
   if ListItem = nil then
     exit;
-  Name := inputbox('设备名称修改', '请输入名称：', '主机');
+  Name := inputbox('设备名称修改', '请输入名称：', ListItem.subitems.strings[0]);
 
   if Length(name) > 12 then
   begin
@@ -514,8 +518,8 @@ begin
   end;
 
   ListItem.subitems.strings[0] := Name;
-
-  str := 'astparam s rxn1 ' + Name;
+  Name := ChineseToUniCode(Name);
+  str := 'astparam s rxn' + ListItem.Caption + ' ' + Name;
   str := str + ';astparam save';
   tcp.SetCallBack(TCPReadData);
   tcp.SetWork(str, 800);
@@ -531,7 +535,7 @@ begin
   ListItem := ListView9.Selected;
   if ListItem = nil then
     exit;
-  Name := inputbox('设备名称修改', '请输入名称：', '主机');
+  Name := inputbox('设备名称修改', '请输入名称：', ListItem.subitems.strings[0]);
 
   if Length(name) > 12 then
   begin
@@ -540,8 +544,8 @@ begin
   end;
 
   ListItem.subitems.strings[0] := Name;
-
-  str := 'astparam s rxn1 ' + Name;
+  Name := ChineseToUniCode(Name);
+  str := 'astparam s rxn' + ListItem.Caption + ' ' + Name;
   str := str + ';astparam save';
   tcp.SetCallBack(TCPReadData);
   tcp.SetWork(str, 800);
@@ -562,9 +566,9 @@ end;
 
 procedure TfrmSetting.PasLibVlcPlayer1MediaPlayerEncounteredError(Sender: TObject);
 begin
-  //if FileExists('logo.png') then
-  //  play('logo.png');
-  Panel1.Visible:=true;
+  // if FileExists('logo.png') then
+  // play('logo.png');
+  Panel1.Visible := true;
 end;
 
 procedure TfrmSetting.PasLibVlcPlayer1MediaPlayerPlaying(Sender: TObject);
@@ -575,47 +579,41 @@ end;
 
 procedure TfrmSetting.PasLibVlcPlayer1MediaPlayerStopped(Sender: TObject);
 begin
-Panel1.Visible:=true;
+  Panel1.Visible := true;
+  PlayBtn.Enabled := true;
 end;
 
 procedure TfrmSetting.PauseBtnClick(Sender: TObject);
 begin
-  PasLibVlcPlayer1.Pause();
+  PasLibVlcPlayer1.Stop();
+  PasLibVlcPlayer1.FreeLibvlc;
+  // PasLibVlcPlayer1.Pause();
+  PlayBtn.Enabled := true;
 end;
 
 procedure TfrmSetting.play2();
-begin
-  PlayBtnClick(nil);
-end;
-
-procedure TfrmSetting.play(str: string);
-begin
-  // PasLibVlcPlayer1.Play(TFileStream.Create(MrlEdit.Text, fmOpenRead), [libvlc_media_record_str('c:\Users\robert\Desktop\stream.mp4', '', '', 0, 0, 0, '', 0, 0, 0, TRUE)]);
-
-  PasLibVlcPlayer1.play(str);
-  // PasLibVlcPlayer1.MarqueeShowText('marquee test %H:%M:%S');
-  edit7.Text:=str;
-end;
-
-procedure TfrmSetting.PlayBtnClick(Sender: TObject);
 var
-  // appl_path: string;
-  // logo_path: string;
   logo_file_1: string;
   logo_file_2: string;
-  s:String;
+  s: String;
 begin
   // PasLibVlcPlayer1.Play(TFileStream.Create(MrlEdit.Text, fmOpenRead), [libvlc_media_record_str('c:\Users\robert\Desktop\stream.mp4', '', '', 0, 0, 0, '', 0, 0, 0, TRUE)]);
   if dv.MainRTSP = '' then
     exit;
 
-  //  s:= PasLibVlcPlayer1.GetMediaMrl;
+  // s:= PasLibVlcPlayer1.GetMediaMrl;
+  //PasLibVlcPlayer1.Stop();
+  //PasLibVlcPlayer1.FreeLibvlc;
 
-  if (PasLibVlcPlayer1.IsPlay) then
+  PasLibVlcPlayer1.VLC.Path := ExtractFilePath(Application.ExeName) + '\';
+
+  if (PasLibVlcPlayer1.IsPlay) and (Trim(Edit7.Text) = PasLibVlcPlayer1.MRL) then
     exit;
 
   PlayBtn.Enabled := false;
-  PasLibVlcPlayer1.play(dv.SubRTSP);
+  // PasLibVlcPlayer1.Stop();
+  // Edit7.Text:=dv.SubRTSP;
+  PasLibVlcPlayer1.play(Trim(Edit7.Text));
 
   { appl_path := ExtractFilePath(Application.ExeName);
     if ((appl_path <> '') and (appl_path[Length(appl_path)] <> PathDelim)) then
@@ -632,9 +630,22 @@ begin
     begin
     PasLibVlcPlayer1.LogoShowFiles([logo_file_1, logo_file_2]);
     end; }
-
+  PlayBtn.Enabled := true;
   // PasLibVlcPlayer1.MarqueeShowText('Loading %H:%M:%S');
-  Edit7.Text:= dv.SubRTSP;
+end;
+
+procedure TfrmSetting.play(str: string);
+begin
+  // PasLibVlcPlayer1.Play(TFileStream.Create(MrlEdit.Text, fmOpenRead), [libvlc_media_record_str('c:\Users\robert\Desktop\stream.mp4', '', '', 0, 0, 0, '', 0, 0, 0, TRUE)]);
+
+  PasLibVlcPlayer1.play(str);
+  // PasLibVlcPlayer1.MarqueeShowText('marquee test %H:%M:%S');
+  Edit7.Text := str;
+end;
+
+procedure TfrmSetting.PlayBtnClick(Sender: TObject);
+begin
+  DataEngineManager.DoIt(play2);
 end;
 
 procedure TfrmSetting.ResumeBtnClick(Sender: TObject);
@@ -775,6 +786,21 @@ begin
   end;
 end;
 
+procedure TfrmSetting.Button16Click(Sender: TObject);
+begin
+  if not tcp.checkStOK then
+  begin
+    MessageDlg('当前设备连接失败,请关闭当前窗口重新连接！！！', mtInformation, [mbOK], 0);
+    exit;
+  end;
+
+  if tcp.Client.Connected then
+  begin
+    tcp.SetWork('reboot');
+    MessageDlg('设备正在重启中...,请关闭当前窗口重新连接！！！', mtInformation, [mbOK], 0);
+  end;
+end;
+
 procedure TfrmSetting.Button18Click(Sender: TObject);
 begin
   if (udp <> nil) then
@@ -787,7 +813,7 @@ end;
 
 procedure TfrmSetting.Button19Click(Sender: TObject);
 var
-  i, j, x, y, id: Integer;
+  i, j, x, y: Integer;
   str, s: String;
   ldv: TVDevice;
 
@@ -824,13 +850,7 @@ begin
       if s = '' then
         Continue;
 
-      try
-        id := StrToInt(s);
-      Except
-        Continue;
-      end;
-
-      ldv := DeviceList.get(id);
+      ldv := DeviceList.GetByID(s);
 
       if ldv <> nil then
       begin
@@ -857,6 +877,11 @@ var
   l: Integer;
   r: Boolean;
 begin
+  if not tcp.checkStOK then
+  begin
+    MessageDlg('当前设备连接失败,请关闭当前窗口重新连接！！！', mtInformation, [mbOK], 0);
+    exit;
+  end;
   l := Length(Edit1.Text);
   if l > 10 then
   begin
@@ -911,6 +936,11 @@ end;
 
 procedure TfrmSetting.Button4Click(Sender: TObject);
 begin
+  if not tcp.checkStOK then
+  begin
+    MessageDlg('当前设备连接失败,请关闭当前窗口重新连接！！！', mtInformation, [mbOK], 0);
+    exit;
+  end;
   if tcp.Client.Connected then
   begin
     tcp.SetCallBack(TCPReadData);
@@ -921,6 +951,11 @@ end;
 
 procedure TfrmSetting.Button7Click(Sender: TObject);
 begin
+  if not tcp.checkStOK then
+  begin
+    MessageDlg('当前设备连接失败,请关闭当前窗口重新连接！！！', mtInformation, [mbOK], 0);
+    exit;
+  end;
   if tcp.Client.Connected then
   begin
     tcp.SetCallBack(TCPReadData);
@@ -931,6 +966,11 @@ end;
 
 procedure TfrmSetting.Button9Click(Sender: TObject);
 begin
+  if not tcp.checkStOK then
+  begin
+    MessageDlg('当前设备连接失败,请关闭当前窗口重新连接！！！', mtInformation, [mbOK], 0);
+    exit;
+  end;
   if tcp.Client.Connected then
   begin
     tcp.SetCallBack(TCPReadData);
@@ -1035,7 +1075,6 @@ procedure TfrmSetting.Button6Click(Sender: TObject);
 var
   buff: array of Byte;
   str: string;
-
   lList: TStrings;
   i, n: Integer;
 begin
@@ -1097,6 +1136,7 @@ begin
   end;
 
   lList := TStringList.Create;
+
   try
     for i := 0 to ListView7.Items.Count - 1 do
       lList.add(ListView7.Items[i].subitems.strings[0]);
@@ -1108,6 +1148,7 @@ begin
       lList.add(ListView9.Items[i].subitems.strings[0]);
 
     lList.SaveToFile(ExtractFilePath(Application.ExeName) + '\' + 'rxName.dat');
+
     dv.save;
   finally
     lList.Free;
@@ -1376,12 +1417,12 @@ begin
   begin
 
     Item := ListView.Items.add;
-    Item.caption := IntToStr(i + ZXId);
+    Item.Caption := IntToStr(i + ZXId);
 
-    name := '主机' + Item.caption;
+    name := '主机' + Item.Caption;
 
-    if (TxName.Count - 1) >= (i + ZXId) then
-      name := TxName.strings[i + ZXId];
+    if (TxName.Count - 1) >= (i + ZXId - 1) then
+      name := TxName.strings[i + ZXId - 1];
 
     Item.subitems.add(name);
 
@@ -1419,12 +1460,12 @@ begin
   begin
 
     Item := ListView.Items.add;
-    Item.caption := IntToStr(i + ZXId);
+    Item.Caption := IntToStr(i + ZXId);
 
-    name := '坐席' + Item.caption;
+    name := '坐席' + Item.Caption;
 
-    if (RxName.Count - 1) >= (i + ZXId) then
-      name := RxName.strings[i + ZXId];
+    if (RxName.Count - 1) >= (i + ZXId - 1) then
+      name := RxName.strings[i + ZXId - 1];
 
     Item.subitems.add(name);
 
@@ -1493,6 +1534,7 @@ begin
       bc := Length(str) div 2;
       SetLength(buf, bc);
       i := HexToBin(PChar(str), @buf[0], bc);
+
       if i <> bc then
         exit;
 
@@ -1595,7 +1637,8 @@ procedure TfrmSetting.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   // if tcp <> nil then
   // tcp.stop;
-  PasLibVlcPlayer1.STOP();
+  //PasLibVlcPlayer1.Stop();
+
   if dv <> nil then
     dv.save;
 end;
@@ -1631,6 +1674,7 @@ end;
 
 procedure TfrmSetting.FormDestroy(Sender: TObject);
 begin
+
   TxName.Free;
   RxName.Free;
 end;
@@ -1640,9 +1684,10 @@ var
   i, j: Integer;
   ddv: TVDevice;
 begin
+  PageControl1.TabIndex := 0;
   if dv <> nil then
   begin
-    SELF.caption := '兆科音视频坐席管理设置' + ' : ' + dv.Name + ', ' + dv.ip;
+    SELF.Caption := '兆科音视频坐席管理设置' + ' : ' + dv.Name + ', ' + dv.ip;
     ipIP := TIP.Create(dv.ip);
     ipIP.parserIP(dv.ip);
     Edit1.Text := dv.Name;
@@ -1652,11 +1697,11 @@ begin
     // edit4.Text:=
     Edit5.Text := ipIP.ip1 + '.' + ipIP.ip2 + '.' + ipIP.ip3 + '.1';
 
-    if (dv.Typee = 'Rx') and (dv.SubRTSP = '') then
+    if (dv.Typee = 'Rx') then
     begin
       if dv.TxvID <> '' then
       begin
-        ddv := DeviceList.GetTx(StrToInt(dv.TxvID));
+        ddv := DeviceList.GetTx(dv.TxvID);
         if ddv <> nil then
         begin
           dv.SubRTSP := ddv.SubRTSP;
@@ -1665,8 +1710,10 @@ begin
       end;
     end;
 
-    DataEngineManager.DoIt(play2);
-    dv.load;
+    Edit7.Text := dv.SubRTSP;
+    //PlayBtn.Enabled := true;
+    //DataEngineManager.DoIt(play2);
+    dv.load();
 
     if dv.TxPull <> '' then
       TCPReadData('astparam g pullperm ' + dv.TxPull, -1)

@@ -161,8 +161,8 @@ begin
 end;
 
 procedure TClientObject.InitUDP(lip: String; lPort: Integer);
-var
-  i: Integer;
+//var
+//  i: Integer;
 begin
   try
     FUDP.Active := False;
@@ -344,6 +344,9 @@ end;
 
 procedure TClientObject.DoWork(w: TWork);
 begin
+  Log('TCP·¢ËÍIP:' + FTCPClient.Socket.Binding.Ip + ':' + inttostr(FTCPClient.Socket.Binding.Port) + ' --> ' + FTCPClient.Host + ':' + inttostr(FTCPClient.Port));
+  Log(w.data);
+
   FTCPClient.IOHandler.WriteLn(w.Data + #13#10);
 
   // while FTCPClient.IOHandler.InputBuffer.Size > 0 do

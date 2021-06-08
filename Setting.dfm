@@ -36,7 +36,7 @@ object frmSetting: TfrmSetting
     object TabSheet1: TTabSheet
       Caption = #20449#21495#39044#35272
       object PasLibVlcPlayer1: TPasLibVlcPlayer
-        Left = 48
+        Left = 73
         Top = 32
         Width = 409
         Height = 381
@@ -52,10 +52,10 @@ object frmSetting: TfrmSetting
           Width = 185
           Height = 199
           BevelOuter = bvNone
-          ParentColor = True
+          ParentBackground = False
           TabOrder = 0
           object Image1: TImage
-            Left = 35
+            Left = 37
             Top = 42
             Width = 105
             Height = 105
@@ -1563,9 +1563,9 @@ object frmSetting: TfrmSetting
         end
       end
       object PR: TPanel
-        Left = 559
+        Left = 544
         Top = 0
-        Width = 513
+        Width = 528
         Height = 487
         Align = alRight
         BevelOuter = bvNone
@@ -1584,7 +1584,7 @@ object frmSetting: TfrmSetting
           Top = 70
           Width = 100
           Height = 35
-          Caption = #26242#20572
+          Caption = #20572#27490
           TabOrder = 1
           OnClick = PauseBtnClick
         end
@@ -1869,14 +1869,12 @@ object frmSetting: TfrmSetting
         end
       end
       object Edit7: TEdit
-        Left = 48
+        Left = 73
         Top = 428
         Width = 409
         Height = 24
         Color = clBtnFace
-        ReadOnly = True
         TabOrder = 2
-        Text = 'Edit7'
       end
     end
     object TabSheet2: TTabSheet
@@ -1902,6 +1900,7 @@ object frmSetting: TfrmSetting
             Width = 200
           end>
         GridLines = True
+        ReadOnly = True
         RowSelect = True
         TabOrder = 0
         ViewStyle = vsReport
@@ -1926,6 +1925,7 @@ object frmSetting: TfrmSetting
             Width = 200
           end>
         GridLines = True
+        ReadOnly = True
         RowSelect = True
         TabOrder = 1
         ViewStyle = vsReport
@@ -2238,12 +2238,12 @@ object frmSetting: TfrmSetting
         object StringGrid1: TStringGrid
           Left = 32
           Top = 40
-          Width = 785
-          Height = 275
+          Width = 665
+          Height = 337
           BorderStyle = bsNone
           ColCount = 10
           DefaultColWidth = 50
-          DefaultRowHeight = 25
+          DefaultRowHeight = 30
           RowCount = 10
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
           ParentColor = True
@@ -2271,7 +2271,7 @@ object frmSetting: TfrmSetting
       end
     end
     object TabSheet8: TTabSheet
-      Caption = #20854#23427
+      Caption = #35774#22791#20449#24687
       ImageIndex = 7
       object GroupBox1: TGroupBox
         Left = 43
@@ -2415,6 +2415,15 @@ object frmSetting: TfrmSetting
           Caption = #20851' LED'
           TabOrder = 1
           OnClick = Button3Click
+        end
+        object Button16: TButton
+          Left = 162
+          Top = 152
+          Width = 184
+          Height = 80
+          Caption = #37325#21551#35774#22791
+          TabOrder = 2
+          OnClick = Button16Click
         end
       end
     end

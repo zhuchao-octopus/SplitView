@@ -194,6 +194,7 @@ type
     p_mi          : libvlc_media_player_t_ptr;
     p_mi_ev_mgr   : libvlc_event_manager_t_ptr;
 
+    FMRL:String;
     //
     FError        : string;
     FMute         : Boolean;
@@ -364,7 +365,7 @@ type
 
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-
+    procedure  FreeLibvlc();
     function GetPlayerHandle(): libvlc_media_player_t_ptr;
 
     procedure SetBounds(ALeft, ATop, AWidth, AHeight: Integer); override;
@@ -613,7 +614,7 @@ type
     property OnStartDock;
     property OnStartDrag;
     property OnUnDock;
-
+    property MRL :String read FMRL;
     property SpuShow : Boolean
       read    FSpuShow
       write   SetSpuShow
@@ -1685,7 +1686,14 @@ begin
 
   inherited Destroy;
 end;
-
+procedure TPasLibVlcPlayer.FreeLibvlc;
+begin
+   if Assigned(FVLC) then
+  begin
+    FVLC.Free;
+    FVLC := NIL;
+  end;
+end;
 procedure TPasLibVlcPlayer.EventsEnable();
 begin
 
@@ -1951,14 +1959,14 @@ begin
     libvlc_media_player_set_display_window(p_mi, FPlayerWinCtrl.Handle);
   end;
 end;
-
+//创建VLC包装类实例
 function TPasLibVlcPlayer.GetVlcInstance() : TPasLibVlc;
 var
   oIdx : Integer;
 begin
   if not Assigned(FVLC) then
   begin
-    FVLC := TPasLibVlc.Create;
+    FVLC := TPasLibVlc.Create;////创建VLC包装类实例
 
     for oIdx := 0 to FStartOptions.Count - 1 do
     begin
@@ -2027,7 +2035,7 @@ begin
     end;
   end;
 end;
-
+//player 调用
 function TPasLibVlcPlayer.GetPlayerHandle(): libvlc_media_player_t_ptr;
 var
    p_instance : libvlc_instance_t_ptr;
@@ -2036,7 +2044,7 @@ begin
   if (p_mi = NIL) then
   begin
     // get instance
-    p_instance := VLC.Handle;
+    p_instance := VLC.Handle; //创建VLC包装类实例VLC  //创建LIBvlc实例 VLC.Handle
 
     if (p_instance <> NIL) then
     begin
@@ -2100,7 +2108,7 @@ end;
 
 
 procedure TPasLibVlcPlayer.Play(var media : TPasLibVlcMedia; audioOutput: WideString = ''; audioOutputDeviceId: WideString = ''; audioSetTimeOut: Cardinal = 1000);
-begin
+begin //3
   // assign media to player
   libvlc_media_player_set_media(p_mi, media.MD);
 
@@ -2153,7 +2161,7 @@ var
   lcMRL : WideString;
   proto : WideString;
   host  : WideString;
-begin
+begin //1
   lcMRL := Trim(LowerCase(mrl));
 
   // get media protocol, http, rtp, file, etc.
@@ -2207,7 +2215,7 @@ procedure TPasLibVlcPlayer.PlayNormal(mrl: WideString; const mediaOptions : arra
 var
   media : TPasLibVlcMedia;
   mediaOptionIdx : Integer;
-begin
+begin//2
   if (SELF.Parent = NIL) then
   begin
     SELF.Parent := SELF.Owner as TWinControl;
@@ -2231,6 +2239,7 @@ begin
     media.AddOption(mediaOptions[mediaOptionIdx]);
   end;
 
+  FMRL:=  mrl;
   Play(media, audioOutput, audioOutputDeviceId, audioSetTimeOut);
 end;
 
@@ -2308,7 +2317,7 @@ end;
  *)
 
 procedure TPasLibVlcPlayer.Play(mrl: WideString; audioOutput : WideString = ''; audioOutputDeviceId : WideString = ''; audioSetTimeOut : Cardinal = 1000);
-begin
+begin //1
   Play(mrl, [], audioOutput, audioOutputDeviceId, audioSetTimeOut);
 end;
 

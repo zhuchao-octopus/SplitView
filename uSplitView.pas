@@ -1,23 +1,5 @@
 // ---------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// This software is Copyright (c) 2015 Embarcadero Technologies, Inc.
+// This software is Copyright (c) 2015 Embarcadero Technologies, Inc.
 // You may only use this software if you are an authorized licensee
 // of an Embarcadero developer tools product.
 // This software is considered a Redistributable as defined under
@@ -119,6 +101,20 @@ type
     N4: TMenuItem;
     ImageList3: TImageList;
     ImageList4: TImageList;
+    MainMenu1: TMainMenu;
+    N5: TMenuItem;
+    N6: TMenuItem;
+    N7: TMenuItem;
+    N8: TMenuItem;
+    N9: TMenuItem;
+    N10: TMenuItem;
+    N11: TMenuItem;
+    N12: TMenuItem;
+    N13: TMenuItem;
+    N14: TMenuItem;
+    N15: TMenuItem;
+    N16: TMenuItem;
+    N17: TMenuItem;
 
     procedure FormCreate(Sender: TObject);
     procedure cbxVclStylesChange(Sender: TObject);
@@ -166,18 +162,29 @@ type
     procedure N3Click(Sender: TObject);
     procedure N2Click(Sender: TObject);
     procedure N1Click(Sender: TObject);
+    procedure N8Click(Sender: TObject);
+    procedure N14Click(Sender: TObject);
+    procedure N9Click(Sender: TObject);
+    procedure N16Click(Sender: TObject);
+    procedure N11Click(Sender: TObject);
+    procedure N10Click(Sender: TObject);
+    procedure N12Click(Sender: TObject);
+    procedure N13Click(Sender: TObject);
+    procedure N17Click(Sender: TObject);
   private
     procedure Log(const Msg: string);
     procedure SynchroPage(ItemIndex: Integer);
-    procedure UpdateListView();
+    procedure RXTXListViewAddItems();
     procedure UpdateNetDeviceKP(Cmd: String);
-    procedure UpdateLocalDevices(dv: TVDevice);
+    procedure UpdateLocalDevices();
+    procedure ADDItemsToLocalDevices(dv: TVDevice);
     procedure InitUDP_S_KP();
 
     function GetTCPConnection(Ip: String; Port: Integer): TClientObject;
     function GetUDPConnection(Ip: String; Port: Integer): TClientObject;
     procedure St(slot: Integer; Msg: String);
     function GetDevice(Name: String): TVDevice;
+    function GetListItem(ListView: TListView; Caption: String): TListItem;
     procedure CheckItems(Lv: TListView; Item: TListItem; MultiSel: Boolean);
 
     procedure WMNCPaint(var Msg: TWMNCPaint); message WM_NCPAINT;
@@ -193,6 +200,8 @@ var
   srx, stx: TVDevice;
 
   Sortf: Boolean;
+  lvhOldProc, lvhNewProc: TFarProc;
+  FLVHeader: HWND;
 
 implementation
 
@@ -384,6 +393,8 @@ var
 begin
   tcp := Pointer(TIdTCPClient(Sender).tag);
   St(1, 'TCP 连接断开' + tcp.Client.Host + ':' + IntToStr(tcp.Client.Port));
+  DataEngineManager.Del(tcp.Client.Host + ':' + IntToStr(tcp.Client.Port));
+  St(2, '连接总数：' + IntToStr(DataEngineManager.count()));
 end;
 
 procedure TSplitViewForm.IdTCPClient1Status(ASender: TObject; const AStatus: TIdStatus; const AStatusText: string);
@@ -392,16 +403,26 @@ begin
   St(1, 'TCP Status:' + AStatusText);
 end;
 
-procedure TSplitViewForm.UpdateLocalDevices(dv: TVDevice);
+procedure TSplitViewForm.ADDItemsToLocalDevices(dv: TVDevice);
 begin
   DeviceList.Add(dv.Name, dv);
-  UpdateListView();
+  RXTXListViewAddItems();
 end;
 
-procedure TSplitViewForm.UpdateListView();
+procedure TSplitViewForm.UpdateLocalDevices();
 var
   ListItem: TListItem;
-  i, k: Integer;
+  i: Integer;
+  dv: TVDevice;
+begin
+
+  StatusBar1.Panels[0].text := 'Rx : ' + IntToStr(DeviceList.DevicesRx.count) + '    Tx : ' + IntToStr(DeviceList.DevicesTx.count)
+end;
+
+procedure TSplitViewForm.RXTXListViewAddItems();
+var
+  ListItem: TListItem;
+  i: Integer;
   dv: TVDevice;
 begin
 
@@ -461,8 +482,8 @@ begin
       ListItem.subitems.Add(dv.TxvID);
       dv.bNew := false;
     end;
-     ListView1.columns.endupdate;
-     LockWindowUpdate(0);
+    ListView1.columns.endupdate;
+    LockWindowUpdate(0);
   end;
 
   StatusBar1.Panels[0].text := 'Rx : ' + IntToStr(DeviceList.DevicesRx.count) + '    Tx : ' + IntToStr(DeviceList.DevicesTx.count)
@@ -508,8 +529,9 @@ var
   udp: TClientObject;
   // txid:Integer;
   t, i: Integer;
-  str: String;
+  // str: String;
   buff: array [0 .. 2] of byte;
+  Item: TListItem;
 begin
   if srx = nil then
     Exit;
@@ -534,23 +556,38 @@ begin
     tcp.SetWork(str, 900);
     end
     else }
-  begin
-    // Showmessage('TCP 连接不成功。');
-    // Ip := '225.1.0.0';
-    // Port := 3333;
-    buff[0] := $FF;
-    buff[1] := StrToInt(srx.ID);
-    buff[2] := t;
-    Log('UDP:' + IntToStr(buff[0]) + ' RX:' + IntToStr(buff[1]) + ' TX:' + IntToStr(buff[2]));
-    for i := 0 to LocalIPList.count - 1 do
+
+  try
     begin
-      udp := GetUDPConnection(LocalIPList[i], 3334);
-      if udp <> nil then
+      // Showmessage('TCP 连接不成功。');
+      // Ip := '225.1.0.0';
+      // Port := 3333;
+      buff[0] := $FF;
+      buff[1] := StrToInt(srx.ID);
+      buff[2] := t;
+      Log('UDP:' + IntToStr(buff[0]) + ' RX:' + IntToStr(buff[1]) + ' TX:' + IntToStr(buff[2]));
+      for i := 0 to LocalIPList.count - 1 do
       begin
-        udp.UDPSendHexStr('225.1.0.0', 3333, BuffToHexStr(buff));
+        udp := GetUDPConnection(LocalIPList[i], 3334);
+        if udp <> nil then
+        begin
+          udp.UDPSendHexStr('225.1.0.0', 3333, BuffToHexStr(buff));
+        end;
+      end;
+      srx.TxvID := stx.ID;
+      srx.TxaID := stx.ID;
+      Item := GetListItem(ListView1, srx.Name);
+      if Item <> nil then
+      begin
+        item.subitems.Strings[6]:=srx.TxvID;
+        item.subitems.Strings[7]:=srx.TxvID;
+        Item.update;
       end;
     end;
+  except
+    Exit;
   end;
+
 end;
 
 procedure TSplitViewForm.Button2Click(Sender: TObject);
@@ -613,7 +650,7 @@ procedure TSplitViewForm.Button4Click(Sender: TObject);
 begin
   ListView2.items.Clear;
   DeviceList.DevicesTx.Clear;
-  UpdateListView();
+  RXTXListViewAddItems();
   UpdateNetDeviceKP('0x01 0x00 0x00 0x0d');
 end;
 
@@ -622,7 +659,7 @@ begin
 
   ListView1.items.Clear;
   DeviceList.DevicesRx.Clear;
-  UpdateListView();
+  RXTXListViewAddItems();
   UpdateNetDeviceKP('0x02 0x00 0x00 0x0d');
 end;
 
@@ -631,7 +668,7 @@ begin
   ListView1.items.Clear;
   ListView2.items.Clear;
   DeviceList.Clear;
-  UpdateListView();
+  RXTXListViewAddItems();
   // ListView1DblClick(nil);
 end;
 
@@ -645,7 +682,7 @@ begin
   ListView1.items.Clear;
   ListView2.items.Clear;
   DeviceList.Clear;
-  UpdateListView();
+  RXTXListViewAddItems();
   UpdateNetDeviceKP('0x00 x00 0x00');
 end;
 
@@ -700,9 +737,89 @@ begin
     end;
     if Msg.ID = 100 then // UDP
     begin
-      UpdateLocalDevices(TVDevice(Msg.obj));
+      ADDItemsToLocalDevices(TVDevice(Msg.obj));
     end;
   end;
+end;
+
+procedure TSplitViewForm.N10Click(Sender: TObject);
+begin
+  N1Click(nil);
+  N10.Checked := not N10.Checked;
+  N11.Checked := false;
+  N12.Checked := false;
+  N13.Checked := false;
+end;
+
+procedure TSplitViewForm.N11Click(Sender: TObject);
+begin
+  N2Click(nil);
+  N10.Checked := false;
+  N11.Checked := not N11.Checked;
+  N12.Checked := false;
+  N13.Checked := false;
+end;
+
+procedure TSplitViewForm.N12Click(Sender: TObject);
+begin
+  N3Click(nil);
+  N10.Checked := false;
+  N11.Checked := false;
+  N12.Checked := not N12.Checked;
+  N13.Checked := false;
+end;
+
+procedure TSplitViewForm.N13Click(Sender: TObject);
+begin
+  N4Click(nil);
+  N10.Checked := false;
+  N11.Checked := false;
+  N12.Checked := false;
+  N13.Checked := not N13.Checked;
+end;
+
+procedure TSplitViewForm.N14Click(Sender: TObject);
+var
+  udp: TClientObject;
+  t, i: Integer;
+  // str: String;
+  buff: array [0 .. 2] of byte;
+begin
+
+  if srx = nil then
+    Exit;
+  if stx = nil then
+    Exit;
+
+  t := StrToInt(stx.ID);
+
+  buff[0] := $FF;
+  buff[1] := StrToInt(srx.ID);
+  buff[2] := t;
+  Log('UDP:' + IntToStr(buff[0]) + ' RX:' + IntToStr(buff[1]) + ' TX:' + IntToStr(buff[2]));
+
+  for i := 0 to LocalIPList.count - 1 do
+  begin
+    udp := GetUDPConnection(LocalIPList[i], 3334);
+    if udp <> nil then
+    begin
+      udp.UDPSendHexStr('225.1.0.0', 3333, BuffToHexStr(buff));
+    end;
+  end;
+
+end;
+
+procedure TSplitViewForm.N16Click(Sender: TObject);
+begin
+  SV.opened := not SV.opened;
+  N1.Checked := not N1.Checked;
+end;
+
+procedure TSplitViewForm.N17Click(Sender: TObject);
+begin
+  ListView1.GridLines := not ListView1.GridLines;
+  ListView2.GridLines := not ListView2.GridLines;
+  N17.Checked := not N17.Checked;
 end;
 
 procedure TSplitViewForm.N1Click(Sender: TObject);
@@ -745,6 +862,17 @@ begin
   N1.Checked := false;
 end;
 
+procedure TSplitViewForm.N8Click(Sender: TObject);
+begin
+  close;
+end;
+
+procedure TSplitViewForm.N9Click(Sender: TObject);
+begin
+  Panel3.visible := not Panel3.visible;
+  N9.Checked := Panel3.visible;
+end;
+
 procedure TSplitViewForm.Timer3Timer(Sender: TObject);
 begin
   Button4.Enabled := false;
@@ -756,6 +884,18 @@ begin
   Button4.Enabled := true;
   Button5.Enabled := true;
   Button8.Enabled := true;
+end;
+
+function TSplitViewForm.GetListItem(ListView: TListView; Caption: String): TListItem;
+var
+  i: Integer;
+begin
+  Result := nil;
+  for i := 0 to ListView.items.count - 1 do
+  begin
+    if Caption = ListView.items[i].Caption then
+      Result := ListView.items[i];
+  end;
 end;
 
 function TSplitViewForm.GetDevice(Name: String): TVDevice;
@@ -831,6 +971,7 @@ begin
       frmSetting.TabSheet4.tabvisible := true;
       frmSetting.TabSheet5.tabvisible := true;
       frmSetting.TabSheet8.tabvisible := true;
+
       frmSetting.showmodal;
     end;
   end;

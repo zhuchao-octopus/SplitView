@@ -37,7 +37,6 @@ begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
 
-  TStyleManager.TrySetStyle('Windows10');
   Application.CreateForm(TSplitViewForm, SplitViewForm);
   Application.CreateForm(TfrmSetting, frmSetting);
   Application.CreateForm(TGSettingfrm, GSettingfrm);
